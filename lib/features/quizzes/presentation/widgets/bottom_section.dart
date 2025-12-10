@@ -1,12 +1,7 @@
-import 'package:classroom_quiz_admin_portal/core/constants/app_strings.dart';
 import 'package:classroom_quiz_admin_portal/core/global/custom_button.dart';
-import 'package:classroom_quiz_admin_portal/core/global/custom_text.dart';
 import 'package:classroom_quiz_admin_portal/core/theme/colors.dart';
-import 'package:classroom_quiz_admin_portal/core/theme/fonts.dart';
-import 'package:classroom_quiz_admin_portal/core/utils/helpers/size_helpers.dart';
-import 'package:classroom_quiz_admin_portal/features/create_quiz/presentation/widgets/defaults_card.dart';
-import 'package:classroom_quiz_admin_portal/features/create_quiz/presentation/widgets/quick_action_card.dart';
-import 'package:classroom_quiz_admin_portal/features/create_quiz/presentation/widgets/shadow_theme.dart';
+import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/widgets/defaults_card.dart';
+import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/widgets/quick_action_card.dart';
 import 'package:flutter/material.dart';
 
 class BottomSection extends StatelessWidget {

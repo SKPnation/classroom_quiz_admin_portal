@@ -1,6 +1,6 @@
 import 'package:classroom_quiz_admin_portal/core/global/custom_button.dart';
-import 'package:classroom_quiz_admin_portal/features/create_quiz/presentation/widgets/card_scaffold.dart';
-import 'package:classroom_quiz_admin_portal/features/create_quiz/presentation/widgets/defaults_setting_row.dart';
+import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/widgets/card_scaffold.dart';
+import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/widgets/defaults_setting_row.dart';
 import 'package:flutter/material.dart';
 
 class DefaultsCard extends StatelessWidget {

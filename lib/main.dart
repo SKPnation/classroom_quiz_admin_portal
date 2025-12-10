@@ -1,7 +1,8 @@
 import 'package:classroom_quiz_admin_portal/core/navigation/navigation_controller.dart';
-import 'package:classroom_quiz_admin_portal/features/ai_generator/presentation/controllers/ai_generator_controller.dart';
-import 'package:classroom_quiz_admin_portal/features/create_quiz/presentation/controllers/create_quiz_controller.dart';
 import 'package:classroom_quiz_admin_portal/features/dashboard/presentation/controllers/dashboard_controller.dart';
+import 'package:classroom_quiz_admin_portal/features/delivery/presentation/controllers/schedule_controller.dart';
+import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/controllers/ai_generator_controller.dart';
+import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/controllers/create_quiz_controller.dart';
 import 'package:classroom_quiz_admin_portal/features/site_layout/presentation/controllers/menu_controller.dart';
 import 'package:classroom_quiz_admin_portal/src/app.dart';
 import 'package:flutter/material.dart';
@@ -26,6 +27,7 @@ void main() async {
   Get.put<MenController>(MenController());
   Get.put<CreateQuizController>(CreateQuizController());
   Get.put<AiGeneratorController>(AiGeneratorController());
+  Get.put<ScheduleController>(ScheduleController());
 
   runApp(const App());
 }

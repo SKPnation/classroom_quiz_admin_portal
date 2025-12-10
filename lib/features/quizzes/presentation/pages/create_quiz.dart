@@ -1,8 +1,8 @@
 import 'package:classroom_quiz_admin_portal/core/theme/colors.dart';
-import 'package:classroom_quiz_admin_portal/features/create_quiz/presentation/widgets/bottom_section.dart';
-import 'package:classroom_quiz_admin_portal/features/create_quiz/presentation/widgets/choice_card.dart';
-import 'package:classroom_quiz_admin_portal/features/create_quiz/presentation/widgets/header_title.dart';
-import 'package:classroom_quiz_admin_portal/features/create_quiz/presentation/widgets/hero_strip.dart';
+import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/widgets/bottom_section.dart';
+import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/widgets/choice_card.dart';
+import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/widgets/header_title.dart';
+import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/widgets/hero_strip.dart';
 import 'package:flutter/material.dart';
 
 class CreateQuizPage extends StatelessWidget {

@@ -1,7 +1,7 @@
 import 'package:classroom_quiz_admin_portal/core/global/custom_button.dart';
 import 'package:classroom_quiz_admin_portal/core/global/custom_text.dart';
 import 'package:classroom_quiz_admin_portal/core/theme/colors.dart';
-import 'package:classroom_quiz_admin_portal/features/create_quiz/presentation/widgets/shadow_theme.dart';
+import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/widgets/shadow_theme.dart';
 import 'package:flutter/material.dart';
 
 class ChoiceCard extends StatelessWidget {
@@ -82,7 +82,7 @@ class ChoiceCard extends StatelessWidget {
 
 
 class Tag extends StatelessWidget {
-  const Tag({required this.text});
+  const Tag({super.key, required this.text});
 
   final String text;
 

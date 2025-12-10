@@ -1,6 +1,13 @@
 import 'package:classroom_quiz_admin_portal/core/constants/app_strings.dart';
-import 'package:classroom_quiz_admin_portal/features/create_quiz/presentation/pages/create_quiz.dart';
 import 'package:classroom_quiz_admin_portal/features/dashboard/presentation/pages/dashboard.dart';
+import 'package:classroom_quiz_admin_portal/features/delivery/presentation/pages/classes_page.dart';
+import 'package:classroom_quiz_admin_portal/features/delivery/presentation/pages/schedules_page.dart';
+import 'package:classroom_quiz_admin_portal/features/grading_insights/presentation/pages/results_page.dart';
+import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/pages/ai_generator.dart';
+import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/pages/create_quiz.dart';
+import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/pages/question_bank.dart';
+import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/pages/quiz_editor.dart';
+import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/pages/templates.dart';
 import 'package:classroom_quiz_admin_portal/features/site_layout/presentation/pages/site_layout.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_navigation/get_navigation.dart';
@@ -14,7 +21,6 @@ abstract class AppPages {
     GetPage(name: Routes.rootRoute, page: () => SiteLayout()),
   ];
 
-  static final List<Widget> menuPages = [Dashboard(), CreateQuizPage()];
 }
 
 Route<dynamic> generateRoute(RouteSettings settings) {
@@ -23,6 +29,20 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       return _getPageRoute(Dashboard());
     case Routes.createQuizRoute:
       return _getPageRoute(CreateQuizPage());
+    case Routes.aiGeneratorRoute:
+      return _getPageRoute(AiQuestionGeneratorPage());
+    case Routes.quizEditorRoute:
+      return _getPageRoute(QuizEditorPage());
+    case Routes.questionBankRoute:
+      return _getPageRoute(QuestionBankPage());
+    case Routes.templatesRoute:
+      return _getPageRoute(TemplatesPage());
+    case Routes.resultsRoute:
+      return _getPageRoute(ResultsPage());
+    case Routes.schedulesRoute:
+      return _getPageRoute(SchedulesPage());
+    case Routes.classesRoute:
+      return _getPageRoute(ClassesPage());
     default:
       return _getPageRoute(Dashboard());
   }
@@ -97,7 +117,7 @@ List<MenuItem> primaryMenuItemRoutes = [
 ];
 
 List<MenuItem> quizMenuItemRoutes = [
-  MenuItem(Routes.aiGeneratorDisplayName, Routes.dashboardRoute),
+  MenuItem(Routes.aiGeneratorDisplayName, Routes.aiGeneratorRoute),
   MenuItem(Routes.quizEditorDisplayName, Routes.quizEditorRoute),
   MenuItem(Routes.questionBankDisplayName, Routes.questionBankRoute),
   MenuItem(Routes.templatesDisplayName, Routes.templatesRoute),

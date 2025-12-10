@@ -1,5 +1,5 @@
 import 'package:classroom_quiz_admin_portal/core/theme/colors.dart';
-import 'package:classroom_quiz_admin_portal/features/create_quiz/presentation/widgets/shadow_theme.dart';
+import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/widgets/shadow_theme.dart';
 import 'package:flutter/material.dart';
 
 class CardScaffold extends StatelessWidget {

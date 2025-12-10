@@ -36,11 +36,25 @@ class MenController extends GetxController {
       case Routes.createQuizDisplayName:
         return _customIcon(SvgElements.svgCreateQuiz, itemName);
       case Routes.aiGeneratorDisplayName:
-        return _customIcon(SvgElements.svgCreateQuiz, itemName);
+        return _customIcon(SvgElements.svgAiGenerator, itemName);
       case Routes.quizEditorDisplayName:
         return _customIcon(SvgElements.svgQuizEditor, itemName);
       case Routes.questionBankDisplayName:
         return _customIcon(SvgElements.svgQuestionBank, itemName);
+      case Routes.templatesDisplayName:
+        return _customIcon(SvgElements.svgTemplates, itemName);
+      case Routes.schedulesDisplayName:
+        return _customIcon(SvgElements.svgSchedules, itemName);
+      case Routes.classesDisplayName:
+        return _customIcon(SvgElements.svgClasses, itemName);
+      case Routes.studentsDisplayName:
+        return _customIcon(SvgElements.svgStudents, itemName);
+      case Routes.resultsDisplayName:
+        return _customIcon(SvgElements.svgResults, itemName);
+      case Routes.gradingQueueDisplayName:
+        return _customIcon(SvgElements.svgGradingQueue, itemName);
+      case Routes.mediaLibraryDisplayName:
+        return _customIcon(SvgElements.svgMediaLibrary, itemName);
       default:
         return _customIcon(SvgElements.svgSettings, itemName);
     }
@@ -58,6 +72,20 @@ class MenController extends GetxController {
         return Routes.quizEditorDisplayName;
       case Routes.questionBankRoute:
         return Routes.questionBankDisplayName;
+      case Routes.templatesRoute:
+        return Routes.templatesDisplayName;
+      case Routes.schedulesRoute:
+        return Routes.schedulesDisplayName;
+      case Routes.classesRoute:
+        return Routes.classesDisplayName;
+      case Routes.studentsRoute:
+        return Routes.studentsDisplayName;
+      case Routes.resultsRoute:
+        return Routes.resultsDisplayName;
+      case Routes.gradingQueueRoute:
+        return Routes.gradingQueueDisplayName;
+      case Routes.mediaLibraryRoute:
+        return Routes.mediaLibraryDisplayName;
       default:
         return Routes.dashboardDisplayName;
     }

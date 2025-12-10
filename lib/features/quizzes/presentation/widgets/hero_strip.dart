@@ -1,8 +1,7 @@
 import 'package:classroom_quiz_admin_portal/core/theme/colors.dart';
-import 'package:classroom_quiz_admin_portal/features/create_quiz/presentation/widgets/hero_link.dart';
-import 'package:classroom_quiz_admin_portal/features/create_quiz/presentation/widgets/hero_text.dart';
-import 'package:classroom_quiz_admin_portal/features/create_quiz/presentation/widgets/screen_dimension_helper.dart';
-import 'package:classroom_quiz_admin_portal/features/create_quiz/presentation/widgets/shadow_theme.dart';
+import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/widgets/hero_link.dart';
+import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/widgets/hero_text.dart';
+import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/widgets/shadow_theme.dart';
 import 'package:flutter/material.dart';
 
 class HeroStrip extends StatelessWidget {
