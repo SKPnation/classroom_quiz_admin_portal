@@ -124,12 +124,14 @@ class _ResultsPageState extends State<ResultsPage> {
   Widget _buildStatsGrid(double maxWidth) {
     // Use a simple Wrap to behave like CSS grid auto-fit
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        _statCard(label: 'Total Students', value: '$totalStudents'),
-        _statCard(label: 'Average Score', value: '$avgScore%'),
-        _statCard(label: 'AI Accuracy', value: '$aiAccuracy%'),
-        _statCard(label: 'Manual Overrides', value: '$manualOverrides'),
+        Expanded(child: _statCard(label: 'Total Students', value: '$totalStudents')),
+        SizedBox(width: 12),
+        Expanded(child: _statCard(label: 'Average Score', value: '$avgScore%')),
+        SizedBox(width: 12),
+        Expanded(child: _statCard(label: 'AI Accuracy', value: '$aiAccuracy%')),
+        SizedBox(width: 12),
+        Expanded(child: _statCard(label: 'Manual Overrides', value: '$manualOverrides'))
       ],
     );
   }

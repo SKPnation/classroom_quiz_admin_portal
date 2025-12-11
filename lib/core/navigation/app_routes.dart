@@ -2,7 +2,9 @@ import 'package:classroom_quiz_admin_portal/core/constants/app_strings.dart';
 import 'package:classroom_quiz_admin_portal/features/dashboard/presentation/pages/dashboard.dart';
 import 'package:classroom_quiz_admin_portal/features/delivery/presentation/pages/classes_page.dart';
 import 'package:classroom_quiz_admin_portal/features/delivery/presentation/pages/schedules_page.dart';
+import 'package:classroom_quiz_admin_portal/features/grading_insights/presentation/pages/grading_queue.dart';
 import 'package:classroom_quiz_admin_portal/features/grading_insights/presentation/pages/results_page.dart';
+import 'package:classroom_quiz_admin_portal/features/delivery/presentation/pages/students_page.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/pages/ai_generator.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/pages/create_quiz.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/pages/question_bank.dart';
@@ -43,6 +45,10 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       return _getPageRoute(SchedulesPage());
     case Routes.classesRoute:
       return _getPageRoute(ClassesPage());
+    case Routes.studentsRoute:
+      return _getPageRoute(StudentsPage());
+    case Routes.gradingQueueRoute:
+      return _getPageRoute(GradingQueuePage());
     default:
       return _getPageRoute(Dashboard());
   }

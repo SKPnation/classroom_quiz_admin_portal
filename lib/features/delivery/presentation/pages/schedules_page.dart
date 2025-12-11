@@ -64,24 +64,16 @@ class _SchedulesPageState extends State<SchedulesPage> {
       return row.className == _selectedClass;
     }).toList();
 
-    return Scaffold(
-      backgroundColor: _bg,
-      body: SizedBox.expand(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildHeader(),
-                const SizedBox(height: 16),
-                _buildStatsRow(),
-                const SizedBox(height: 16),
-                _buildTableCard(filtered, width),
-              ],
-            ),
-          ),
-        ),
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildHeader(),
+          const SizedBox(height: 16),
+          _buildStatsRow(),
+          const SizedBox(height: 16),
+          _buildTableCard(filtered, width),
+        ],
       ),
     );
   }
