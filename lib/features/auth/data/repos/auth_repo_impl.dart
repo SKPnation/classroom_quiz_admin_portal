@@ -12,7 +12,7 @@ class AuthRepoImpl extends AuthRepo {
     // 1. Define the settings (Web-only)
     final actionCodeSettings = ActionCodeSettings(
       // We pass orgId in the URL so it's available when the user returns
-      url: 'https://lecturer-quiz-portal.netlify.app/#/finish-sign-in?orgId=$orgId',
+      url: 'https://lecturer-quiz-portal.netlify.app/finish-sign-in?orgId=$orgId',
       handleCodeInApp: true,
     );
 

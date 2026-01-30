@@ -1,6 +1,8 @@
 import 'dart:html' as html;
+import 'package:classroom_quiz_admin_portal/core/navigation/app_routes.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class FinishSignInPage extends StatefulWidget {
   const FinishSignInPage({super.key});
@@ -22,15 +24,19 @@ class _FinishSignInPageState extends State<FinishSignInPage> {
 
     // 1. Check if the URL is actually a sign-in link
     if (auth.isSignInWithEmailLink(currentUrl)) {
-
       // 2. Retrieve the email we saved earlier in local storage
       String? email = html.window.localStorage['emailForSignIn'];
 
       // If the email is missing (e.g. user opened link in a different browser)
       // you must prompt them to enter it manually.
       if (email == null) {
-        // Show a dialog asking for email or redirect to login
-        print("Email not found in local storage. Prompting user...");
+        Get.snackbar(
+          "Email Required",
+          "Please re-enter your email to finish signing in.",
+        );
+        Get.offAllNamed(
+          Routes.findSchoolRoute,
+        ); // Send them back so they aren't stuck on the loading screen
         return;
       }
 
@@ -42,8 +48,17 @@ class _FinishSignInPageState extends State<FinishSignInPage> {
         );
 
         // 4. Grab your custom orgId parameter from the URL
-        final uri = Uri.parse(currentUrl);
+        final uri = Uri.parse(html.window.location.href);
+
+        // Try standard parameters
         String? orgId = uri.queryParameters['orgId'];
+
+        // FALLBACK: If orgId is null, it's probably trapped after the '#'
+        if (orgId == null && uri.hasFragment) {
+          // uri.fragment usually looks like "/finish-sign-in?orgId=pvamu"
+          final fragmentUri = Uri.parse(uri.fragment);
+          orgId = fragmentUri.queryParameters['orgId'];
+        }
 
         print("Signed in user: ${userCredential.user?.uid}");
         print("Organization ID: $orgId");
@@ -51,8 +66,7 @@ class _FinishSignInPageState extends State<FinishSignInPage> {
         // 5. Clear the email from storage and navigate to Dashboard
         html.window.localStorage.remove('emailForSignIn');
 
-        // Example: Navigator.of(context).pushReplacementNamed('/dashboard');
-
+        Get.offAllNamed(Routes.rootRoute, arguments: {'orgId': orgId});
       } catch (e) {
         print("Error finishing sign-in: $e");
       }
