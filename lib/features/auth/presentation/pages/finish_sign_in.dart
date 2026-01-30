@@ -27,6 +27,8 @@ class _FinishSignInPageState extends State<FinishSignInPage> {
       // 2. Retrieve the email we saved earlier in local storage
       String? email = html.window.localStorage['emailForSignIn'];
 
+      print("EMAIL RETRIEVED: $email");
+
       // If the email is missing (e.g. user opened link in a different browser)
       // you must prompt them to enter it manually.
       if (email == null) {
@@ -34,9 +36,10 @@ class _FinishSignInPageState extends State<FinishSignInPage> {
           "Email Required",
           "Please re-enter your email to finish signing in.",
         );
-        Get.offAllNamed(
-          Routes.findSchoolRoute,
-        ); // Send them back so they aren't stuck on the loading screen
+        // Get.offAllNamed(Routes.findSchoolRoute);
+
+        print("Email is required: $email");
+        // Send them back so they aren't stuck on the loading screen
         return;
       }
 
@@ -61,7 +64,7 @@ class _FinishSignInPageState extends State<FinishSignInPage> {
         }
 
         print("Signed in user: ${userCredential.user?.uid}");
-        print("Organization ID: $orgId");
+        print("✅ Verified Organization ID: $orgId");
 
         // 5. Clear the email from storage and navigate to Dashboard
         html.window.localStorage.remove('emailForSignIn');

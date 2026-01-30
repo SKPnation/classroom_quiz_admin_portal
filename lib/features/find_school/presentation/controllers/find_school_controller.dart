@@ -63,7 +63,7 @@ class FindSchoolController extends GetxController {
   // --- Timer Logic ---
   void _startCountdown() {
     showPivotOption.value = false;
-    secondsRemaining.value = 30;
+    secondsRemaining.value = 60;
     countdownTimer?.cancel();
 
     countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
@@ -318,7 +318,7 @@ class FindSchoolController extends GetxController {
       await authRepo.sendSignInLink(email: email, orgId: selectedOrgId.value);
 
       linkSent.value = true;
-      _startCountdown(); // Start the 30s timer!
+      _startCountdown(); // Start the 60 timer!
     } on FirebaseAuthException catch (e) {
       debugPrint('Firebase Auth Error: ${e.code}');
 
@@ -358,7 +358,7 @@ class FindSchoolController extends GetxController {
     showPivotOption.value = false;
     isGmailAllowed.value = false;
     dialogErrorMessage.value = '';
-    secondsRemaining.value = 30;
+    secondsRemaining.value = 60;
 
     if (!keepSchools) schools.clear();
   }
