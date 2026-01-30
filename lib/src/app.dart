@@ -21,6 +21,7 @@ class App extends StatelessWidget {
       theme: ThemeData(scaffoldBackgroundColor: AppColors.white),
       getPages: AppPages.pages,
       debugShowCheckedModeBanner: false,
+
       initialBinding: AllControllerBinding(),
     );
   }
