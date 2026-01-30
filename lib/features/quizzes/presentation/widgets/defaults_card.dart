@@ -1,4 +1,6 @@
+import 'package:classroom_quiz_admin_portal/core/constants/app_strings.dart';
 import 'package:classroom_quiz_admin_portal/core/global/custom_button.dart';
+import 'package:classroom_quiz_admin_portal/core/theme/colors.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/widgets/card_scaffold.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/widgets/defaults_setting_row.dart';
 import 'package:flutter/material.dart';
@@ -9,7 +11,7 @@ class DefaultsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CardScaffold(
-      title: 'Defaults',
+      title: AppStrings.defaultsTitle,
       child: Column(
         children: [
           DefaultsSettingRow(
@@ -26,7 +28,7 @@ class DefaultsCard extends StatelessWidget {
           const SizedBox(height: 12),
           DefaultsSettingRow(
             label: 'Shuffle questions',
-            child: Switch(value: true, onChanged: (_) {}),
+            child: Switch(value: true, activeThumbColor: AppColors.gold, onChanged: (bool value) {  },),
           ),
           const SizedBox(height: 12),
           DefaultsSettingRow(

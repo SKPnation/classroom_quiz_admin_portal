@@ -9,12 +9,12 @@ class DefaultsSettingRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final border = AppColors.grey[200];
+    final border = AppColors.grey[300]!.withValues(alpha: .2);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
         color: Colors.white,
-        border: Border.all(color: border!),
+        border: Border.all(color: border),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(

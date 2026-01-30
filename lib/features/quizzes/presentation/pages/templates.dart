@@ -1,3 +1,6 @@
+import 'package:classroom_quiz_admin_portal/core/global/custom_button.dart';
+import 'package:classroom_quiz_admin_portal/core/global/custom_text.dart';
+import 'package:classroom_quiz_admin_portal/core/theme/colors.dart';
 import 'package:flutter/material.dart';
 
 class TemplatesPage extends StatefulWidget {
@@ -9,13 +12,12 @@ class TemplatesPage extends StatefulWidget {
 
 class _TemplatesPageState extends State<TemplatesPage> {
   // ---- Design tokens ----
-  static const _bg = Color(0xFFF3F4F6);
   static const _card = Colors.white;
   static const _ink = Color(0xFF111827);
   static const _sub = Color(0xFF6B7280);
   static const _border = Color(0xFFE5E7EB);
-  static const _purple = Color(0xFF6366F1);
-  static const _chipBg = Color(0xFFF3F4FF);
+  static const _purple = AppColors.purple;
+  static final Color _chipBg = AppColors.purple.withValues(alpha: 0.12);
   static const _radius = 16.0;
 
   // ---- Filters ----
@@ -104,7 +106,8 @@ class _TemplatesPageState extends State<TemplatesPage> {
       final typeOk = _selectedType == 'All Types' || t.type == _selectedType;
       final levelOk =
           _selectedLevel == 'All Levels' || t.level == _selectedLevel;
-      final searchOk = _search.isEmpty ||
+      final searchOk =
+          _search.isEmpty ||
           t.title.toLowerCase().contains(_search.toLowerCase()) ||
           t.description.toLowerCase().contains(_search.toLowerCase());
       return subjectOk && typeOk && levelOk && searchOk;
@@ -167,7 +170,8 @@ class _TemplatesPageState extends State<TemplatesPage> {
         label: 'Subject',
         value: _selectedSubject,
         items: _subjectOptions,
-        onChanged: (v) => setState(() => _selectedSubject = v ?? _selectedSubject),
+        onChanged: (v) =>
+            setState(() => _selectedSubject = v ?? _selectedSubject),
       ),
       _dropdownFilter(
         label: 'Type',
@@ -189,8 +193,10 @@ class _TemplatesPageState extends State<TemplatesPage> {
               prefixIcon: const Icon(Icons.search, size: 18),
               hintText: 'Search templates',
               hintStyle: const TextStyle(fontSize: 13, color: _sub),
-              contentPadding:
-              const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 10,
+                vertical: 0,
+              ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
                 borderSide: const BorderSide(color: _border),
@@ -203,23 +209,17 @@ class _TemplatesPageState extends State<TemplatesPage> {
         ),
       ),
       const SizedBox(width: 8),
-      SizedBox(
-        height: 40,
-        child: ElevatedButton.icon(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: _purple,
-            foregroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-          ),
-          icon: const Icon(Icons.add, size: 18),
-          label: const Text(
-            'New Template',
-            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
-          ),
-          onPressed: _onCreateTemplate,
+
+      Btn(
+        width: 165,
+        primary: true,
+        onPressed: _onCreateTemplate,
+        child: Row(
+          children: [
+            const Icon(Icons.add, size: 18, color: AppColors.white),
+            const SizedBox(width: 4),
+            const CustomText(text: 'New Template', color: AppColors.white),
+          ],
         ),
       ),
     ];
@@ -267,8 +267,10 @@ class _TemplatesPageState extends State<TemplatesPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label,
-              style: const TextStyle(fontSize: 11, color: _sub, height: 1.1)),
+          Text(
+            label,
+            style: const TextStyle(fontSize: 11, color: _sub, height: 1.1),
+          ),
           const SizedBox(height: 2),
           Expanded(
             child: Container(
@@ -286,11 +288,9 @@ class _TemplatesPageState extends State<TemplatesPage> {
                   style: const TextStyle(fontSize: 13, color: _ink),
                   items: items
                       .map(
-                        (e) => DropdownMenuItem<String>(
-                      value: e,
-                      child: Text(e),
-                    ),
-                  )
+                        (e) =>
+                            DropdownMenuItem<String>(value: e, child: Text(e)),
+                      )
                       .toList(),
                   onChanged: onChanged,
                 ),
@@ -312,11 +312,11 @@ class _TemplatesPageState extends State<TemplatesPage> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        Expanded(child: _summaryCard('Total Templates', total.toString()),),
+        Expanded(child: _summaryCard('Total Templates', total.toString())),
         SizedBox(width: 12),
-        Expanded(child: _summaryCard('Quizzes', quizCount.toString()),),
+        Expanded(child: _summaryCard('Quizzes', quizCount.toString())),
         SizedBox(width: 12),
-        Expanded(child: _summaryCard('Exams', examCount.toString()),),
+        Expanded(child: _summaryCard('Exams', examCount.toString())),
       ],
     );
   }
@@ -477,40 +477,55 @@ class _TemplatesPageState extends State<TemplatesPage> {
                 children: t.tags
                     .map(
                       (tag) => Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 3,
-                    ),
-                    decoration: BoxDecoration(
-                      color: _chipBg,
-                      borderRadius: BorderRadius.circular(999),
-                    ),
-                    child: Text(
-                      tag,
-                      style: const TextStyle(fontSize: 11, color: _ink),
-                    ),
-                  ),
-                )
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 3,
+                        ),
+                        decoration: BoxDecoration(
+                          color: _chipBg,
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                        child: Text(
+                          tag,
+                          style: const TextStyle(fontSize: 11, color: _ink),
+                        ),
+                      ),
+                    )
                     .toList(),
               ),
               const Spacer(),
+
               SizedBox(
                 height: 32,
-                child: OutlinedButton(
-                  style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: _purple),
-                    foregroundColor: _purple,
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(999),
-                    ),
-                  ),
+                width: 120,
+                child: CustomButton(
+                  radius: 100,
+                  borderColor: _purple,
+                  bgColor: Colors.transparent,
                   onPressed: () => _onUseTemplate(t),
-                  child: const Text(
-                    'Use template',
-                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
-                  ),
+                  text: 'Use template',
+                  textColor: AppColors.purple,
+                  fontWeight: FontWeight.w600,
+                  showBorder: true,
+                  borderWidth: 1.5,
+                  fontSize: 12,
                 ),
+
+                // OutlinedButton(
+                //   style: OutlinedButton.styleFrom(
+                //     side: const BorderSide(color: _purple),
+                //     foregroundColor: _purple,
+                //     padding: const EdgeInsets.symmetric(horizontal: 12),
+                //     shape: RoundedRectangleBorder(
+                //       borderRadius: BorderRadius.circular(999),
+                //     ),
+                //   ),
+                //   onPressed: () => _onUseTemplate(t),
+                //   child: const Text(
+                //     'Use template',
+                //     style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                //   ),
+                // ),
               ),
             ],
           ),
@@ -523,23 +538,23 @@ class _TemplatesPageState extends State<TemplatesPage> {
 
   void _onCreateTemplate() {
     // TODO: navigate to a "Create Template" / quiz editor screen
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('New Template tapped')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('New Template tapped')));
   }
 
   void _onUseTemplate(_Template t) {
     // TODO: open quiz editor pre-filled from template
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Use template: ${t.title}')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text('Use template: ${t.title}')));
   }
 
   void _onMenuAction(String action, _Template t) {
     // Stub actions
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('$action tapped for ${t.title}')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text('$action tapped for ${t.title}')));
   }
 }
 

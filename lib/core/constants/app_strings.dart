@@ -48,5 +48,6 @@ class AppStrings {
   static const String resourcesTitle = "Resources";
 
   static const String quickActionsTitle = "Quick Actions";
+  static const String defaultsTitle = "Defaults";
 
 }

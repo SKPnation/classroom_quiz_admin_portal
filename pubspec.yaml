@@ -40,6 +40,10 @@ dependencies:
   get: any #state management, dependency injection and GetMaterial widgets
   get_storage: ^2.0.3 #Local cache
 
+  firebase_core: ^4.2.1
+  cloud_firestore: ^6.1.0
+  firebase_auth: ^6.0.1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

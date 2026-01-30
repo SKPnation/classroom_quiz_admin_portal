@@ -32,7 +32,6 @@ class ChoiceCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        border: Border.all(color: border!),
         borderRadius: BorderRadius.circular(16),
         boxShadow: Shadows.card,
       ),

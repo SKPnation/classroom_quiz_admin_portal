@@ -1,6 +1,9 @@
 import 'package:classroom_quiz_admin_portal/core/navigation/navigation_controller.dart';
+import 'package:classroom_quiz_admin_portal/features/auth/data/repos/auth_repo_impl.dart';
 import 'package:classroom_quiz_admin_portal/features/dashboard/presentation/controllers/dashboard_controller.dart';
 import 'package:classroom_quiz_admin_portal/features/delivery/presentation/controllers/schedule_controller.dart';
+import 'package:classroom_quiz_admin_portal/features/find_school/data/repos/find_school_repo_impl.dart';
+import 'package:classroom_quiz_admin_portal/features/find_school/presentation/controllers/find_school_controller.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/controllers/ai_generator_controller.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/controllers/create_quiz_controller.dart';
 import 'package:classroom_quiz_admin_portal/features/site_layout/presentation/controllers/menu_controller.dart';
@@ -15,6 +18,7 @@ class AllControllerBinding extends Bindings{
     Get.lazyPut(() => CreateQuizController());
     Get.lazyPut(() => AiGeneratorController());
     Get.lazyPut(() => ScheduleController());
+    Get.lazyPut(() => FindSchoolController(findSchoolRepo: FindSchoolRepoImpl(), authRepo: AuthRepoImpl()));
   }
 }
 

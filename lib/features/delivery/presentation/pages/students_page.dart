@@ -1,3 +1,4 @@
+import 'package:classroom_quiz_admin_portal/core/theme/colors.dart';
 import 'package:flutter/material.dart';
 
 class StudentsPage extends StatefulWidget {
@@ -14,7 +15,7 @@ class _StudentsPageState extends State<StudentsPage> {
   static const _ink = Color(0xFF111827);
   static const _sub = Color(0xFF6B7280);
   static const _border = Color(0xFFE5E7EB);
-  static const _purple = Color(0xFF6366F1);
+  static const _purple = AppColors.purple;
   static const _radius = 16.0;
 
   // ---- Data ----

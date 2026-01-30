@@ -2,6 +2,7 @@ import 'package:classroom_quiz_admin_portal/core/constants/app_strings.dart';
 import 'package:classroom_quiz_admin_portal/features/dashboard/presentation/pages/dashboard.dart';
 import 'package:classroom_quiz_admin_portal/features/delivery/presentation/pages/classes_page.dart';
 import 'package:classroom_quiz_admin_portal/features/delivery/presentation/pages/schedules_page.dart';
+import 'package:classroom_quiz_admin_portal/features/find_school/presentation/pages/find_school_page.dart';
 import 'package:classroom_quiz_admin_portal/features/grading_insights/presentation/pages/grading_queue.dart';
 import 'package:classroom_quiz_admin_portal/features/grading_insights/presentation/pages/results_page.dart';
 import 'package:classroom_quiz_admin_portal/features/delivery/presentation/pages/students_page.dart';
@@ -17,9 +18,10 @@ import 'package:get/get_navigation/get_navigation.dart';
 abstract class AppPages {
   AppPages._();
 
-  static final String initial = Routes.rootRoute;
+  static final String initial = Routes.findSchoolRoute;
 
   static final pages = [
+    GetPage(name: Routes.findSchoolRoute, page: () => FindSchoolPage()),
     GetPage(name: Routes.rootRoute, page: () => SiteLayout()),
   ];
 
@@ -60,6 +62,8 @@ PageRoute _getPageRoute(Widget child) {
 
 abstract class Routes {
   Routes._();
+
+  static const findSchoolRoute = "/find-school";
 
   ///PRIMARY
   static const dashboardDisplayName = AppStrings.dashboardTitle;

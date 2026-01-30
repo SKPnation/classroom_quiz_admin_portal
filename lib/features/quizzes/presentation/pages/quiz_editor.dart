@@ -1,13 +1,9 @@
+import 'package:classroom_quiz_admin_portal/core/theme/colors.dart';
 import 'package:flutter/material.dart';
 
 // ---------- Models / enums ----------
 
-enum QuestionType {
-  multipleChoice,
-  trueFalse,
-  shortAnswer,
-  essay,
-}
+enum QuestionType { multipleChoice, trueFalse, shortAnswer, essay }
 
 class QuestionModel {
   final String id;
@@ -77,16 +73,16 @@ class _QuizEditorPageState extends State<QuizEditorPage> {
   static const _ink = Color(0xFF111827);
   static const _sub = Color(0xFF6B7280);
   static const _border = Color(0xFFE5E7EB);
-  static const _blue = Color(0xFF2563EB);
   static const _ring = Color.fromRGBO(37, 99, 235, 0.25);
   static const _radius = 14.0;
 
   final TextEditingController _promptController = TextEditingController();
   final TextEditingController _shortKeywordsController =
-  TextEditingController();
+      TextEditingController();
   final TextEditingController _essayRubricController = TextEditingController();
-  final TextEditingController _essayMaxWordsController =
-  TextEditingController(text: '400');
+  final TextEditingController _essayMaxWordsController = TextEditingController(
+    text: '400',
+  );
 
   List<QuestionModel> questions = [];
   String? activeId;
@@ -171,8 +167,9 @@ class _QuizEditorPageState extends State<QuizEditorPage> {
     final idx = questions.indexWhere((q) => q.id == id);
     if (idx == -1) return;
     setState(() {
-      final copy =
-      questions[idx].copyWithNewId(DateTime.now().microsecondsSinceEpoch.toString());
+      final copy = questions[idx].copyWithNewId(
+        DateTime.now().microsecondsSinceEpoch.toString(),
+      );
       questions.insert(idx + 1, copy);
       activeId = copy.id;
       _loadCurrentIntoControllers();
@@ -241,23 +238,20 @@ class _QuizEditorPageState extends State<QuizEditorPage> {
               const SizedBox(height: 16),
               isNarrow
                   ? Column(
-                children: [
-                  _buildQuestionsCard(),
-                  const SizedBox(height: 16),
-                  _buildEditorCard(),
-                ],
-              )
+                      children: [
+                        _buildQuestionsCard(),
+                        const SizedBox(height: 16),
+                        _buildEditorCard(),
+                      ],
+                    )
                   : Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(
-                    width: 320,
-                    child: _buildQuestionsCard(),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(child: _buildEditorCard()),
-                ],
-              ),
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(width: 320, child: _buildQuestionsCard()),
+                        const SizedBox(width: 16),
+                        Expanded(child: _buildEditorCard()),
+                      ],
+                    ),
             ],
           ),
         );
@@ -300,10 +294,14 @@ class _QuizEditorPageState extends State<QuizEditorPage> {
     );
   }
 
-  Widget _headerButton(String label, {bool primary = false, VoidCallback? onTap}) {
-    final bg = primary ? _blue : Colors.white;
+  Widget _headerButton(
+    String label, {
+    bool primary = false,
+    VoidCallback? onTap,
+  }) {
+    final bg = primary ? AppColors.purple : Colors.white;
     final fg = primary ? Colors.white : _ink;
-    final borderColor = primary ? _blue : _border;
+    final borderColor = primary ? Colors.transparent : _border;
 
     return InkWell(
       onTap: onTap,
@@ -363,7 +361,7 @@ class _QuizEditorPageState extends State<QuizEditorPage> {
             child: Column(
               children: [
                 ...questions.asMap().entries.map(
-                      (entry) => _buildQuestionListItem(
+                  (entry) => _buildQuestionListItem(
                     index: entry.key,
                     question: entry.value,
                   ),
@@ -419,15 +417,9 @@ class _QuizEditorPageState extends State<QuizEditorPage> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: isActive ? _blue : _border),
+        border: Border.all(color: isActive ? AppColors.gold : _border),
         boxShadow: isActive
-            ? const [
-          BoxShadow(
-            color: _ring,
-            blurRadius: 0,
-            spreadRadius: 2,
-          )
-        ]
+            ? const [BoxShadow(color: _ring, blurRadius: 0, spreadRadius: 2)]
             : null,
       ),
       child: Row(
@@ -437,8 +429,10 @@ class _QuizEditorPageState extends State<QuizEditorPage> {
               onTap: () => _setActive(question.id),
               borderRadius: BorderRadius.circular(12),
               child: Padding(
-                padding:
-                const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 8,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -457,10 +451,7 @@ class _QuizEditorPageState extends State<QuizEditorPage> {
                           : question.prompt,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 11,
-                        color: _sub,
-                      ),
+                      style: const TextStyle(fontSize: 11, color: _sub),
                     ),
                   ],
                 ),
@@ -542,11 +533,18 @@ class _QuizEditorPageState extends State<QuizEditorPage> {
                 child: DropdownButton<String>(
                   value: _typeLabel(q.type),
                   isExpanded: true,
+                  dropdownColor: Colors.white,
+                  // THIS fixes the menu background
                   items: QuestionType.values
-                      .map((t) => DropdownMenuItem<String>(
-                    value: _typeLabel(t),
-                    child: Text(_typeLabel(t)),
-                  ))
+                      .map(
+                        (t) => DropdownMenuItem<String>(
+                          value: _typeLabel(t),
+                          child: Text(
+                            _typeLabel(t),
+                            style: const TextStyle(color: Colors.black),
+                          ),
+                        ),
+                      )
                       .toList(),
                   onChanged: (val) {
                     if (val == null) return;
@@ -575,7 +573,10 @@ class _QuizEditorPageState extends State<QuizEditorPage> {
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
-                  borderSide: const BorderSide(color: _blue, width: 1.5),
+                  borderSide: const BorderSide(
+                    color: AppColors.gold,
+                    width: 1.5,
+                  ),
                 ),
                 contentPadding: const EdgeInsets.all(10),
                 filled: true,
@@ -647,6 +648,8 @@ class _QuizEditorPageState extends State<QuizEditorPage> {
                         children: [
                           Switch(
                             value: q.required,
+                            activeThumbColor: AppColors.gold,
+                            inactiveThumbColor: AppColors.grey[300],
                             onChanged: (val) {
                               setState(() {
                                 q.required = val;
@@ -657,10 +660,7 @@ class _QuizEditorPageState extends State<QuizEditorPage> {
                           const Flexible(
                             child: Text(
                               'Students must answer',
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: _sub,
-                              ),
+                              style: TextStyle(fontSize: 11, color: _sub),
                             ),
                           ),
                         ],
@@ -708,208 +708,6 @@ class _QuizEditorPageState extends State<QuizEditorPage> {
     );
   }
 
-
-  // Widget _buildEditorCard() {
-  //   final q = _activeQuestion;
-  //   if (q == null) return const SizedBox.shrink();
-  //
-  //   return Container(
-  //     decoration: BoxDecoration(
-  //       color: _card,
-  //       borderRadius: BorderRadius.circular(_radius),
-  //       border: Border.all(color: _border),
-  //       boxShadow: const [
-  //         BoxShadow(
-  //           blurRadius: 3,
-  //           offset: Offset(0, 1),
-  //           color: Color.fromARGB(10, 0, 0, 0),
-  //         ),
-  //       ],
-  //     ),
-  //     child: Padding(
-  //       padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
-  //       child: Column(
-  //         crossAxisAlignment: CrossAxisAlignment.start,
-  //         children: [
-  //           const Text(
-  //             'Edit Question',
-  //             style: TextStyle(
-  //               fontSize: 16,
-  //               fontWeight: FontWeight.w600,
-  //               color: _ink,
-  //             ),
-  //           ),
-  //           const SizedBox(height: 12),
-  //           const Divider(height: 1, color: _border),
-  //           const SizedBox(height: 14),
-  //           const Text(
-  //             'Type',
-  //             style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
-  //           ),
-  //           const SizedBox(height: 6),
-  //           Container(
-  //             padding: const EdgeInsets.symmetric(horizontal: 10),
-  //             decoration: BoxDecoration(
-  //               borderRadius: BorderRadius.circular(10),
-  //               border: Border.all(color: _border),
-  //               color: Colors.white,
-  //             ),
-  //             child: DropdownButtonHideUnderline(
-  //               child: DropdownButton<String>(
-  //                 value: _typeLabel(q.type),
-  //                 isExpanded: true,
-  //                 items: QuestionType.values
-  //                     .map((t) => DropdownMenuItem<String>(
-  //                   value: _typeLabel(t),
-  //                   child: Text(_typeLabel(t)),
-  //                 ))
-  //                     .toList(),
-  //                 onChanged: (val) {
-  //                   if (val == null) return;
-  //                   setState(() {
-  //                     q.type = _typeFromLabel(val);
-  //                   });
-  //                 },
-  //               ),
-  //             ),
-  //           ),
-  //           const SizedBox(height: 14),
-  //           const Text(
-  //             'Prompt',
-  //             style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
-  //           ),
-  //           const SizedBox(height: 6),
-  //           TextField(
-  //             controller: _promptController,
-  //             maxLines: null,
-  //             minLines: 4,
-  //             decoration: InputDecoration(
-  //               hintText: 'Enter the question text',
-  //               border: OutlineInputBorder(
-  //                 borderRadius: BorderRadius.circular(10),
-  //                 borderSide: const BorderSide(color: _border),
-  //               ),
-  //               focusedBorder: OutlineInputBorder(
-  //                 borderRadius: BorderRadius.circular(10),
-  //                 borderSide: const BorderSide(color: _blue, width: 1.5),
-  //               ),
-  //               contentPadding: const EdgeInsets.all(10),
-  //               filled: true,
-  //               fillColor: Colors.white,
-  //             ),
-  //             onChanged: (_) => _saveFromControllers(),
-  //           ),
-  //           const SizedBox(height: 14),
-  //           _buildTypeSpecificFields(q),
-  //           const SizedBox(height: 14),
-  //           Row(
-  //             children: [
-  //               Expanded(
-  //                 child: Column(
-  //                   crossAxisAlignment: CrossAxisAlignment.start,
-  //                   children: [
-  //                     const Text(
-  //                       'Points',
-  //                       style: TextStyle(
-  //                           fontWeight: FontWeight.w600, fontSize: 13),
-  //                     ),
-  //                     const SizedBox(height: 6),
-  //                     TextField(
-  //                       keyboardType: TextInputType.number,
-  //                       decoration: InputDecoration(
-  //                         border: OutlineInputBorder(
-  //                           borderRadius: BorderRadius.circular(10),
-  //                           borderSide: const BorderSide(color: _border),
-  //                         ),
-  //                         contentPadding: const EdgeInsets.symmetric(
-  //                           horizontal: 10,
-  //                           vertical: 8,
-  //                         ),
-  //                       ),
-  //                       controller: TextEditingController(
-  //                         text: q.points.toString(),
-  //                       ),
-  //                       onChanged: (val) {
-  //                         final v = int.tryParse(val) ?? 0;
-  //                         setState(() {
-  //                           q.points = v;
-  //                         });
-  //                       },
-  //                     ),
-  //                   ],
-  //                 ),
-  //               ),
-  //               const SizedBox(width: 12),
-  //               Expanded(
-  //                 child: Column(
-  //                   crossAxisAlignment: CrossAxisAlignment.start,
-  //                   children: [
-  //                     const Text(
-  //                       'Required',
-  //                       style: TextStyle(
-  //                           fontWeight: FontWeight.w600, fontSize: 13),
-  //                     ),
-  //                     const SizedBox(height: 6),
-  //                     Row(
-  //                       children: [
-  //                         Switch(
-  //                           value: q.required,
-  //                           onChanged: (val) {
-  //                             setState(() {
-  //                               q.required = val;
-  //                             });
-  //                           },
-  //                         ),
-  //                         const SizedBox(width: 4),
-  //                         const Expanded(
-  //                           child: Text(
-  //                             'Students must answer',
-  //                             style: TextStyle(fontSize: 11, color: _sub),
-  //                           ),
-  //                         ),
-  //                       ],
-  //                     ),
-  //                   ],
-  //                 ),
-  //               ),
-  //             ],
-  //           ),
-  //           const SizedBox(height: 8),
-  //           const Divider(height: 1, color: Colors.transparent),
-  //           const SizedBox(height: 8),
-  //           Row(
-  //             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-  //             children: [
-  //               const Expanded(
-  //                 child: Text(
-  //                   'Tip: Use ⌘/Ctrl+D to duplicate; ⌘/Ctrl+↑/↓ to reorder.',
-  //                   style: TextStyle(fontSize: 11, color: _sub),
-  //                 ),
-  //               ),
-  //               Container(
-  //                 padding:
-  //                 const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-  //                 decoration: BoxDecoration(
-  //                   color: const Color(0xFFEEF2FF),
-  //                   borderRadius: BorderRadius.circular(999),
-  //                 ),
-  //                 child: Text(
-  //                   'Total Points: $_totalPoints',
-  //                   style: const TextStyle(
-  //                     color: Color(0xFF3730A3),
-  //                     fontSize: 12,
-  //                     fontWeight: FontWeight.w600,
-  //                   ),
-  //                 ),
-  //               ),
-  //             ],
-  //           ),
-  //         ],
-  //       ),
-  //     ),
-  //   );
-  // }
-
   Widget _buildTypeSpecificFields(QuestionModel q) {
     switch (q.type) {
       case QuestionType.multipleChoice:
@@ -932,87 +730,87 @@ class _QuizEditorPageState extends State<QuizEditorPage> {
           style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
         ),
         const SizedBox(height: 6),
-        ...q.options.asMap().entries.map((entry) {
-          final idx = entry.key;
-          final value = entry.value;
-          final label = String.fromCharCode(65 + idx); // A, B, C...
+        RadioGroup<int>(
+          groupValue: q.correctIndex, // ✅ current selected
+          onChanged: (val) {
+            if (val == null) return;
+            setState(() => q.correctIndex = val);
+          },
+          child: Column(
+            children: q.options.asMap().entries.map((entry) {
+              final idx = entry.key;
+              final value = entry.value;
+              final label = String.fromCharCode(65 + idx); // A, B, C...
 
-          return Container(
-            margin: const EdgeInsets.only(bottom: 6),
-            child: Row(
-              children: [
-                SizedBox(
-                  width: 30,
-                  child: Text(
-                    '$label.',
-                    style: const TextStyle(fontSize: 12, color: _sub),
-                  ),
-                ),
-                Expanded(
-                  child: TextField(
-                    controller: TextEditingController(text: value),
-                    decoration: InputDecoration(
-                      hintText: 'Option ${idx + 1}',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: const BorderSide(color: _border),
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 8,
+              return Container(
+                margin: const EdgeInsets.only(bottom: 6),
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: 30,
+                      child: Text(
+                        '$label.',
+                        style: const TextStyle(fontSize: 12, color: _sub),
                       ),
                     ),
-                    onChanged: (val) {
-                      setState(() {
-                        q.options[idx] = val;
-                      });
-                    },
-                  ),
-                ),
-                const SizedBox(width: 10),
-                InkWell(
-                  onTap: () {
-                    setState(() {
-                      q.correctIndex = idx;
-                    });
-                  },
-                  child: Row(
-                    children: [
-                      Radio<int>(
-                        value: idx,
-                        groupValue: q.correctIndex,
+                    Expanded(
+                      child: TextField(
+                        controller: TextEditingController(text: value),
+                        decoration: InputDecoration(
+                          hintText: 'Option ${idx + 1}',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: const BorderSide(color: _border),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 8,
+                          ),
+                        ),
                         onChanged: (val) {
-                          if (val == null) return;
                           setState(() {
-                            q.correctIndex = val;
+                            q.options[idx] = val;
                           });
                         },
-                        visualDensity: VisualDensity.compact,
                       ),
-                      const Text(
-                        'Correct',
-                        style: TextStyle(fontSize: 11, color: _sub),
-                      ),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(width: 10),
+
+                    // This radio now belongs to the single parent RadioGroup
+                    Row(
+                      children: [
+                        Radio<int>(
+                          value: idx,
+                          visualDensity: VisualDensity.compact,
+                        ),
+                        const Text(
+                          'Correct',
+                          style: TextStyle(fontSize: 11, color: _sub),
+                        ),
+                      ],
+                    ),
+
+                    IconButton(
+                      icon: const Icon(Icons.close, size: 18),
+                      splashRadius: 18,
+                      onPressed: () {
+                        if (q.options.length <= 1) return;
+                        setState(() {
+                          q.options.removeAt(idx);
+
+                          // keep correctIndex valid
+                          if (q.correctIndex >= q.options.length) {
+                            q.correctIndex = 0;
+                          }
+                        });
+                      },
+                    ),
+                  ],
                 ),
-                IconButton(
-                  icon: const Icon(Icons.close, size: 18),
-                  splashRadius: 18,
-                  onPressed: () {
-                    if (q.options.length <= 1) return;
-                    setState(() {
-                      q.options.removeAt(idx);
-                      if (q.correctIndex >= q.options.length) {
-                        q.correctIndex = 0;
-                      }
-                    });
-                  },
-                ),
-              ],
-            ),
-          );
-        }),
+              );
+            }).toList(),
+          ),
+        ),
         const SizedBox(height: 4),
         TextButton(
           onPressed: () {
@@ -1131,8 +929,7 @@ class _QuizEditorPageState extends State<QuizEditorPage> {
                 children: [
                   const Text(
                     'Max Words',
-                    style:
-                    TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
                   ),
                   const SizedBox(height: 6),
                   TextField(
@@ -1154,9 +951,7 @@ class _QuizEditorPageState extends State<QuizEditorPage> {
               ),
             ),
             const SizedBox(width: 12),
-            const Expanded(
-              child: SizedBox.shrink(),
-            ),
+            const Expanded(child: SizedBox.shrink()),
           ],
         ),
         const SizedBox(height: 4),
@@ -1173,10 +968,13 @@ class _QuizEditorPageState extends State<QuizEditorPage> {
     debugPrint('Quiz payload:');
     for (final q in questions) {
       debugPrint(
-          '${_typeLabel(q.type)} | ${q.points} pts | required=${q.required} | prompt="${q.prompt}"');
+        '${_typeLabel(q.type)} | ${q.points} pts | required=${q.required} | prompt="${q.prompt}"',
+      );
     }
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Quiz saved (mock). Check console for payload.')),
+      const SnackBar(
+        content: Text('Quiz saved (mock). Check console for payload.'),
+      ),
     );
   }
 }

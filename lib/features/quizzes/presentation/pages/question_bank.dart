@@ -1,3 +1,4 @@
+import 'package:classroom_quiz_admin_portal/core/global/custom_button.dart';
 import 'package:flutter/material.dart';
 
 class QuestionBankPage extends StatefulWidget {
@@ -171,24 +172,7 @@ class _QuestionBankPageState extends State<QuestionBankPage> {
         ),
       ),
       const SizedBox(width: 8),
-      SizedBox(
-        height: 40,
-        child: ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: _purple,
-            foregroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-          ),
-          onPressed: _onAddQuestion,
-          child: const Text(
-            'Add Question',
-            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
-          ),
-        ),
-      ),
+      Btn(label: "Add Question", onPressed: _onAddQuestion, width: 135, primary: true),
     ];
 
     if (isNarrow) {

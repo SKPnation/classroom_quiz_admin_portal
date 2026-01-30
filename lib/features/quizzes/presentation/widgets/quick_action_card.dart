@@ -4,6 +4,7 @@ import 'package:classroom_quiz_admin_portal/core/global/custom_text.dart';
 import 'package:classroom_quiz_admin_portal/core/theme/colors.dart';
 import 'package:classroom_quiz_admin_portal/core/theme/fonts.dart';
 import 'package:classroom_quiz_admin_portal/core/utils/helpers/size_helpers.dart';
+import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/widgets/card_scaffold.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/widgets/shadow_theme.dart';
 import 'package:flutter/material.dart';
 
@@ -12,74 +13,46 @@ class QuickActionsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final border = AppColors.grey[200];
 
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        border: Border.all(color: border!),
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: Shadows.card,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: EdgeInsets.only(left: 20, right: 20, top: 20, bottom: 16),
-            child: CustomText(
-              text: AppStrings.quickActionsTitle,
-              weight: FontWeight.w700,
-              size: AppFonts.baseSize,
-            ),
-          ),
-          Container(
-            height: 1,
-            width: displayWidth(context),
-            color: AppColors.grey[900],
-          ),
-          Padding(
-            padding: EdgeInsets.only(left: 20, right: 20, top: 20, bottom: 70),
-            child: Column(
-              children: [
-                QuickActionItem(
-                  secWidth: 100,
-                  priWidth: 160,
-                  title: 'From Template',
-                  hint: 'Pick from saved templates',
-                  secBtnTitle: 'Manage',
-                  primaryBtnTitle: 'Choose Template',
-                  onPressedSecBtn: () {},
-                  onPressedPrimaryBtn: () {},
-                ),
-                SizedBox(height: 12),
-                QuickActionItem(
-                  secWidth: 100,
-                  priWidth: 130,
-                  title: 'Import',
-                  hint: 'CSV, QTI, GIFT, Google Forms',
-                  secBtnTitle: 'Guide',
-                  primaryBtnTitle: 'Import File',
-                  onPressedSecBtn: () {},
-                  onPressedPrimaryBtn: () {},
-                ),
-                SizedBox(height: 12),
-                QuickActionItem(
-                  secWidth: 100,
-                  priWidth: 130,
-                  title: 'Continue Draft',
-                  hint:
-                      'Unit 4 Practice - Nov 2, 2:15 PM • CSE 101 Chapter 3 - Oct 28, 10:02 AM • PHY 202 Midterm B - Oct 20, 7:44 PM',
-                  secBtnTitle: 'View All',
-                  primaryBtnTitle: 'Open Latest',
-                  onPressedSecBtn: () {},
-                  onPressedPrimaryBtn: () {},
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
+    return CardScaffold(
+      title: AppStrings.quickActionsTitle,
+      child: Column(children: [
+        QuickActionItem(
+          secWidth: 100,
+          priWidth: 160,
+          title: 'From Template',
+          hint: 'Pick from saved templates',
+          secBtnTitle: 'Manage',
+          primaryBtnTitle: 'Choose Template',
+          onPressedSecBtn: () {},
+          onPressedPrimaryBtn: () {},
+        ),
+        SizedBox(height: 12),
+        QuickActionItem(
+          secWidth: 100,
+          priWidth: 130,
+          title: 'Import',
+          hint: 'CSV, QTI, GIFT, Google Forms',
+          secBtnTitle: 'Guide',
+          primaryBtnTitle: 'Import File',
+          onPressedSecBtn: () {},
+          onPressedPrimaryBtn: () {},
+        ),
+        SizedBox(height: 12),
+        QuickActionItem(
+          secWidth: 100,
+          priWidth: 130,
+          title: 'Continue Draft',
+          hint:
+          'Unit 4 Practice - Nov 2, 2:15 PM • CSE 101 Chapter 3 - Oct 28, 10:02 AM • PHY 202 Midterm B - Oct 20, 7:44 PM',
+          secBtnTitle: 'View All',
+          primaryBtnTitle: 'Open Latest',
+          onPressedSecBtn: () {},
+          onPressedPrimaryBtn: () {},
+        ),
+      ]),
     );
+
   }
 }
 
@@ -109,12 +82,12 @@ class QuickActionItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final border = AppColors.grey[200];
+    final border = AppColors.grey[300]!.withValues(alpha: .2);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
         color: Colors.white,
-        border: Border.all(color: border!),
+        border: Border.all(color: border),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(

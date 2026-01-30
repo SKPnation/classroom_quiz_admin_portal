@@ -1,4 +1,5 @@
 
+import 'package:classroom_quiz_admin_portal/core/theme/colors.dart';
 import 'package:flutter/material.dart';
 
 class ResultsPage extends StatefulWidget {
@@ -15,7 +16,7 @@ class _ResultsPageState extends State<ResultsPage> {
   static const _ink = Color(0xFF111827);
   static const _sub = Color(0xFF6B7280);
   static const _border = Color(0xFFE5E7EB);
-  static const _blue = Color(0xFF2563EB);
+  static const _purple = AppColors.purple;
   static const _green = Color(0xFF22C55E);
   static const _red = Color(0xFFDC2626);
   static const _radius = 14.0;
@@ -242,7 +243,7 @@ class _ResultsPageState extends State<ResultsPage> {
         ),
         ElevatedButton(
           style: ElevatedButton.styleFrom(
-            backgroundColor: _blue,
+            backgroundColor: _purple,
             foregroundColor: Colors.white,
             padding:
             const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
