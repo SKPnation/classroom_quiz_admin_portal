@@ -1,4 +1,5 @@
 import 'package:classroom_quiz_admin_portal/core/constants/app_strings.dart';
+import 'package:classroom_quiz_admin_portal/features/auth/presentation/pages/finish_sign_in.dart';
 import 'package:classroom_quiz_admin_portal/features/dashboard/presentation/pages/dashboard.dart';
 import 'package:classroom_quiz_admin_portal/features/delivery/presentation/pages/classes_page.dart';
 import 'package:classroom_quiz_admin_portal/features/delivery/presentation/pages/schedules_page.dart';
@@ -22,6 +23,7 @@ abstract class AppPages {
 
   static final pages = [
     GetPage(name: Routes.findSchoolRoute, page: () => FindSchoolPage()),
+    GetPage(name: Routes.finishSignInRoute, page: () => FinishSignInPage()),
     GetPage(name: Routes.rootRoute, page: () => SiteLayout()),
   ];
 
@@ -64,6 +66,7 @@ abstract class Routes {
   Routes._();
 
   static const findSchoolRoute = "/find-school";
+  static const finishSignInRoute = "/finish-sign-in";
 
   ///PRIMARY
   static const dashboardDisplayName = AppStrings.dashboardTitle;
@@ -109,7 +112,7 @@ abstract class Routes {
   static const settingsRoute = "/settings";
 
   //-------
-  static const authRoute = "/authentication";
+  // static const authRoute = "/authentication";
 
   static const rootRoute = "/";
 }

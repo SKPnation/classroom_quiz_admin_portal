@@ -41,7 +41,7 @@ class FindSchoolController extends GetxController {
 
   // 🕒 Timer & Pivot States
   Timer? countdownTimer;
-  final secondsRemaining = 30.obs;
+  final secondsRemaining = 60.obs;
   final showPivotOption = false.obs;
   final isGmailAllowed = false.obs; // For testing/bypass
 
