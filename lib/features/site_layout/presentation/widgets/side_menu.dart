@@ -220,21 +220,29 @@ class SideMenu extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: resourcesMenuItemRoutes
                       .map(
-                        (item) => SideMenuItem(
-                          itemName: item.name,
-                          onTap: () {
-                            if (!menController.isActive(item.name)) {
-                              menController.changeActiveItemTo(
-                                item.name,
-                                item.route,
-                              );
-                              if (ResponsiveWidget.isSmallScreen(context)) {
-                                Get.back();
+                        (item){
+                          var name = item.name;
+                          var route = item.route;
+
+                          print("name: $name");
+                          print("route: $route");
+
+                          return SideMenuItem(
+                            itemName: item.name,
+                            onTap: () {
+                              if (!menController.isActive(item.name)) {
+                                menController.changeActiveItemTo(
+                                  item.name,
+                                  item.route,
+                                );
+                                if (ResponsiveWidget.isSmallScreen(context)) {
+                                  Get.back();
+                                }
+                                navigationController.navigateTo(item.route);
                               }
-                              navigationController.navigateTo(item.route);
-                            }
-                          },
-                        ),
+                            },
+                          );
+                        },
                       )
                       .toList(),
                 ),

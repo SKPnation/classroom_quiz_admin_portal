@@ -6,6 +6,7 @@ import 'package:classroom_quiz_admin_portal/features/find_school/data/repos/find
 import 'package:classroom_quiz_admin_portal/features/find_school/presentation/controllers/find_school_controller.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/controllers/ai_generator_controller.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/controllers/create_quiz_controller.dart';
+import 'package:classroom_quiz_admin_portal/features/resources/presentation/controllers/settings_controller.dart';
 import 'package:classroom_quiz_admin_portal/features/site_layout/presentation/controllers/menu_controller.dart';
 import 'package:get/get.dart';
 
@@ -18,6 +19,7 @@ class AllControllerBinding extends Bindings{
     Get.lazyPut(() => CreateQuizController());
     Get.lazyPut(() => AiGeneratorController());
     Get.lazyPut(() => ScheduleController());
+    Get.lazyPut(() => SettingsController());
     Get.lazyPut(() => FindSchoolController(findSchoolRepo: FindSchoolRepoImpl(), authRepo: AuthRepoImpl()));
   }
 }

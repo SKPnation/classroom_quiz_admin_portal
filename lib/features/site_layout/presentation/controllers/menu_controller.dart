@@ -86,6 +86,8 @@ class MenController extends GetxController {
         return Routes.gradingQueueDisplayName;
       case Routes.mediaLibraryRoute:
         return Routes.mediaLibraryDisplayName;
+      case Routes.settingsRoute:
+        return Routes.settingsDisplayName;
       default:
         return Routes.dashboardDisplayName;
     }

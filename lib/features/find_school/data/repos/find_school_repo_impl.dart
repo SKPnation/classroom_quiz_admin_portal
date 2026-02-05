@@ -1,7 +1,6 @@
 import 'package:classroom_quiz_admin_portal/features/find_school/data/models/school_model.dart';
 import 'package:classroom_quiz_admin_portal/features/find_school/domain/repos/find_school_repo.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 class FindSchoolRepoImpl extends FindSchoolRepo {
   final CollectionReference<Map<String, dynamic>> organisations =

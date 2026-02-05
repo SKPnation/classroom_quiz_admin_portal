@@ -4,4 +4,5 @@ class CreateQuizController extends GetxController{
   static CreateQuizController get instance => Get.find();
 
 
+
 }

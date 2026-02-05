@@ -6,12 +6,16 @@ import 'package:classroom_quiz_admin_portal/features/find_school/data/repos/find
 import 'package:classroom_quiz_admin_portal/features/find_school/presentation/controllers/find_school_controller.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/controllers/ai_generator_controller.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/controllers/create_quiz_controller.dart';
+import 'package:classroom_quiz_admin_portal/features/resources/presentation/controllers/settings_controller.dart';
 import 'package:classroom_quiz_admin_portal/features/site_layout/presentation/controllers/menu_controller.dart';
 import 'package:classroom_quiz_admin_portal/src/app.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+
+
+final storage = GetStorage();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -43,6 +47,8 @@ void main() async {
       authRepo: AuthRepoImpl(),
     ),
   );
+  Get.put<SettingsController>(SettingsController());
+
 
   runApp(const App());
 }

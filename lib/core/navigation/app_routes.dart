@@ -1,4 +1,5 @@
 import 'package:classroom_quiz_admin_portal/core/constants/app_strings.dart';
+import 'package:classroom_quiz_admin_portal/core/data/local/get_store_keys.dart';
 import 'package:classroom_quiz_admin_portal/features/auth/presentation/pages/finish_sign_in.dart';
 import 'package:classroom_quiz_admin_portal/features/dashboard/presentation/pages/dashboard.dart';
 import 'package:classroom_quiz_admin_portal/features/delivery/presentation/pages/classes_page.dart';
@@ -12,21 +13,27 @@ import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/pages/
 import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/pages/question_bank.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/pages/quiz_editor.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/pages/templates.dart';
+import 'package:classroom_quiz_admin_portal/features/resources/presentation/controllers/settings_controller.dart';
+import 'package:classroom_quiz_admin_portal/features/resources/presentation/pages/media_library.dart';
+import 'package:classroom_quiz_admin_portal/features/resources/presentation/pages/settings_page.dart';
 import 'package:classroom_quiz_admin_portal/features/site_layout/presentation/pages/site_layout.dart';
+import 'package:classroom_quiz_admin_portal/main.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:get/get_navigation/get_navigation.dart';
 
 abstract class AppPages {
   AppPages._();
 
-  static final String initial = Routes.findSchoolRoute;
+  static final String initial = storage.read(GetStoreKeys.userKey) != null
+      ? Routes.rootRoute
+      : Routes.findSchoolRoute;
 
   static final pages = [
     GetPage(name: Routes.findSchoolRoute, page: () => FindSchoolPage()),
     GetPage(name: Routes.finishSignInRoute, page: () => FinishSignInPage()),
     GetPage(name: Routes.rootRoute, page: () => SiteLayout()),
   ];
-
 }
 
 Route<dynamic> generateRoute(RouteSettings settings) {
@@ -53,8 +60,19 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       return _getPageRoute(StudentsPage());
     case Routes.gradingQueueRoute:
       return _getPageRoute(GradingQueuePage());
+    case Routes.mediaLibraryRoute:
+      return _getPageRoute(MediaLibrary());
     default:
-      return _getPageRoute(Dashboard());
+      return _getPageRoute(
+        Obx(
+          () => SettingsPage(
+            profileCompleted:
+                SettingsController.instance.profileCompleted.value,
+            completionPercent:
+                SettingsController.instance.percentageCompletion.value,
+          ),
+        ),
+      );
   }
 }
 
