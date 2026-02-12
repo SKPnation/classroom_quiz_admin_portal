@@ -169,7 +169,6 @@ class FindSchoolController extends GetxController {
   }
 
   Future<void> sendVerificationLink({required String domain}) async {
-
     final email = emailTEC.text.trim().toLowerCase();
     dialogErrorMessage.value = ''; // Reset error on new attempt
 
@@ -214,14 +213,12 @@ class FindSchoolController extends GetxController {
     }
   }
 
-  Future<void> signInWithEmailPassword() async {
+  Future<void> signInWithEmailPassword({required SchoolModel school}) async {
     await authRepo.signInWithEmailPassword(
       email: emailTEC.text,
       password: passwordTEC.text,
+      school: school
     );
-
-    print(emailTEC.text);
-    print(passwordTEC.text);
   }
 
   bool _isValidSchoolEmail(String email, String domain) {

@@ -1,4 +1,8 @@
+import 'dart:convert';
+
 import 'package:classroom_quiz_admin_portal/core/global/custom_button.dart';
+import 'package:classroom_quiz_admin_portal/core/utils/config.dart';
+import 'package:dart_openai/dart_openai.dart';
 import 'package:flutter/material.dart';
 
 class AiQuestionGeneratorPage extends StatefulWidget {
@@ -14,6 +18,13 @@ class _AiQuestionGeneratorPageState extends State<AiQuestionGeneratorPage> {
   bool _isLoading = false;
 
   final List<_GeneratedQuestion> _questions = [];
+
+  @override
+  void initState() {
+    OpenAI.apiKey = AppConfig.openAiApiKey;
+
+    super.initState();
+  }
 
   @override
   void dispose() {
@@ -35,37 +46,116 @@ class _AiQuestionGeneratorPageState extends State<AiQuestionGeneratorPage> {
       _questions.clear();
     });
 
+    try {
+      // We instruct the AI to return a JSON list. This makes parsing reliable.
+      final systemPrompt = '''
+You are a helpful assistant that generates quiz questions.
+Respond with a valid JSON list of objects.
+Each object must have two keys: "question" (string) and "answer" (string).
+Do not include any text outside of the JSON list.
+''';
+
+      // Create the chat completion request
+      final chatCompletion = await OpenAI.instance.chat.create(
+        model: 'gpt-3.5-turbo',
+        // Or 'gpt-4' if you have access
+        responseFormat: {"type": "json_object"},
+        // Enforce JSON output
+        messages: [
+          OpenAIChatCompletionChoiceMessageModel(
+            role: OpenAIChatMessageRole.system,
+            content: [
+              OpenAIChatCompletionChoiceMessageContentItemModel.text(
+                systemPrompt,
+              ),
+            ],
+          ),
+          OpenAIChatCompletionChoiceMessageModel(
+            role: OpenAIChatMessageRole.user,
+            content: [
+              OpenAIChatCompletionChoiceMessageContentItemModel.text(text),
+            ],
+          ),
+        ],
+        temperature: 0.7,
+        // Adjust for creativity vs. predictability
+        maxTokens: 500,
+      );
+
+      final jsonContent =
+          chatCompletion.choices.first.message.content?.first.text;
+
+      if (jsonContent != null) {
+        final decodedJson = jsonDecode(jsonContent);
+
+        List<dynamic> questionsList;
+        if (decodedJson is List) {
+          questionsList = decodedJson;
+        } else if (decodedJson is Map &&
+            decodedJson.values.any((v) => v is List)) {
+          questionsList = decodedJson.values.firstWhere((v) => v is List);
+        } else {
+          throw Exception(
+            "Could not find a list of questions in the AI response.",
+          );
+        }
+
+        final generatedQuestions = questionsList.map((item) {
+          return _GeneratedQuestion(
+            question: item['question'] ?? 'No question text',
+            answer: item['answer'] ?? 'No answer text',
+          );
+        }).toList();
+
+        setState(() {
+          _questions.addAll(generatedQuestions);
+        });
+      }
+    } catch (e) {
+      // Handle potential errors from the API call or JSON parsing
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error generating questions: $e')));
+    } finally {
+      // Ensure the loading indicator is always turned off
+      setState(() {
+        _isLoading = false;
+      });
+    }
+
+    //-----------------------------------------------------
+
     // Simulate AI call
-    await Future.delayed(const Duration(seconds: 1, milliseconds: 500));
-
-    final mock = <_GeneratedQuestion>[
-      _GeneratedQuestion(
-        question:
-            'What process converts light energy into chemical energy in plants?',
-        answer: 'Photosynthesis',
-      ),
-      _GeneratedQuestion(
-        question: 'Which pigment in leaves captures light energy?',
-        answer: 'Chlorophyll',
-      ),
-      _GeneratedQuestion(
-        question: 'In which cell organelle does photosynthesis occur?',
-        answer: 'Chloroplast',
-      ),
-      _GeneratedQuestion(
-        question: 'Name the gas released during photosynthesis.',
-        answer: 'Oxygen',
-      ),
-      _GeneratedQuestion(
-        question: 'What is the main product of photosynthesis?',
-        answer: 'Glucose',
-      ),
-    ];
-
-    setState(() {
-      _questions.addAll(mock);
-      _isLoading = false;
-    });
+    // await Future.delayed(const Duration(seconds: 1, milliseconds: 500));
+    //
+    // final mock = <_GeneratedQuestion>[
+    //   _GeneratedQuestion(
+    //     question:
+    //         'What process converts light energy into chemical energy in plants?',
+    //     answer: 'Photosynthesis',
+    //   ),
+    //   _GeneratedQuestion(
+    //     question: 'Which pigment in leaves captures light energy?',
+    //     answer: 'Chlorophyll',
+    //   ),
+    //   _GeneratedQuestion(
+    //     question: 'In which cell organelle does photosynthesis occur?',
+    //     answer: 'Chloroplast',
+    //   ),
+    //   _GeneratedQuestion(
+    //     question: 'Name the gas released during photosynthesis.',
+    //     answer: 'Oxygen',
+    //   ),
+    //   _GeneratedQuestion(
+    //     question: 'What is the main product of photosynthesis?',
+    //     answer: 'Glucose',
+    //   ),
+    // ];
+    //
+    // setState(() {
+    //   _questions.addAll(mock);
+    //   _isLoading = false;
+    // });
   }
 
   void _onClear() {
@@ -181,29 +271,14 @@ class _AiQuestionGeneratorPageState extends State<AiQuestionGeneratorPage> {
                     Btn(
                       label: "Generate Questions",
                       width: 180,
-                      onPressed: () => _isLoading ? null : _onGenerate,
+                      onPressed: (){
+                        if(!_isLoading){
+                          _onGenerate();
+                        }
+                      },
+                      // onPressed: () => _isLoading ? null : _onGenerate,
                       primary: true,
                     ),
-                    // ElevatedButton(
-                    //   onPressed: _isLoading ? null : _onGenerate,
-                    //   style: ElevatedButton.styleFrom(
-                    //     backgroundColor: blue,
-                    //     padding: const EdgeInsets.symmetric(
-                    //       horizontal: 18,
-                    //       vertical: 10,
-                    //     ),
-                    //     shape: RoundedRectangleBorder(
-                    //       borderRadius: BorderRadius.circular(10),
-                    //     ),
-                    //     foregroundColor: Colors.white,
-                    //   ),
-                    //   child: const Text(
-                    //     'Generate Questions',
-                    //     style: TextStyle(
-                    //       fontWeight: FontWeight.w600,
-                    //     ),
-                    //   ),
-                    // ),
                   ],
                 ),
                 if (_isLoading) ...[

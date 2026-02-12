@@ -50,4 +50,10 @@ class AppStrings {
   static const String quickActionsTitle = "Quick Actions";
   static const String defaultsTitle = "Defaults";
 
+  ///------------------------------------------------------------------
+  static const String lecturer = "lecturer";
+  static const String members = "members";
+  static const String users = "users";
+  static const String organisations = "orgs";
+
 }

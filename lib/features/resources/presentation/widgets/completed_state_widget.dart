@@ -1,5 +1,7 @@
 /* ---------------------- COMPLETED STATE ---------------------- */
 
+import 'package:classroom_quiz_admin_portal/features/find_school/data/models/school_model.dart';
+import 'package:classroom_quiz_admin_portal/features/resources/data/model/user_model.dart';
 import 'package:classroom_quiz_admin_portal/features/resources/presentation/widgets/avatar_circle_widget.dart';
 import 'package:classroom_quiz_admin_portal/features/resources/presentation/widgets/cardshell_widget.dart';
 import 'package:classroom_quiz_admin_portal/features/resources/presentation/widgets/small_icon_dot.dart';
@@ -7,7 +9,14 @@ import 'package:classroom_quiz_admin_portal/features/resources/presentation/widg
 import 'package:flutter/material.dart';
 
 class ProfileCompletedCard extends StatelessWidget {
-  const ProfileCompletedCard({super.key});
+  const ProfileCompletedCard({
+    super.key,
+    required this.user,
+    required this.school,
+  });
+
+  final UserModel user;
+  final SchoolModel school;
 
   @override
   Widget build(BuildContext context) {
@@ -84,7 +93,8 @@ class ProfileCompletedCard extends StatelessWidget {
                   },
                   style: ElevatedButton.styleFrom(
                     elevation: 0,
-                    backgroundColor: const Color(0xFF2563EB), // blue-600
+                    backgroundColor: const Color(0xFF2563EB),
+                    // blue-600
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),

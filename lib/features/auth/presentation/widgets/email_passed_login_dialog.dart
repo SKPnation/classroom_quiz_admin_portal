@@ -1,3 +1,4 @@
+import 'package:classroom_quiz_admin_portal/core/theme/colors.dart';
 import 'package:classroom_quiz_admin_portal/features/find_school/data/models/school_model.dart';
 import 'package:classroom_quiz_admin_portal/features/find_school/presentation/controllers/find_school_controller.dart';
 import 'package:flutter/material.dart';
@@ -21,6 +22,7 @@ class EmailPasswordLoginDialog extends StatelessWidget {
 
     return AlertDialog(
       title: const Text('Sign In'),
+      backgroundColor: AppColors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       content: SizedBox(
         width: 400,
@@ -95,7 +97,8 @@ class EmailPasswordLoginDialog extends StatelessWidget {
             ),
             onPressed: controller.loading.value
                 ? null
-                : () => _handleLogin(isEmailValid: isEmailValid),
+                : () =>
+                      _handleLogin(isEmailValid: isEmailValid, school: school),
             child: controller.loading.value
                 ? const SizedBox(
                     height: 20,
@@ -112,14 +115,16 @@ class EmailPasswordLoginDialog extends StatelessWidget {
     );
   }
 
-  void _handleLogin({required bool isEmailValid}) async {
+  void _handleLogin({
+    required bool isEmailValid,
+    required SchoolModel school,
+  }) async {
     controller.dialogErrorMessage.value = "";
 
     print("is email valid: $isEmailValid ");
     if (isEmailValid) {
-
-      await controller.signInWithEmailPassword();
-    }else{
+      await controller.signInWithEmailPassword(school: school);
+    } else {
       controller.dialogErrorMessage.value = "Invalid email address";
     }
   }

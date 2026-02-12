@@ -19,6 +19,17 @@ class SchoolModel {
     required this.isActive,
   });
 
+  Map<String, dynamic> toJson() {
+    return {
+      'name': name,
+      'nameLower': nameLower ?? name.toLowerCase(),
+      'logoUrl': logoUrl,
+      'code': code,
+      'allowedDomains': allowedDomains,
+      'isActive': isActive,
+    };
+  }
+
   factory SchoolModel.fromDoc(
       QueryDocumentSnapshot<Map<String, dynamic>> doc,
       ) {
@@ -31,6 +42,19 @@ class SchoolModel {
       code: data['code'] as String?,
       allowedDomains: (data['allowedDomains'] as List?)?.cast<String>() ?? [],
       isActive: (data['isActive'] as bool?) ?? true,
+    );
+  }
+
+  factory SchoolModel.fromJson(Map<String, dynamic> json, {String? docId}) {
+    return SchoolModel(
+      // Use docId if provided, otherwise look for 'id' in the json, or default to empty
+      id: docId ?? json['id'] ?? '',
+      name: (json['name'] ?? '').toString(),
+      nameLower: json['nameLower'] as String?,
+      logoUrl: json['logoUrl'] as String?,
+      code: json['code'] as String?,
+      allowedDomains: (json['allowedDomains'] as List?)?.cast<String>() ?? [],
+      isActive: (json['isActive'] as bool?) ?? true,
     );
   }
 }

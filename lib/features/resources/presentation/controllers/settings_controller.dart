@@ -1,15 +1,27 @@
 import 'package:classroom_quiz_admin_portal/core/data/local/get_store_keys.dart';
 import 'package:classroom_quiz_admin_portal/core/navigation/app_routes.dart';
+import 'package:classroom_quiz_admin_portal/features/auth/data/repos/auth_repo_impl.dart';
 import 'package:classroom_quiz_admin_portal/features/resources/data/model/user_model.dart';
+import 'package:classroom_quiz_admin_portal/features/resources/data/repos/user_repo_impl.dart';
 import 'package:classroom_quiz_admin_portal/features/site_layout/presentation/controllers/menu_controller.dart';
 import 'package:classroom_quiz_admin_portal/main.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 
 class SettingsController extends GetxController {
   static SettingsController get instance => Get.find();
 
+  final fullNameTEC = TextEditingController();
+  final officeTEC = TextEditingController();
+  final bioTEC = TextEditingController();
+  final departmentTEC = TextEditingController();
+
   var profileCompleted = true.obs;
   var percentageCompletion = 0.0.obs;
+
+  UserRepoImpl userRepo = UserRepoImpl();
+  AuthRepoImpl authRepo = AuthRepoImpl();
 
   void computeProfileCompleted() {
     final cached = storage.read(GetStoreKeys.userKey);
@@ -54,6 +66,14 @@ class SettingsController extends GetxController {
   bool validateFields(Map<String, dynamic> map) {
     // .values.any checks if at least one element meets the condition
     return !map.values.any((value) => value == null || value.toString().trim().isEmpty);
+  }
+
+  saveProfile({required UserModel user, required String orgId}) async{
+    await userRepo.saveProfile(user, orgId);
+  }
+
+  signOut() {
+    authRepo.signOut();
   }
 
 
