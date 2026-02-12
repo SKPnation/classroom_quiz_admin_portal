@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:classroom_quiz_admin_portal/core/global/custom_button.dart';
-import 'package:classroom_quiz_admin_portal/core/utils/config.dart';
 import 'package:dart_openai/dart_openai.dart';
 import 'package:flutter/material.dart';
 
