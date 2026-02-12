@@ -19,9 +19,14 @@ class _AiQuestionGeneratorPageState extends State<AiQuestionGeneratorPage> {
 
   final List<_GeneratedQuestion> _questions = [];
 
+  // In ai_generator.dart
+// Use this instead of AppConfig.openAiApiKey
+  final apiKey = const String.fromEnvironment('OPENAI_API_KEY');
+
   @override
   void initState() {
-    OpenAI.apiKey = AppConfig.openAiApiKey;
+    // OpenAI.apiKey = AppConfig.openAiApiKey;
+    OpenAI.apiKey = apiKey;
 
     super.initState();
   }
