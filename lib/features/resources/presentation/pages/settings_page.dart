@@ -8,6 +8,7 @@ import 'package:classroom_quiz_admin_portal/features/resources/presentation/widg
 import 'package:classroom_quiz_admin_portal/features/resources/presentation/widgets/security_card.dart';
 import 'package:classroom_quiz_admin_portal/main.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class SettingsPage extends StatelessWidget {
   SettingsPage({
@@ -31,6 +32,8 @@ class SettingsPage extends StatelessWidget {
 
     // 1. Safety Check: If data is missing, don't try to build the page
     if (userInfoCache == null || orgInfoCache == null) {
+      Get.back(); // Close the dialog
+      SettingsController.instance.signOut();
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
