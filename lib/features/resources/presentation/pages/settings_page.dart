@@ -26,82 +26,83 @@ class SettingsPage extends StatelessWidget {
     const bg = Color(0xFFF1F5F9); // slate-100-ish
     const ink = Color(0xFF111827); // gray-900
 
-    // final userInfoCache = storage.read(GetStoreKeys.userKey);
-    // final orgInfoCache = storage.read(GetStoreKeys.orgKey);
-    //
-    // UserModel userModel = UserModel.fromJson(userInfoCache);
-    // SchoolModel schoolModel = SchoolModel.fromJson(orgInfoCache);
+    final userInfoCache = storage.read(GetStoreKeys.userKey);
+    final orgInfoCache = storage.read(GetStoreKeys.orgKey);
 
-    return Container(
-      color: bg,
-      padding: const EdgeInsets.all(24),
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 920),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Settings',
-                style: TextStyle(
-                  fontSize: 32,
-                  fontWeight: FontWeight.w800,
-                  color: ink,
-                  height: 1.1,
+    // 1. Safety Check: If data is missing, don't try to build the page
+    if (userInfoCache == null || orgInfoCache == null) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
+    // 2. Now it is safe to parse
+    try {
+      UserModel userModel = UserModel.fromJson(userInfoCache);
+      SchoolModel schoolModel = SchoolModel.fromJson(orgInfoCache);
+
+      return Container(
+        color: bg,
+        padding: const EdgeInsets.all(24),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 920),
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Settings',
+                  style: TextStyle(
+                    fontSize: 32,
+                    fontWeight: FontWeight.w800,
+                    color: ink,
+                    height: 1.1,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 16),
+                const SizedBox(height: 16),
 
-              // Title row (like your pages)
-              const Text(
-                'Profile Settings',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w700,
-                  color: ink,
+                // Title row (like your pages)
+                const Text(
+                  'Profile Settings',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                    color: ink,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 12),
+                const SizedBox(height: 12),
 
-              // MAIN PROFILE CARD (switch by state)
-              // if (profileCompleted)
-              //   ProfileCompletedCard(user: userModel, school: schoolModel)
-              // else
-              //   ProfileInProgressCard(
-              //     percent: completionPercent.clamp(0.0, 1.0),
-              //     user: userModel,
-              //     school: schoolModel
-              //   ),
+                // MAIN PROFILE CARD (switch by state)
+                if (profileCompleted)
+                  ProfileCompletedCard(user: userModel, school: schoolModel)
+                else
+                  ProfileInProgressCard(
+                    percent: completionPercent.clamp(0.0, 1.0),
+                    user: userModel,
+                    school: schoolModel,
+                  ),
 
-              const SizedBox(height: 16),
+                const SizedBox(height: 16),
 
-              // Preferences Card (same on both)
-              const PreferencesCard(),
-              const SizedBox(height: 16),
+                // Preferences Card (same on both)
+                const PreferencesCard(),
+                const SizedBox(height: 16),
 
-              // Security Card (same on both)
-              const SecurityCard(),
+                // Security Card (same on both)
+                const SecurityCard(),
 
-              const SizedBox(height: 24),
+                const SizedBox(height: 24),
 
-              // subtle footer space
-              Container(height: 8, color: Colors.transparent),
-            ],
+                // subtle footer space
+                Container(height: 8, color: Colors.transparent),
+              ],
+            ),
           ),
         ),
-      ),
-    );
+      );
+    } catch (e) {
+      // 3. Handle data corruption (e.g., if JSON structure changed)
+      return const Scaffold(
+        body: Center(child: Text("Error loading profile settings.")),
+      );
+    }
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
