@@ -64,10 +64,9 @@ class SettingsPage extends StatelessWidget {
               const SizedBox(height: 12),
 
               // MAIN PROFILE CARD (switch by state)
-              if (profileCompleted)
-                ProfileCompletedCard(user: userModel, school: schoolModel)
-              else
-                SizedBox(),
+              // if (profileCompleted)
+              //   ProfileCompletedCard(user: userModel, school: schoolModel)
+              // else
                 // ProfileInProgressCard(
                 //   percent: completionPercent.clamp(0.0, 1.0),
                 //   user: userModel,
