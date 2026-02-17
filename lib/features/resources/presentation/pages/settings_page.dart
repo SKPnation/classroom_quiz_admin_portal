@@ -26,11 +26,11 @@ class SettingsPage extends StatelessWidget {
     const bg = Color(0xFFF1F5F9); // slate-100-ish
     const ink = Color(0xFF111827); // gray-900
 
-    // final userInfoCache = storage.read(GetStoreKeys.userKey);
-    // final orgInfoCache = storage.read(GetStoreKeys.orgKey);
-    //
-    // UserModel userModel = UserModel.fromJson(userInfoCache);
-    // SchoolModel schoolModel = SchoolModel.fromJson(orgInfoCache);
+    final userInfoCache = storage.read(GetStoreKeys.userKey);
+    final orgInfoCache = storage.read(GetStoreKeys.orgKey);
+
+    UserModel userModel = UserModel.fromJson(userInfoCache);
+    SchoolModel schoolModel = SchoolModel.fromJson(orgInfoCache);
 
     return Container(
       color: bg,
