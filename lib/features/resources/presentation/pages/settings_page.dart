@@ -26,11 +26,11 @@ class SettingsPage extends StatelessWidget {
     const bg = Color(0xFFF1F5F9); // slate-100-ish
     const ink = Color(0xFF111827); // gray-900
 
-    final userInfoCache = storage.read(GetStoreKeys.userKey);
-    final orgInfoCache = storage.read(GetStoreKeys.orgKey);
-
-    UserModel userModel = UserModel.fromJson(userInfoCache);
-    SchoolModel schoolModel = SchoolModel.fromJson(orgInfoCache);
+    // final userInfoCache = storage.read(GetStoreKeys.userKey);
+    // final orgInfoCache = storage.read(GetStoreKeys.orgKey);
+    //
+    // UserModel userModel = UserModel.fromJson(userInfoCache);
+    // SchoolModel schoolModel = SchoolModel.fromJson(orgInfoCache);
 
     return Container(
       color: bg,
@@ -41,27 +41,27 @@ class SettingsPage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Settings',
-                style: TextStyle(
-                  fontSize: 32,
-                  fontWeight: FontWeight.w800,
-                  color: ink,
-                  height: 1.1,
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // Title row (like your pages)
-              const Text(
-                'Profile Settings',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w700,
-                  color: ink,
-                ),
-              ),
-              const SizedBox(height: 12),
+              // const Text(
+              //   'Settings',
+              //   style: TextStyle(
+              //     fontSize: 32,
+              //     fontWeight: FontWeight.w800,
+              //     color: ink,
+              //     height: 1.1,
+              //   ),
+              // ),
+              // const SizedBox(height: 16),
+              //
+              // // Title row (like your pages)
+              // const Text(
+              //   'Profile Settings',
+              //   style: TextStyle(
+              //     fontSize: 20,
+              //     fontWeight: FontWeight.w700,
+              //     color: ink,
+              //   ),
+              // ),
+              // const SizedBox(height: 12),
 
               // MAIN PROFILE CARD (switch by state)
               // if (profileCompleted)
@@ -73,19 +73,19 @@ class SettingsPage extends StatelessWidget {
                 //   school: schoolModel
                 // ),
 
-              const SizedBox(height: 16),
-
-              // Preferences Card (same on both)
-              const PreferencesCard(),
-              const SizedBox(height: 16),
-
-              // Security Card (same on both)
-              const SecurityCard(),
-
-              const SizedBox(height: 24),
-
-              // subtle footer space
-              Container(height: 8, color: Colors.transparent),
+              // const SizedBox(height: 16),
+              //
+              // // Preferences Card (same on both)
+              // const PreferencesCard(),
+              // const SizedBox(height: 16),
+              //
+              // // Security Card (same on both)
+              // const SecurityCard(),
+              //
+              // const SizedBox(height: 24),
+              //
+              // // subtle footer space
+              // Container(height: 8, color: Colors.transparent),
             ],
           ),
         ),
