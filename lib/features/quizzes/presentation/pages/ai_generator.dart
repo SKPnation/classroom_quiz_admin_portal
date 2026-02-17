@@ -20,12 +20,23 @@ class _AiQuestionGeneratorPageState extends State<AiQuestionGeneratorPage> {
 
   // In ai_generator.dart
 // Use this instead of AppConfig.openAiApiKey
-  final apiKey = const String.fromEnvironment('OPENAI_API_KEY');
+  String apiKey = "";
+
+
+  void getApiKey() {
+    apiKey = const String.fromEnvironment('OPENAI_API_KEY');
+
+    if (apiKey.isEmpty) {
+      debugPrint("🚨 Warning: OpenAI API key not found in environment.");
+    }
+
+    OpenAI.apiKey = apiKey;
+  }
 
   @override
   void initState() {
     // OpenAI.apiKey = AppConfig.openAiApiKey;
-    OpenAI.apiKey = apiKey;
+    getApiKey();
 
     super.initState();
   }
