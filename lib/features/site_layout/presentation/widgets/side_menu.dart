@@ -221,11 +221,9 @@ class SideMenu extends StatelessWidget {
                   children: resourcesMenuItemRoutes
                       .map(
                         (item){
-                          var name = item.name;
-                          var route = item.route;
-
-                          print("name: $name");
-                          print("route: $route");
+                          // var name = item.name;
+                          // var route = item.route;
+                          //
 
                           return SideMenuItem(
                             itemName: item.name,

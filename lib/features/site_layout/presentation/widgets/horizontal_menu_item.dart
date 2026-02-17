@@ -21,8 +21,6 @@ class HorizontalMenuItem extends StatelessWidget {
         onTap: onTap!,
         onHover: (value){
           if (value) {
-            print("hovering on $itemName");  // ✅ print here
-
             menuController.onHover(itemName!);
           } else {
             menuController.onHover(""); // or null
