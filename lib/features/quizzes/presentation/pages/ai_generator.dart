@@ -26,8 +26,8 @@ class _AiQuestionGeneratorPageState extends State<AiQuestionGeneratorPage> {
 
   @override
   void initState() {
-    OpenAI.apiKey = AppConfig.openAiApiKey;
-    // quizEditorController.getApiKey();
+    // OpenAI.apiKey = AppConfig.openAiApiKey;
+    quizEditorController.getApiKey();
 
     super.initState();
   }
