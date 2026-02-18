@@ -72,4 +72,8 @@ class QuizItemModel {
       createdAt: createdAt,
     );
   }
+
+  copyWithNewId(String string) {
+
+  }
 }

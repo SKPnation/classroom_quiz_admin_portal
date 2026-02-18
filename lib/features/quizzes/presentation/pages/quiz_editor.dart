@@ -1,6 +1,9 @@
 import 'package:classroom_quiz_admin_portal/core/theme/colors.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/data/models/quiz_item_model.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/controllers/quiz_editor_controller.dart';
+import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/widgets/question_list_item.dart';
+import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/widgets/quiz_editor_header_btn.dart';
+import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/widgets/quiz_editor_question_card.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -73,25 +76,12 @@ class _QuizEditorPageState extends State<QuizEditorPage> {
   // Colors from the HTML design
   static const _bg = Color(0xFFF6F7FB);
   static const _card = Colors.white;
-  static const _ink = Color(0xFF111827);
-  static const _sub = Color(0xFF6B7280);
-  static const _border = Color(0xFFE5E7EB);
-  static const _ring = Color.fromRGBO(37, 99, 235, 0.25);
   static const _radius = 14.0;
-
-  final TextEditingController _promptController = TextEditingController();
-  final TextEditingController _shortKeywordsController =
-      TextEditingController();
-  final TextEditingController _essayRubricController = TextEditingController();
-  final TextEditingController _essayMaxWordsController = TextEditingController(
-    text: '400',
-  );
+  static const sub = Color(0xFF6B7280);
+  static const _ink = Color(0xFF111827);
 
   final quizEditorController = QuizEditorController.instance;
 
-  String? activeId;
-
-  // QuestionType newQuestionType = QuestionType.multipleChoice;
 
   @override
   void initState() {
@@ -104,10 +94,10 @@ class _QuizEditorPageState extends State<QuizEditorPage> {
 
   @override
   void dispose() {
-    _promptController.dispose();
-    _shortKeywordsController.dispose();
-    _essayRubricController.dispose();
-    _essayMaxWordsController.dispose();
+    quizEditorController.promptController.dispose();
+    quizEditorController.shortKeywordsController.dispose();
+    quizEditorController.essayRubricController.dispose();
+    quizEditorController.essayMaxWordsController.dispose();
     super.dispose();
   }
 
@@ -118,8 +108,7 @@ class _QuizEditorPageState extends State<QuizEditorPage> {
   //   );
   // }
   //
-  // QuestionModel? get _activeQuestion =>
-  //     questions.firstWhere((q) => q.id == activeId, orElse: () => questions[0]);
+
   //
   // void _setActive(String id) {
   //   setState(() {
@@ -156,79 +145,11 @@ class _QuizEditorPageState extends State<QuizEditorPage> {
   //     _loadCurrentIntoControllers();
   //   });
   // }
-  //
-  // void _moveQuestion(String id, int dir) {
-  //   final idx = questions.indexWhere((q) => q.id == id);
-  //   if (idx == -1) return;
-  //   final newIdx = (idx + dir).clamp(0, questions.length - 1);
-  //   if (newIdx == idx) return;
-  //   setState(() {
-  //     final item = questions.removeAt(idx);
-  //     questions.insert(newIdx, item);
-  //   });
-  // }
-  //
-  // void _duplicateQuestion(String id) {
-  //   final idx = questions.indexWhere((q) => q.id == id);
-  //   if (idx == -1) return;
-  //   setState(() {
-  //     final copy = questions[idx].copyWithNewId(
-  //       DateTime.now().microsecondsSinceEpoch.toString(),
-  //     );
-  //     questions.insert(idx + 1, copy);
-  //     activeId = copy.id;
-  //     _loadCurrentIntoControllers();
-  //   });
-  // }
-  //
-  // void _deleteQuestion(String id) {
-  //   if (questions.length == 1) {
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       const SnackBar(content: Text('Keep at least one question.')),
-  //     );
-  //     return;
-  //   }
-  //   final idx = questions.indexWhere((q) => q.id == id);
-  //   if (idx == -1) return;
-  //   setState(() {
-  //     questions.removeAt(idx);
-  //     if (activeId == id) {
-  //       activeId = questions[(idx - 1).clamp(0, questions.length - 1)].id;
-  //       _loadCurrentIntoControllers();
-  //     }
-  //   });
-  // }
 
   int get _totalPoints => quizEditorController.quizItems.fold(
     0,
     (sum, q) => sum + (q.points < 0 ? 0 : q.points),
   );
-
-  String _typeLabel(QuizItemType t) {
-    switch (t) {
-      case QuizItemType.multipleChoice:
-        return 'Multiple Choice';
-      case QuizItemType.trueFalse:
-        return 'True/False';
-      case QuizItemType.shortAnswer:
-        return 'Short Answer';
-      case QuizItemType.essay:
-        return 'Essay';
-    }
-  }
-
-  // QuestionType _typeFromLabel(String label) {
-  //   switch (label) {
-  //     case 'True/False':
-  //       return QuestionType.trueFalse;
-  //     case 'Short Answer':
-  //       return QuestionType.shortAnswer;
-  //     case 'Essay':
-  //       return QuestionType.essay;
-  //     default:
-  //       return QuestionType.multipleChoice;
-  //   }
-  // }
 
   // ---------- UI ----------
 
@@ -237,31 +158,29 @@ class _QuizEditorPageState extends State<QuizEditorPage> {
     return LayoutBuilder(
       builder: (context, constraints) {
         final isNarrow = constraints.maxWidth < 980;
-        return Obx(
-          () => SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildHeader(),
-                const SizedBox(height: 16),
-                isNarrow
-                    ? Column(
-                        children: [
-                          _buildQuestionsCard(),
-                          const SizedBox(height: 16),
-                          // _buildEditorCard(),
-                        ],
-                      )
-                    : Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          SizedBox(width: 320, child: _buildQuestionsCard()),
-                          const SizedBox(width: 16),
-                          // Expanded(child: _buildEditorCard()),
-                        ],
-                      ),
-              ],
-            ),
+        return SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildHeader(),
+              const SizedBox(height: 16),
+              isNarrow
+                  ? Column(
+                children: [
+                  QuizEditorQuestionCard(),
+                  const SizedBox(height: 16),
+                  // _buildEditorCard(),
+                ],
+              )
+                  : Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(width: 320, child: QuizEditorQuestionCard()),
+                  const SizedBox(width: 16),
+                  // Expanded(child: _buildEditorCard()),
+                ],
+              ),
+            ],
           ),
         );
       },
@@ -286,218 +205,20 @@ class _QuizEditorPageState extends State<QuizEditorPage> {
             SizedBox(height: 4),
             Text(
               'Build questions, set answers & points, then publish.',
-              style: TextStyle(fontSize: 13, color: _sub),
+              style: TextStyle(fontSize: 13, color: sub),
             ),
           ],
         ),
         Row(
           children: [
-            _headerButton('Preview'),
+            QuizEditorHeaderBtn(label: 'Preview'),
             const SizedBox(width: 8),
-            _headerButton('Save Draft'),
+            QuizEditorHeaderBtn(label: 'Save Draft'),
             const SizedBox(width: 8),
             // _headerButton('Publish', primary: true, onTap: _onPublish),
           ],
         ),
       ],
-    );
-  }
-
-  Widget _headerButton(
-    String label, {
-    bool primary = false,
-    VoidCallback? onTap,
-  }) {
-    final bg = primary ? AppColors.purple : Colors.white;
-    final fg = primary ? Colors.white : _ink;
-    final borderColor = primary ? Colors.transparent : _border;
-
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(10),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-        decoration: BoxDecoration(
-          color: bg,
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: borderColor),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            color: fg,
-            fontWeight: FontWeight.w600,
-            fontSize: 13,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildQuestionsCard() {
-    var questions = quizEditorController.quizItems;
-    return Container(
-      decoration: BoxDecoration(
-        color: _card,
-        borderRadius: BorderRadius.circular(_radius),
-        border: Border.all(color: _border),
-        boxShadow: const [
-          BoxShadow(
-            blurRadius: 3,
-            offset: Offset(0, 1),
-            color: Color.fromARGB(10, 0, 0, 0),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                'Questions',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: _ink,
-                ),
-              ),
-            ),
-          ),
-          const Divider(height: 1, color: _border),
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                //TODO: questions should use QuizItemModel from data layer, not QuestionModel from this file - refactor to separate out the editor state management from the UI
-                ...questions.map(
-                  (e){
-                    int index = questions.indexOf(e);
-                    return _buildQuestionListItem(index: index, question: e);
-                  },
-                ),
-                // ...questions.asMap().entries.map(
-                //   (entry) => _buildQuestionListItem(
-                //     index: entry.key,
-                //     question: entry.value,
-                //   ),
-                // ),
-                const SizedBox(height: 10),
-                // Row(
-                //   children: [
-                //     Expanded(
-                //       child: Container(
-                //         padding: const EdgeInsets.symmetric(horizontal: 10),
-                //         decoration: BoxDecoration(
-                //           borderRadius: BorderRadius.circular(10),
-                //           border: Border.all(color: _border),
-                //           color: Colors.white,
-                //         ),
-                //         child: DropdownButtonHideUnderline(
-                //           child: DropdownButton<QuestionType>(
-                //             value: newQuestionType,
-                //             isExpanded: true,
-                //             items: QuizItemType.values.map((type) {
-                //               return DropdownMenuItem<QuestionType>(
-                //                 value: type,
-                //                 child: Text(_typeLabel(type)),
-                //               );
-                //             }).toList(),
-                //             onChanged: (val) {
-                //               if (val == null) return;
-                //               setState(() => newQuestionType = val);
-                //             },
-                //           ),
-                //         ),
-                //       ),
-                //     ),
-                //     const SizedBox(width: 8),
-                //     // _headerButton('+ New', onTap: _addQuestion),
-                //   ],
-                // ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildQuestionListItem({
-    required int index,
-    required QuizItemModel question,
-  }) {
-    final bool isActive = question.id == activeId;
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: isActive ? AppColors.gold : _border),
-        boxShadow: isActive
-            ? const [BoxShadow(color: _ring, blurRadius: 0, spreadRadius: 2)]
-            : null,
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: InkWell(
-              // onTap: () => _setActive(question.id),
-              onTap: () {},
-              borderRadius: BorderRadius.circular(12),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 8,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Q${index + 1}: ${_typeLabel(question.type)}',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 13,
-                        color: _ink,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      question.question.isEmpty
-                          ? 'Untitled question'
-                          : question.question,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontSize: 11, color: _sub),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          // IconButton(
-          //   icon: const Text('⬆️'),
-          //   onPressed: () => _moveQuestion(question.id, -1),
-          //   splashRadius: 18,
-          // ),
-          // IconButton(
-          //   icon: const Text('⬇️'),
-          //   onPressed: () => _moveQuestion(question.id, 1),
-          //   splashRadius: 18,
-          // ),
-          // IconButton(
-          //   icon: const Text('⎘'),
-          //   onPressed: () => _duplicateQuestion(question.id),
-          //   splashRadius: 18,
-          // ),
-          // IconButton(
-          //   icon: const Text('🗑️'),
-          //   onPressed: () => _deleteQuestion(question.id),
-          //   splashRadius: 18,
-          // ),
-        ],
-      ),
     );
   }
 

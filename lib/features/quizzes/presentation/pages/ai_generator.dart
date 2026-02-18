@@ -120,7 +120,7 @@ class _AiQuestionGeneratorPageState extends State<AiQuestionGeneratorPage> {
                     minLines: 5,
                     decoration: InputDecoration(
                       hintText:
-                          'e.g. Generate 5 multiple-choice generatedQuestions about photosynthesis for first-year biology students.',
+                          'e.g. Generate 5 multiple-choice questions about photosynthesis for first-year biology students.',
                       hintStyle: const TextStyle(fontSize: 15, color: sub),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
@@ -167,7 +167,7 @@ class _AiQuestionGeneratorPageState extends State<AiQuestionGeneratorPage> {
                     const SizedBox(height: 16),
                     const Center(
                       child: Text(
-                        '🧠 AI is generating your generatedQuestions...',
+                        '🧠 AI is generating your questions...',
                         style: TextStyle(fontSize: 14, color: sub),
                       ),
                     ),

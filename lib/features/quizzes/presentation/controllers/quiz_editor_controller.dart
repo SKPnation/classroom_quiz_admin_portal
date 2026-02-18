@@ -11,14 +11,23 @@ class QuizEditorController extends GetxController {
   static QuizEditorController get instance => Get.find();
 
   final TextEditingController promptController = TextEditingController();
+  final TextEditingController shortKeywordsController = TextEditingController();
+  final TextEditingController essayRubricController = TextEditingController();
+  final TextEditingController essayMaxWordsController = TextEditingController(
+    text: '400',
+  );
+
   var isLoading = false.obs;
 
   RxList<GeneratedQuestion> generatedQuestions = <GeneratedQuestion>[].obs;
   var quizItems = <QuizItemModel>[].obs;
 
-  // In ai_generator.dart
-  // Use this instead of AppConfig.openAiApiKey
+  Rx<QuizItemType> newQuestionType = QuizItemType.multipleChoice.obs;
   String apiKey = "";
+  var activeId = "".obs;
+
+  QuizItemModel? get _activeQuestion =>
+      quizItems.firstWhere((q) => q.id == activeId, orElse: () => quizItems[0]);
 
   void getApiKey() {
     apiKey = const String.fromEnvironment('OPENAI_API_KEY');
@@ -117,60 +126,55 @@ Do not include any text outside of the JSON list.
       // Ensure the loading indicator is always turned off
       isLoading.value = false;
     }
-
-    //-----------------------------------------------------
-
-    // Simulate AI call
-    // await Future.delayed(const Duration(seconds: 1, milliseconds: 500));
-    //
-    // final mock = <_GeneratedQuestion>[
-    //   _GeneratedQuestion(
-    //     question:
-    //         'What process converts light energy into chemical energy in plants?',
-    //     answer: 'Photosynthesis',
-    //   ),
-    //   _GeneratedQuestion(
-    //     question: 'Which pigment in leaves captures light energy?',
-    //     answer: 'Chlorophyll',
-    //   ),
-    //   _GeneratedQuestion(
-    //     question: 'In which cell organelle does photosynthesis occur?',
-    //     answer: 'Chloroplast',
-    //   ),
-    //   _GeneratedQuestion(
-    //     question: 'Name the gas released during photosynthesis.',
-    //     answer: 'Oxygen',
-    //   ),
-    //   _GeneratedQuestion(
-    //     question: 'What is the main product of photosynthesis?',
-    //     answer: 'Glucose',
-    //   ),
-    // ];
-    //
-    // setState(() {
-    //   _questions.addAll(mock);
-    //   _isLoading = false;
-    // });
   }
-
-  // void addItemFromAi({
-  //   required String questionText,
-  //   required String answerText,
-  // }) {
-  //   items.add(
-  //     QuizItemModel(
-  //       id: const Uuid().v4(),
-  //       type: QuizItemType.shortAnswer,
-  //       question: questionText,
-  //       answerKey: answerText,
-  //       points: 1,
-  //       createdAt: DateTime.now(),
-  //     ),
-  //   );
-  // }
 
   void addQuestion(QuizItemModel item) {
     quizItems.add(item);
+  }
+
+  void moveQuestion(String id, int dir) {
+    final idx = quizItems.indexWhere((q) => q.id == id);
+    if (idx == -1) return;
+    final newIdx = (idx + dir).clamp(0, quizItems.length - 1);
+    if (newIdx == idx) return;
+    final item = quizItems.removeAt(idx);
+    quizItems.insert(newIdx, item);
+  }
+
+  void duplicateQuestion(String id) {
+    final idx = quizItems.indexWhere((q) => q.id == id);
+    if (idx == -1) return;
+    final copy = quizItems[idx].copyWithNewId(
+      DateTime.now().microsecondsSinceEpoch.toString(),
+    );
+    quizItems.insert(idx + 1, copy);
+    activeId = copy.id;
+    _loadCurrentIntoControllers();
+  }
+
+  void deleteQuestion(String id) {
+    // if (quizItems.length == 1) {
+    //   CustomSnackBar.errorSnackBar('Keep at least one question.')
+    //   return;
+    // }
+    final idx = quizItems.indexWhere((q) => q.id == id);
+    if (idx == -1) return;
+    quizItems.removeAt(idx);
+    if (activeId.value == id) {
+      activeId.value = quizItems[(idx - 1).clamp(0, quizItems.length - 1)].id;
+      _loadCurrentIntoControllers();
+    }
+  }
+
+  void _loadCurrentIntoControllers() {
+    final q = _activeQuestion;
+    if (q == null) return;
+    promptController.text = q.question;
+
+    //TODO: uncomment after you've added these fields to the QuizItemModel
+    // shortKeywordsController.text = q.shortKeywords;
+    // essayRubricController.text = q.essayRubric;
+    // essayMaxWordsController.text = q.maxWords.toString();
   }
 
   void removeItem(String id) {
