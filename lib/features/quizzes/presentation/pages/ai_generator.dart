@@ -1,9 +1,12 @@
 import 'package:classroom_quiz_admin_portal/core/global/custom_button.dart';
 import 'package:classroom_quiz_admin_portal/core/navigation/app_routes.dart';
+import 'package:classroom_quiz_admin_portal/core/navigation/navigation_controller.dart';
+import 'package:classroom_quiz_admin_portal/core/utils/config.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/data/models/question_model.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/data/models/quiz_item_model.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/controllers/quiz_editor_controller.dart';
 import 'package:classroom_quiz_admin_portal/features/site_layout/presentation/controllers/menu_controller.dart';
+import 'package:dart_openai/dart_openai.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:uuid/uuid.dart';
@@ -19,6 +22,7 @@ class AiQuestionGeneratorPage extends StatefulWidget {
 class _AiQuestionGeneratorPageState extends State<AiQuestionGeneratorPage> {
   final quizEditorController = QuizEditorController.instance;
   final menuController = MenController.instance;
+  final navigationController = NavigationController.instance;
 
   @override
   void initState() {
@@ -36,12 +40,13 @@ class _AiQuestionGeneratorPageState extends State<AiQuestionGeneratorPage> {
 
   void _onClear() {
     quizEditorController.promptController.clear();
-    quizEditorController.questions
+    quizEditorController.generatedQuestions
       ..clear()
       ..add(
         const GeneratedQuestion(
           question: 'Prompt cleared. Enter a new one to start again.',
           answer: '',
+          options: null,
           isEmptyMessage: true,
         ),
       );
@@ -59,7 +64,7 @@ class _AiQuestionGeneratorPageState extends State<AiQuestionGeneratorPage> {
 
     return Obx(() {
       final isLoading = quizEditorController.isLoading.value;
-      final questions = quizEditorController.questions;
+      final generatedQuestions = quizEditorController.generatedQuestions;
 
       return SingleChildScrollView(
         child: Column(
@@ -76,7 +81,7 @@ class _AiQuestionGeneratorPageState extends State<AiQuestionGeneratorPage> {
             ),
             const SizedBox(height: 6),
             const Text(
-              'Describe the topic or objectives below, and the AI will generate multiple quiz questions you can review and add to your quiz.',
+              'Describe the topic or objectives below, and the AI will generate multiple quiz generatedQuestions you can review and add to your quiz.',
               style: TextStyle(fontSize: 14, color: sub),
             ),
             const SizedBox(height: 24),
@@ -115,7 +120,7 @@ class _AiQuestionGeneratorPageState extends State<AiQuestionGeneratorPage> {
                     minLines: 5,
                     decoration: InputDecoration(
                       hintText:
-                          'e.g. Generate 5 multiple-choice questions about photosynthesis for first-year biology students.',
+                          'e.g. Generate 5 multiple-choice generatedQuestions about photosynthesis for first-year biology students.',
                       hintStyle: const TextStyle(fontSize: 15, color: sub),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
@@ -162,7 +167,7 @@ class _AiQuestionGeneratorPageState extends State<AiQuestionGeneratorPage> {
                     const SizedBox(height: 16),
                     const Center(
                       child: Text(
-                        '🧠 AI is generating your questions...',
+                        '🧠 AI is generating your generatedQuestions...',
                         style: TextStyle(fontSize: 14, color: sub),
                       ),
                     ),
@@ -198,14 +203,14 @@ class _AiQuestionGeneratorPageState extends State<AiQuestionGeneratorPage> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  if (questions.isEmpty)
+                  if (generatedQuestions.isEmpty)
                     const Text(
-                      'No questions yet. Enter a prompt and click “Generate Questions”.',
+                      'No generatedQuestions yet. Enter a prompt and click “Generate Questions”.',
                       style: TextStyle(fontSize: 14, color: sub),
                     )
                   else
                     Column(
-                      children: questions
+                      children: generatedQuestions
                           .map(
                             (q) => Container(
                               width: double.infinity,
@@ -237,6 +242,32 @@ class _AiQuestionGeneratorPageState extends State<AiQuestionGeneratorPage> {
                                           ),
                                         ),
                                         const SizedBox(height: 6),
+                                        if(q.questionType == 'multipleChoice' && q.options != null)
+                                          Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              const Text(
+                                                'Options:',
+                                                style: TextStyle(
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.w600,
+                                                  color: ink,
+                                                ),
+                                              ),
+                                              const SizedBox(height: 4),
+                                              ...q.options!.map(
+                                                (opt) => Text(
+                                                  '- $opt',
+                                                  style: const TextStyle(
+                                                    fontSize: 14,
+                                                    color: sub,
+                                                  ),
+                                                ),
+                                              ),
+                                              const SizedBox(height: 8),
+                                            ],
+                                          ),
                                         Text(
                                           'AI Answer: ${q.answer}',
                                           style: const TextStyle(
@@ -247,13 +278,17 @@ class _AiQuestionGeneratorPageState extends State<AiQuestionGeneratorPage> {
                                         const SizedBox(height: 8),
                                         OutlinedButton(
                                           onPressed: () {
-                                            // TODO: hook into the quiz editor
-
-                                            //Example; For multi-choice
                                             quizEditorController.addQuestion(
                                               QuizItemModel(
                                                 id: const Uuid().v4(),
-                                                type: QuizItemType.shortAnswer,
+                                                type: QuizItemType.values.firstWhere(
+                                                  (e) =>
+                                                      e.name ==
+                                                      q.questionType,
+                                                  orElse: () =>
+                                                      QuizItemType.shortAnswer,
+                                                ),
+                                                options: q.options ?? [],
                                                 question: q.question,
                                                 answerKey: q.answer,
                                                 points: 1,
@@ -282,6 +317,10 @@ class _AiQuestionGeneratorPageState extends State<AiQuestionGeneratorPage> {
                                               Routes.quizEditorDisplayName,
                                               Routes.quizEditorRoute,
                                             );
+
+                                            navigationController.navigateTo(Routes.quizEditorRoute);
+
+                                            print(quizEditorController.quizItems);
 
                                           },
                                           style: OutlinedButton.styleFrom(

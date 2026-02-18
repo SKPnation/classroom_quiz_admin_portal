@@ -2,6 +2,7 @@ import 'package:classroom_quiz_admin_portal/core/theme/colors.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/data/models/quiz_item_model.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/controllers/quiz_editor_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 // ---------- Models / enums ----------
 
@@ -88,8 +89,8 @@ class _QuizEditorPageState extends State<QuizEditorPage> {
 
   final quizEditorController = QuizEditorController.instance;
 
-
   String? activeId;
+
   // QuestionType newQuestionType = QuestionType.multipleChoice;
 
   @override
@@ -198,8 +199,10 @@ class _QuizEditorPageState extends State<QuizEditorPage> {
   //   });
   // }
 
-  int get _totalPoints =>
-      quizEditorController.items.fold(0, (sum, q) => sum + (q.points < 0 ? 0 : q.points));
+  int get _totalPoints => quizEditorController.quizItems.fold(
+    0,
+    (sum, q) => sum + (q.points < 0 ? 0 : q.points),
+  );
 
   String _typeLabel(QuizItemType t) {
     switch (t) {
@@ -234,29 +237,31 @@ class _QuizEditorPageState extends State<QuizEditorPage> {
     return LayoutBuilder(
       builder: (context, constraints) {
         final isNarrow = constraints.maxWidth < 980;
-        return SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildHeader(),
-              const SizedBox(height: 16),
-              isNarrow
-                  ? Column(
-                      children: [
-                        _buildQuestionsCard(),
-                        const SizedBox(height: 16),
-                        // _buildEditorCard(),
-                      ],
-                    )
-                  : Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SizedBox(width: 320, child: _buildQuestionsCard()),
-                        const SizedBox(width: 16),
-                        // Expanded(child: _buildEditorCard()),
-                      ],
-                    ),
-            ],
+        return Obx(
+          () => SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildHeader(),
+                const SizedBox(height: 16),
+                isNarrow
+                    ? Column(
+                        children: [
+                          _buildQuestionsCard(),
+                          const SizedBox(height: 16),
+                          // _buildEditorCard(),
+                        ],
+                      )
+                    : Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SizedBox(width: 320, child: _buildQuestionsCard()),
+                          const SizedBox(width: 16),
+                          // Expanded(child: _buildEditorCard()),
+                        ],
+                      ),
+              ],
+            ),
           ),
         );
       },
@@ -330,6 +335,7 @@ class _QuizEditorPageState extends State<QuizEditorPage> {
   }
 
   Widget _buildQuestionsCard() {
+    var questions = quizEditorController.quizItems;
     return Container(
       decoration: BoxDecoration(
         color: _card,
@@ -365,6 +371,12 @@ class _QuizEditorPageState extends State<QuizEditorPage> {
             child: Column(
               children: [
                 //TODO: questions should use QuizItemModel from data layer, not QuestionModel from this file - refactor to separate out the editor state management from the UI
+                ...questions.map(
+                  (e){
+                    int index = questions.indexOf(e);
+                    return _buildQuestionListItem(index: index, question: e);
+                  },
+                ),
                 // ...questions.asMap().entries.map(
                 //   (entry) => _buildQuestionListItem(
                 //     index: entry.key,
@@ -432,7 +444,7 @@ class _QuizEditorPageState extends State<QuizEditorPage> {
           Expanded(
             child: InkWell(
               // onTap: () => _setActive(question.id),
-              onTap: (){},
+              onTap: () {},
               borderRadius: BorderRadius.circular(12),
               child: Padding(
                 padding: const EdgeInsets.symmetric(
@@ -451,14 +463,14 @@ class _QuizEditorPageState extends State<QuizEditorPage> {
                       ),
                     ),
                     const SizedBox(height: 2),
-                    // Text(
-                    //   question.prompt.isEmpty
-                    //       ? 'Untitled question'
-                    //       : question.prompt,
-                    //   maxLines: 1,
-                    //   overflow: TextOverflow.ellipsis,
-                    //   style: const TextStyle(fontSize: 11, color: _sub),
-                    // ),
+                    Text(
+                      question.question.isEmpty
+                          ? 'Untitled question'
+                          : question.question,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontSize: 11, color: _sub),
+                    ),
                   ],
                 ),
               ),
@@ -727,261 +739,261 @@ class _QuizEditorPageState extends State<QuizEditorPage> {
   //   }
   // }
 
- //  Widget _buildMultipleChoiceEditor(QuizItemModel q) {
- //    return Column(
- //      crossAxisAlignment: CrossAxisAlignment.start,
- //      children: [
- //        const Text(
- //          'Options',
- //          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
- //        ),
- //        const SizedBox(height: 6),
- //        RadioGroup<int>(
- //          groupValue: q.correctIndex, //current selected
- //          onChanged: (val) {
- //            if (val == null) return;
- //            setState(() => q.correctIndex = val);
- //          },
- //          child: Column(
- //            children: q.options.asMap().entries.map((entry) {
- //              final idx = entry.key;
- //              final value = entry.value;
- //              final label = String.fromCharCode(65 + idx); // A, B, C...
- //
- //              return Container(
- //                margin: const EdgeInsets.only(bottom: 6),
- //                child: Row(
- //                  children: [
- //                    SizedBox(
- //                      width: 30,
- //                      child: Text(
- //                        '$label.',
- //                        style: const TextStyle(fontSize: 12, color: _sub),
- //                      ),
- //                    ),
- //                    Expanded(
- //                      child: TextField(
- //                        controller: TextEditingController(text: value),
- //                        decoration: InputDecoration(
- //                          hintText: 'Option ${idx + 1}',
- //                          border: OutlineInputBorder(
- //                            borderRadius: BorderRadius.circular(10),
- //                            borderSide: const BorderSide(color: _border),
- //                          ),
- //                          contentPadding: const EdgeInsets.symmetric(
- //                            horizontal: 10,
- //                            vertical: 8,
- //                          ),
- //                        ),
- //                        onChanged: (val) {
- //                          setState(() {
- //                            q.options[idx] = val;
- //                          });
- //                        },
- //                      ),
- //                    ),
- //                    const SizedBox(width: 10),
- //
- //                    // This radio now belongs to the single parent RadioGroup
- //                    Row(
- //                      children: [
- //                        Radio<int>(
- //                          value: idx,
- //                          visualDensity: VisualDensity.compact,
- //                        ),
- //                        const Text(
- //                          'Correct',
- //                          style: TextStyle(fontSize: 11, color: _sub),
- //                        ),
- //                      ],
- //                    ),
- //
- //                    IconButton(
- //                      icon: const Icon(Icons.close, size: 18),
- //                      splashRadius: 18,
- //                      onPressed: () {
- //                        if (q.options.length <= 1) return;
- //                        setState(() {
- //                          q.options.removeAt(idx);
- //
- //                          // keep correctIndex valid
- //                          if (q.correctIndex >= q.options.length) {
- //                            q.correctIndex = 0;
- //                          }
- //                        });
- //                      },
- //                    ),
- //                  ],
- //                ),
- //              );
- //            }).toList(),
- //          ),
- //        ),
- //        const SizedBox(height: 4),
- //        TextButton(
- //          onPressed: () {
- //            setState(() {
- //              q.options.add('');
- //            });
- //          },
- //          child: const Text('+ Add option'),
- //        ),
- //      ],
- //    );
- //  }
- //
- // Widget _buildTrueFalseEditor(QuestionModel q) {
- //    return Column(
- //      crossAxisAlignment: CrossAxisAlignment.start,
- //      children: [
- //        const Text(
- //          'Answer',
- //          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
- //        ),
- //        const SizedBox(height: 6),
- //        Row(
- //          children: [
- //            Expanded(
- //              child: ChoiceChip(
- //                label: const Text('True'),
- //                selected: q.tfAnswer,
- //                onSelected: (val) {
- //                  if (val) {
- //                    setState(() => q.tfAnswer = true);
- //                  }
- //                },
- //              ),
- //            ),
- //            const SizedBox(width: 8),
- //            Expanded(
- //              child: ChoiceChip(
- //                label: const Text('False'),
- //                selected: !q.tfAnswer,
- //                onSelected: (val) {
- //                  if (val) {
- //                    setState(() => q.tfAnswer = false);
- //                  }
- //                },
- //              ),
- //            ),
- //          ],
- //        ),
- //      ],
- //    );
- //  }
- //
- //  Widget _buildShortAnswerEditor(QuestionModel q) {
- //    return Column(
- //      crossAxisAlignment: CrossAxisAlignment.start,
- //      children: [
- //        const Text(
- //          'Expected Keywords (comma-separated)',
- //          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
- //        ),
- //        const SizedBox(height: 6),
- //        TextField(
- //          controller: _shortKeywordsController,
- //          decoration: InputDecoration(
- //            hintText: 'e.g. stack, queue, complexity',
- //            border: OutlineInputBorder(
- //              borderRadius: BorderRadius.circular(10),
- //              borderSide: const BorderSide(color: _border),
- //            ),
- //            contentPadding: const EdgeInsets.symmetric(
- //              horizontal: 10,
- //              vertical: 8,
- //            ),
- //          ),
- //          onChanged: (_) => _saveFromControllers(),
- //        ),
- //        const SizedBox(height: 4),
- //        const Text(
- //          'Used for basic auto-grading; teacher can override.',
- //          style: TextStyle(fontSize: 11, color: _sub),
- //        ),
- //      ],
- //    );
- //  }
- //
- //  Widget _buildEssayEditor(QuestionModel q) {
- //    return Column(
- //      crossAxisAlignment: CrossAxisAlignment.start,
- //      children: [
- //        const Text(
- //          'Rubric / Guidance',
- //          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
- //        ),
- //        const SizedBox(height: 6),
- //        TextField(
- //          controller: _essayRubricController,
- //          maxLines: null,
- //          minLines: 3,
- //          decoration: InputDecoration(
- //            hintText: 'Describe rubric or key points to look for.',
- //            border: OutlineInputBorder(
- //              borderRadius: BorderRadius.circular(10),
- //              borderSide: const BorderSide(color: _border),
- //            ),
- //            contentPadding: const EdgeInsets.all(10),
- //          ),
- //          onChanged: (_) => _saveFromControllers(),
- //        ),
- //        const SizedBox(height: 10),
- //        Row(
- //          children: [
- //            Expanded(
- //              child: Column(
- //                crossAxisAlignment: CrossAxisAlignment.start,
- //                children: [
- //                  const Text(
- //                    'Max Words',
- //                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
- //                  ),
- //                  const SizedBox(height: 6),
- //                  TextField(
- //                    controller: _essayMaxWordsController,
- //                    keyboardType: TextInputType.number,
- //                    decoration: InputDecoration(
- //                      border: OutlineInputBorder(
- //                        borderRadius: BorderRadius.circular(10),
- //                        borderSide: const BorderSide(color: _border),
- //                      ),
- //                      contentPadding: const EdgeInsets.symmetric(
- //                        horizontal: 10,
- //                        vertical: 8,
- //                      ),
- //                    ),
- //                    onChanged: (_) => _saveFromControllers(),
- //                  ),
- //                ],
- //              ),
- //            ),
- //            const SizedBox(width: 12),
- //            const Expanded(child: SizedBox.shrink()),
- //          ],
- //        ),
- //        const SizedBox(height: 4),
- //        const Text(
- //          'AI can help score with rubric cues; manual override available.',
- //          style: TextStyle(fontSize: 11, color: _sub),
- //        ),
- //      ],
- //    );
- //  }
- //
- //  void _onPublish() {
- //    final questions = quizEditorController.items;
- //    // For now just print payload
- //    debugPrint('Quiz payload:');
- //    for (final q in questions) {
- //      debugPrint(
- //        '${_typeLabel(q.type)} | ${q.points} pts | required=${q.required} | prompt="${q.prompt}"',
- //      );
- //    }
- //    ScaffoldMessenger.of(context).showSnackBar(
- //      const SnackBar(
- //        content: Text('Quiz saved (mock). Check console for payload.'),
- //      ),
- //    );
- //  }
+  //  Widget _buildMultipleChoiceEditor(QuizItemModel q) {
+  //    return Column(
+  //      crossAxisAlignment: CrossAxisAlignment.start,
+  //      children: [
+  //        const Text(
+  //          'Options',
+  //          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+  //        ),
+  //        const SizedBox(height: 6),
+  //        RadioGroup<int>(
+  //          groupValue: q.correctIndex, //current selected
+  //          onChanged: (val) {
+  //            if (val == null) return;
+  //            setState(() => q.correctIndex = val);
+  //          },
+  //          child: Column(
+  //            children: q.options.asMap().entries.map((entry) {
+  //              final idx = entry.key;
+  //              final value = entry.value;
+  //              final label = String.fromCharCode(65 + idx); // A, B, C...
+  //
+  //              return Container(
+  //                margin: const EdgeInsets.only(bottom: 6),
+  //                child: Row(
+  //                  children: [
+  //                    SizedBox(
+  //                      width: 30,
+  //                      child: Text(
+  //                        '$label.',
+  //                        style: const TextStyle(fontSize: 12, color: _sub),
+  //                      ),
+  //                    ),
+  //                    Expanded(
+  //                      child: TextField(
+  //                        controller: TextEditingController(text: value),
+  //                        decoration: InputDecoration(
+  //                          hintText: 'Option ${idx + 1}',
+  //                          border: OutlineInputBorder(
+  //                            borderRadius: BorderRadius.circular(10),
+  //                            borderSide: const BorderSide(color: _border),
+  //                          ),
+  //                          contentPadding: const EdgeInsets.symmetric(
+  //                            horizontal: 10,
+  //                            vertical: 8,
+  //                          ),
+  //                        ),
+  //                        onChanged: (val) {
+  //                          setState(() {
+  //                            q.options[idx] = val;
+  //                          });
+  //                        },
+  //                      ),
+  //                    ),
+  //                    const SizedBox(width: 10),
+  //
+  //                    // This radio now belongs to the single parent RadioGroup
+  //                    Row(
+  //                      children: [
+  //                        Radio<int>(
+  //                          value: idx,
+  //                          visualDensity: VisualDensity.compact,
+  //                        ),
+  //                        const Text(
+  //                          'Correct',
+  //                          style: TextStyle(fontSize: 11, color: _sub),
+  //                        ),
+  //                      ],
+  //                    ),
+  //
+  //                    IconButton(
+  //                      icon: const Icon(Icons.close, size: 18),
+  //                      splashRadius: 18,
+  //                      onPressed: () {
+  //                        if (q.options.length <= 1) return;
+  //                        setState(() {
+  //                          q.options.removeAt(idx);
+  //
+  //                          // keep correctIndex valid
+  //                          if (q.correctIndex >= q.options.length) {
+  //                            q.correctIndex = 0;
+  //                          }
+  //                        });
+  //                      },
+  //                    ),
+  //                  ],
+  //                ),
+  //              );
+  //            }).toList(),
+  //          ),
+  //        ),
+  //        const SizedBox(height: 4),
+  //        TextButton(
+  //          onPressed: () {
+  //            setState(() {
+  //              q.options.add('');
+  //            });
+  //          },
+  //          child: const Text('+ Add option'),
+  //        ),
+  //      ],
+  //    );
+  //  }
+  //
+  // Widget _buildTrueFalseEditor(QuestionModel q) {
+  //    return Column(
+  //      crossAxisAlignment: CrossAxisAlignment.start,
+  //      children: [
+  //        const Text(
+  //          'Answer',
+  //          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+  //        ),
+  //        const SizedBox(height: 6),
+  //        Row(
+  //          children: [
+  //            Expanded(
+  //              child: ChoiceChip(
+  //                label: const Text('True'),
+  //                selected: q.tfAnswer,
+  //                onSelected: (val) {
+  //                  if (val) {
+  //                    setState(() => q.tfAnswer = true);
+  //                  }
+  //                },
+  //              ),
+  //            ),
+  //            const SizedBox(width: 8),
+  //            Expanded(
+  //              child: ChoiceChip(
+  //                label: const Text('False'),
+  //                selected: !q.tfAnswer,
+  //                onSelected: (val) {
+  //                  if (val) {
+  //                    setState(() => q.tfAnswer = false);
+  //                  }
+  //                },
+  //              ),
+  //            ),
+  //          ],
+  //        ),
+  //      ],
+  //    );
+  //  }
+  //
+  //  Widget _buildShortAnswerEditor(QuestionModel q) {
+  //    return Column(
+  //      crossAxisAlignment: CrossAxisAlignment.start,
+  //      children: [
+  //        const Text(
+  //          'Expected Keywords (comma-separated)',
+  //          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+  //        ),
+  //        const SizedBox(height: 6),
+  //        TextField(
+  //          controller: _shortKeywordsController,
+  //          decoration: InputDecoration(
+  //            hintText: 'e.g. stack, queue, complexity',
+  //            border: OutlineInputBorder(
+  //              borderRadius: BorderRadius.circular(10),
+  //              borderSide: const BorderSide(color: _border),
+  //            ),
+  //            contentPadding: const EdgeInsets.symmetric(
+  //              horizontal: 10,
+  //              vertical: 8,
+  //            ),
+  //          ),
+  //          onChanged: (_) => _saveFromControllers(),
+  //        ),
+  //        const SizedBox(height: 4),
+  //        const Text(
+  //          'Used for basic auto-grading; teacher can override.',
+  //          style: TextStyle(fontSize: 11, color: _sub),
+  //        ),
+  //      ],
+  //    );
+  //  }
+  //
+  //  Widget _buildEssayEditor(QuestionModel q) {
+  //    return Column(
+  //      crossAxisAlignment: CrossAxisAlignment.start,
+  //      children: [
+  //        const Text(
+  //          'Rubric / Guidance',
+  //          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+  //        ),
+  //        const SizedBox(height: 6),
+  //        TextField(
+  //          controller: _essayRubricController,
+  //          maxLines: null,
+  //          minLines: 3,
+  //          decoration: InputDecoration(
+  //            hintText: 'Describe rubric or key points to look for.',
+  //            border: OutlineInputBorder(
+  //              borderRadius: BorderRadius.circular(10),
+  //              borderSide: const BorderSide(color: _border),
+  //            ),
+  //            contentPadding: const EdgeInsets.all(10),
+  //          ),
+  //          onChanged: (_) => _saveFromControllers(),
+  //        ),
+  //        const SizedBox(height: 10),
+  //        Row(
+  //          children: [
+  //            Expanded(
+  //              child: Column(
+  //                crossAxisAlignment: CrossAxisAlignment.start,
+  //                children: [
+  //                  const Text(
+  //                    'Max Words',
+  //                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+  //                  ),
+  //                  const SizedBox(height: 6),
+  //                  TextField(
+  //                    controller: _essayMaxWordsController,
+  //                    keyboardType: TextInputType.number,
+  //                    decoration: InputDecoration(
+  //                      border: OutlineInputBorder(
+  //                        borderRadius: BorderRadius.circular(10),
+  //                        borderSide: const BorderSide(color: _border),
+  //                      ),
+  //                      contentPadding: const EdgeInsets.symmetric(
+  //                        horizontal: 10,
+  //                        vertical: 8,
+  //                      ),
+  //                    ),
+  //                    onChanged: (_) => _saveFromControllers(),
+  //                  ),
+  //                ],
+  //              ),
+  //            ),
+  //            const SizedBox(width: 12),
+  //            const Expanded(child: SizedBox.shrink()),
+  //          ],
+  //        ),
+  //        const SizedBox(height: 4),
+  //        const Text(
+  //          'AI can help score with rubric cues; manual override available.',
+  //          style: TextStyle(fontSize: 11, color: _sub),
+  //        ),
+  //      ],
+  //    );
+  //  }
+  //
+  //  void _onPublish() {
+  //    final questions = quizEditorController.items;
+  //    // For now just print payload
+  //    debugPrint('Quiz payload:');
+  //    for (final q in questions) {
+  //      debugPrint(
+  //        '${_typeLabel(q.type)} | ${q.points} pts | required=${q.required} | prompt="${q.prompt}"',
+  //      );
+  //    }
+  //    ScaffoldMessenger.of(context).showSnackBar(
+  //      const SnackBar(
+  //        content: Text('Quiz saved (mock). Check console for payload.'),
+  //      ),
+  //    );
+  //  }
 }

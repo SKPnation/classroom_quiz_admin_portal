@@ -13,8 +13,8 @@ class QuizEditorController extends GetxController {
   final TextEditingController promptController = TextEditingController();
   var isLoading = false.obs;
 
-  RxList<GeneratedQuestion> questions = <GeneratedQuestion>[].obs;
-  var items = <QuizItemModel>[].obs;
+  RxList<GeneratedQuestion> generatedQuestions = <GeneratedQuestion>[].obs;
+  var quizItems = <QuizItemModel>[].obs;
 
   // In ai_generator.dart
   // Use this instead of AppConfig.openAiApiKey
@@ -39,14 +39,14 @@ class QuizEditorController extends GetxController {
     }
 
     isLoading.value = true;
-    questions.clear();
+    generatedQuestions.clear();
 
     try {
       // We instruct the AI to return a JSON list. This makes parsing reliable.
       final systemPrompt = '''
 You are a helpful assistant that generates quiz questions.
 Respond with a valid JSON list of objects.
-Each object must have two keys: "question" (string) and "answer" (string).
+Each object must have two keys: "question" (string), "answer" (string), if multi-choice, list the options, question_type (shortAnswer, multipleChoice, trueFalse, essay). 
 Do not include any text outside of the JSON list.
 ''';
 
@@ -77,6 +77,8 @@ Do not include any text outside of the JSON list.
         maxTokens: 500,
       );
 
+      print("AI Response: ${chatCompletion.choices.first.message.content}");
+
       final jsonContent =
           chatCompletion.choices.first.message.content?.first.text;
 
@@ -99,10 +101,14 @@ Do not include any text outside of the JSON list.
           return GeneratedQuestion(
             question: item['question'] ?? 'No question text',
             answer: item['answer'] ?? 'No answer text',
+            options: item['options'] != null
+                ? List<String>.from(item['options'])
+                : null,
+            questionType: item['question_type'],
           );
         }).toList();
 
-        questions.addAll(generatedQuestions);
+        this.generatedQuestions.addAll(generatedQuestions);
       }
     } catch (e) {
       // Handle potential errors from the API call or JSON parsing
@@ -164,13 +170,12 @@ Do not include any text outside of the JSON list.
   // }
 
   void addQuestion(QuizItemModel item) {
-    items.add(item);
+    quizItems.add(item);
   }
 
   void removeItem(String id) {
-    items.removeWhere((e) => e.id == id);
+    quizItems.removeWhere((e) => e.id == id);
   }
 
-  void clearItems() => items.clear();
-
+  void clearItems() => quizItems.clear();
 }
