@@ -19,6 +19,10 @@ class QuizEditorController extends GetxController {
 
   var isLoading = false.obs;
 
+  final TextEditingController questionController = TextEditingController();
+  final TextEditingController pointsController = TextEditingController();
+
+
   RxList<GeneratedQuestion> generatedQuestions = <GeneratedQuestion>[].obs;
   var quizItems = <QuizItemModel>[].obs;
 
@@ -26,8 +30,20 @@ class QuizEditorController extends GetxController {
   String apiKey = "";
   var activeId = "".obs;
 
-  QuizItemModel? get _activeQuestion =>
-      quizItems.firstWhere((q) => q.id == activeId, orElse: () => quizItems[0]);
+  QuizItemModel? get activeQuestion {
+    // 1. Check if the list is empty first
+    if (quizItems.isEmpty) return null;
+
+    // 2. Try to find the active question
+    return quizItems.firstWhere(
+          (q) => q.id == activeId.value,
+      // 3. Fallback to the first item only if the list isn't empty
+      orElse: () => quizItems.first,
+    );
+  }
+
+  int get totalPoints =>
+      quizItems.fold(0, (sum, q) => sum + (q.points < 0 ? 0 : q.points));
 
   void getApiKey() {
     apiKey = const String.fromEnvironment('OPENAI_API_KEY');
@@ -142,13 +158,20 @@ Do not include any text outside of the JSON list.
   }
 
   void duplicateQuestion(String id) {
+    // 1. Find the existing item
     final idx = quizItems.indexWhere((q) => q.id == id);
     if (idx == -1) return;
-    final copy = quizItems[idx].copyWithNewId(
-      DateTime.now().microsecondsSinceEpoch.toString(),
-    );
+
+    final original = quizItems[idx];
+
+    // 2. Create the copy
+    final copy = original.copyWith(id: DateTime.now().toString());
+
+    // 3. Insert and update state
     quizItems.insert(idx + 1, copy);
-    activeId = copy.id;
+    activeId.value = copy.id;
+
+    // 4. Refresh the UI controllers
     _loadCurrentIntoControllers();
   }
 
@@ -167,7 +190,7 @@ Do not include any text outside of the JSON list.
   }
 
   void _loadCurrentIntoControllers() {
-    final q = _activeQuestion;
+    final q = activeQuestion;
     if (q == null) return;
     promptController.text = q.question;
 

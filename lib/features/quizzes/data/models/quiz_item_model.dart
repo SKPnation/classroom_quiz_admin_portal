@@ -1,24 +1,21 @@
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 enum QuizItemType { shortAnswer, multipleChoice, trueFalse, essay }
 
 class QuizItemModel {
-  final String id;
-  final QuizItemType type;
-  final String question;
-
-  /// For short-answer: store expected answer (or rubric key)
+  String id;
+  QuizItemType type;
+  String question;
   final String? answerKey;
 
-  /// For MCQ: list options + correct option indexes
-  final List<String> options;
-  final List<int> correctOptionIndexes;
+  // Lists are no longer final so they can be modified in the editor
+  List<String> options;
+  List<int> correctOptionIndexes;
 
-  final int points;
+  int points;
   final DateTime createdAt;
 
-  const QuizItemModel({
+  QuizItemModel({
     required this.id,
     required this.type,
     required this.question,
@@ -27,18 +24,28 @@ class QuizItemModel {
     this.correctOptionIndexes = const [],
     this.points = 1,
     required this.createdAt,
-  });
+  }) {
+    // CRITICAL: Converts potential 'const' lists into growable lists
+    options = List.from(options);
+    correctOptionIndexes = List.from(correctOptionIndexes);
+  }
+
+  // Helper for Single-Choice UI (Radio Buttons)
+  int get correctIndex => correctOptionIndexes.isNotEmpty ? correctOptionIndexes.first : 0;
+
+  set correctIndex(int value) {
+    correctOptionIndexes = [value];
+  }
 
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'type': type.name, // "shortAnswer" | "multipleChoice"
+      'type': type.name,
       'question': question,
       'answerKey': answerKey,
       'options': options,
       'correctOptionIndexes': correctOptionIndexes,
       'points': points,
-      // Firestore-friendly:
       'createdAt': Timestamp.fromDate(createdAt),
     };
   }
@@ -63,17 +70,35 @@ class QuizItemModel {
       ),
       question: (json['question'] ?? '') as String,
       answerKey: json['answerKey'] as String?,
-      options: (json['options'] as List?)?.map((e) => e.toString()).toList() ?? const [],
+      // Use .toList() to ensure Firestore data becomes a modifiable list
+      options: (json['options'] as List?)?.map((e) => e.toString()).toList() ?? [],
       correctOptionIndexes: (json['correctOptionIndexes'] as List?)
           ?.map((e) => int.tryParse(e.toString()) ?? 0)
-          .toList() ??
-          const [],
+          .toList() ?? [],
       points: (json['points'] is int) ? json['points'] as int : int.tryParse('${json['points']}') ?? 1,
       createdAt: createdAt,
     );
   }
 
-  copyWithNewId(String string) {
-
+  QuizItemModel copyWith({
+    String? id,
+    QuizItemType? type,
+    String? question,
+    String? answerKey,
+    List<String>? options,
+    List<int>? correctOptionIndexes,
+    int? points,
+    DateTime? createdAt,
+  }) {
+    return QuizItemModel(
+      id: id ?? this.id,
+      type: type ?? this.type,
+      question: question ?? this.question,
+      answerKey: answerKey ?? this.answerKey,
+      options: options ?? this.options,
+      correctOptionIndexes: correctOptionIndexes ?? this.correctOptionIndexes,
+      points: points ?? this.points,
+      createdAt: createdAt ?? this.createdAt,
+    );
   }
 }
