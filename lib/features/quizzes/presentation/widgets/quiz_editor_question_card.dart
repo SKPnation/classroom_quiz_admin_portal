@@ -5,6 +5,7 @@ import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/widget
 import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/widgets/quiz_editor_header_btn.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:uuid/uuid.dart';
 
 class QuizEditorQuestionCard extends StatelessWidget {
   QuizEditorQuestionCard({super.key});
@@ -91,8 +92,26 @@ class QuizEditorQuestionCard extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: 8),
-                      QuizEditorHeaderBtn(label: '+ New', onTap: (){}),
-                      // QuizEditorHeaderBtn(label: '+ New', onTap: _addQuestion),
+                      QuizEditorHeaderBtn(label: '+ New', onTap:() {
+                        debugPrint("Add new question");
+                        //quizEditorController.addQuestion(
+                        //                         QuizItemModel(
+                        //                           id: const Uuid().v4(),
+                        //                           type: QuizItemType.values.firstWhere(
+                        //                                 (e) =>
+                        //                             e.name ==
+                        //                                 quizEditorController.newQuestionType.value.name,
+                        //                             orElse: () =>
+                        //                             QuizItemType.shortAnswer,
+                        //                           ),
+                        //                           options: q.options ?? [],
+                        //                           question: quizEditorController.promptController.text,
+                        //                           answerKey: quizEditorController.answer,
+                        //                           points: 1,
+                        //                           createdAt: DateTime.now(),
+                        //                         ),
+                        //                       )
+                      } ),
                     ],
                   ),
                 ],
