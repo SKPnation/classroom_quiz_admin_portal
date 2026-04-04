@@ -1,11 +1,15 @@
 import 'dart:convert';
 
 import 'package:classroom_quiz_admin_portal/core/global/custom_snackbar.dart';
+import 'package:classroom_quiz_admin_portal/features/quizzes/data/models/published_quiz_template.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/data/models/question_model.dart';
+import 'package:classroom_quiz_admin_portal/features/quizzes/data/models/quiz_draft_model.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/data/models/quiz_item_model.dart';
+import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/controllers/templates_controller.dart';
 import 'package:dart_openai/dart_openai.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:uuid/uuid.dart';
 
 class QuizEditorController extends GetxController {
   static QuizEditorController get instance => Get.find();
@@ -21,7 +25,7 @@ class QuizEditorController extends GetxController {
 
   final TextEditingController questionController = TextEditingController();
   final TextEditingController pointsController = TextEditingController();
-
+  final TextEditingController draftTitleController = TextEditingController();
 
   RxList<GeneratedQuestion> generatedQuestions = <GeneratedQuestion>[].obs;
   var quizItems = <QuizItemModel>[].obs;
@@ -29,6 +33,11 @@ class QuizEditorController extends GetxController {
   Rx<QuizItemType> newQuestionType = QuizItemType.multipleChoice.obs;
   String apiKey = "";
   var activeId = "".obs;
+
+  final RxList<QuizDraftModel> savedDrafts = <QuizDraftModel>[].obs;
+
+  final RxString currentDraftId = ''.obs;
+  final RxString currentDraftTitle = 'Untitled Quiz'.obs;
 
   QuizItemModel? get activeQuestion {
     // 1. Check if the list is empty first
@@ -99,7 +108,7 @@ Do not include any text outside of the JSON list.
         ],
         temperature: 0.7,
         // Adjust for creativity vs. predictability
-        maxTokens: 500,
+        maxTokens: 1500,
       );
 
       print("AI Response: ${chatCompletion.choices.first.message.content}");
@@ -137,6 +146,7 @@ Do not include any text outside of the JSON list.
       }
     } catch (e) {
       // Handle potential errors from the API call or JSON parsing
+      print('Error generating questions: $e');
       CustomSnackBar.errorSnackBar('Error generating questions: $e');
     } finally {
       // Ensure the loading indicator is always turned off
@@ -146,6 +156,13 @@ Do not include any text outside of the JSON list.
 
   void addQuestion(QuizItemModel item) {
     quizItems.add(item);
+
+    activeId.value = item.id;
+
+    questionController.text = item.question;
+    pointsController.text = item.points.toString();
+
+    quizItems.refresh();
   }
 
   void moveQuestion(String id, int dir) {
@@ -192,7 +209,7 @@ Do not include any text outside of the JSON list.
   void _loadCurrentIntoControllers() {
     final q = activeQuestion;
     if (q == null) return;
-    promptController.text = q.question;
+    // promptController.text = q.question;
 
     //TODO: uncomment after you've added these fields to the QuizItemModel
     // shortKeywordsController.text = q.shortKeywords;
@@ -205,4 +222,205 @@ Do not include any text outside of the JSON list.
   }
 
   void clearItems() => quizItems.clear();
+
+  void setCurrentQuizItem({required QuizItemModel quizItem}) {
+    activeId.value = quizItem.id;
+  }
+
+  List<QuizItemModel> cloneQuizItems(List<QuizItemModel> source) {
+    return source.map((q) {
+      return QuizItemModel(
+        id: q.id,
+        type: q.type,
+        question: q.question,
+        answerKey: q.answerKey,
+        options: List<String>.from(q.options ?? []),
+        points: q.points,
+        createdAt: q.createdAt,
+      );
+    }).toList();
+  }
+
+  void saveCurrentDraft() {
+    final now = DateTime.now();
+
+    final title = currentDraftTitle.value.trim().isEmpty
+        ? 'Untitled Quiz'
+        : currentDraftTitle.value.trim();
+
+    final itemsCopy = cloneQuizItems(List<QuizItemModel>.from(quizItems));
+
+    if (currentDraftId.value.isNotEmpty) {
+      final index = savedDrafts.indexWhere((d) => d.id == currentDraftId.value);
+      if (index != -1) {
+        savedDrafts[index] = savedDrafts[index].copyWith(
+          title: title,
+          items: itemsCopy,
+          savedAt: now,
+        );
+        savedDrafts.refresh();
+        return;
+      }
+    }
+
+    final draft = QuizDraftModel(
+      id: const Uuid().v4(),
+      title: title,
+      items: itemsCopy,
+      savedAt: now,
+    );
+
+    currentDraftId.value = draft.id;
+    savedDrafts.insert(0, draft);
+  }
+
+  void loadDraft(QuizDraftModel draft) {
+    currentDraftId.value = draft.id;
+    currentDraftTitle.value = draft.title;
+    draftTitleController.text = currentDraftTitle.value;
+
+    final clonedItems = cloneQuizItems(draft.items);
+
+    quizItems.assignAll(clonedItems);
+
+    if (quizItems.isNotEmpty) {
+      activeId.value = quizItems.first.id;
+    } else {
+      activeId.value = '';
+    }
+
+    final active = activeQuestion;
+    if (active != null) {
+      questionController.text = active.question;
+      pointsController.text = active.points.toString();
+    } else {
+      questionController.clear();
+      pointsController.clear();
+    }
+
+    quizItems.refresh();
+  }
+
+  void publishDraft(QuizDraftModel draft) {
+    final templatesController = TemplatesController.instance;
+
+    final template = PublishedQuizTemplate(
+      id: draft.id,
+      title: draft.title.trim().isEmpty ? 'Untitled Quiz' : draft.title.trim(),
+      description: 'Published from saved draft',
+      subject: 'Mathematics',
+      type: 'Quiz',
+      level: 'Intro',
+      items: draft.items.map((q) => q.copyWith(
+        options: List<String>.from(q.options),
+        correctOptionIndexes: List<int>.from(q.correctOptionIndexes),
+      )).toList(),
+      publishedAt: DateTime.now(),
+      tags: const ['Published'],
+    );
+
+    templatesController.publishTemplate(template);
+  }
+
+  void publishQuiz() {
+    if (quizItems.isEmpty) {
+      CustomSnackBar.errorSnackBar('Add at least one question before publishing.');
+      return;
+    }
+
+    final hasValidQuestion = quizItems.any((q) => q.question.trim().isNotEmpty);
+
+    if (!hasValidQuestion) {
+      CustomSnackBar.errorSnackBar('Enter at least one question before publishing.');
+      return;
+    }
+
+    final templatesController = TemplatesController.instance;
+
+    final title = currentDraftTitle.value.trim().isEmpty
+        ? 'Untitled Quiz'
+        : currentDraftTitle.value.trim();
+
+    final templateId = currentDraftId.value.isNotEmpty
+        ? currentDraftId.value
+        : const Uuid().v4();
+
+    final copiedItems = quizItems.map((q) {
+      return QuizItemModel(
+        id: q.id,
+        type: q.type,
+        question: q.question,
+        answerKey: q.answerKey,
+        options: List<String>.from(q.options),
+        correctOptionIndexes: List<int>.from(q.correctOptionIndexes),
+        points: q.points,
+        createdAt: q.createdAt,
+      );
+    }).toList();
+
+    templatesController.publishTemplate(
+      PublishedQuizTemplate(
+        id: templateId,
+        title: title,
+        description: 'Published from quiz editor',
+        subject: 'Mathematics',
+        type: 'Quiz',
+        level: 'Intro',
+        items: copiedItems,
+        publishedAt: DateTime.now(),
+        tags: const ['Published'],
+      ),
+    );
+
+    CustomSnackBar.successSnackBar(body: 'Quiz published successfully.');
+  }
+
+
+  void duplicateDraft(QuizDraftModel draft) {
+    final duplicate = QuizDraftModel(
+      id: const Uuid().v4(),
+      title: '${draft.title} (Copy)',
+      items: cloneQuizItems(draft.items),
+      savedAt: DateTime.now(),
+    );
+
+    savedDrafts.insert(0, duplicate);
+  }
+
+  void deleteDraft(String draftId) {
+    savedDrafts.removeWhere((d) => d.id == draftId);
+
+    if (currentDraftId.value == draftId) {
+      currentDraftId.value = '';
+      currentDraftTitle.value = 'Untitled Quiz';
+    }
+  }
+
+  void startNewQuiz() {
+    currentDraftId.value = '';
+    currentDraftTitle.value = 'Untitled Quiz';
+    draftTitleController.text = currentDraftTitle.value;
+
+    clearItems();
+
+    final newItem = QuizItemModel(
+      id: const Uuid().v4(),
+      type: QuizItemType.shortAnswer,
+      question: '',
+      answerKey: '',
+      options: [],
+      points: 1,
+      createdAt: DateTime.now(),
+    );
+
+    quizItems.add(newItem);
+    activeId.value = newItem.id;
+
+    questionController.text = '';
+    pointsController.text = '1';
+
+    quizItems.refresh();
+  }
+
+
 }

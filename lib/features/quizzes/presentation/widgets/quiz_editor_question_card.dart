@@ -92,26 +92,38 @@ class QuizEditorQuestionCard extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: 8),
-                      QuizEditorHeaderBtn(label: '+ New', onTap:() {
-                        debugPrint("Add new question");
-                        //quizEditorController.addQuestion(
-                        //                         QuizItemModel(
-                        //                           id: const Uuid().v4(),
-                        //                           type: QuizItemType.values.firstWhere(
-                        //                                 (e) =>
-                        //                             e.name ==
-                        //                                 quizEditorController.newQuestionType.value.name,
-                        //                             orElse: () =>
-                        //                             QuizItemType.shortAnswer,
-                        //                           ),
-                        //                           options: q.options ?? [],
-                        //                           question: quizEditorController.promptController.text,
-                        //                           answerKey: quizEditorController.answer,
-                        //                           points: 1,
-                        //                           createdAt: DateTime.now(),
-                        //                         ),
-                        //                       )
-                      } ),
+                      QuizEditorHeaderBtn(
+                        label: '+ New',
+                        onTap: () {
+                          debugPrint("Add new question");
+
+                          final selectedType =
+                              quizEditorController.newQuestionType.value;
+
+                          final newItem = QuizItemModel(
+                            id: const Uuid().v4(),
+                            type: selectedType,
+                            question: '',
+                            answerKey: selectedType == QuizItemType.trueFalse
+                                ? 'True'
+                                : '',
+                            options: selectedType == QuizItemType.multipleChoice
+                                ? ['', '', '', '']
+                                : selectedType == QuizItemType.trueFalse
+                                ? ['True', 'False']
+                                : <String>[],
+                            correctOptionIndexes:
+                                selectedType == QuizItemType.multipleChoice ||
+                                    selectedType == QuizItemType.trueFalse
+                                ? [0]
+                                : <int>[],
+                            points: 1,
+                            createdAt: DateTime.now(),
+                          );
+
+                          quizEditorController.addQuestion(newItem);
+                        },
+                      ),
                     ],
                   ),
                 ],

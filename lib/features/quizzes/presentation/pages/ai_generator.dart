@@ -26,7 +26,8 @@ class _AiQuestionGeneratorPageState extends State<AiQuestionGeneratorPage> {
 
   @override
   void initState() {
-    OpenAI.apiKey = AppConfig.openAiApiKey; //TODO: Use for testing only, remove before production
+    OpenAI.apiKey = AppConfig
+        .openAiApiKey; //TODO: Use for testing only, remove before production
     // quizEditorController.getApiKey();
 
     super.initState();
@@ -147,7 +148,9 @@ class _AiQuestionGeneratorPageState extends State<AiQuestionGeneratorPage> {
                       Btn(
                         label: "Clear",
                         width: 100,
-                        onPressed: () => isLoading ? null : _onClear,
+                        onPressed: () {
+                          if (!isLoading) _onClear();
+                        },
                       ),
                       const SizedBox(width: 10),
 
@@ -242,7 +245,9 @@ class _AiQuestionGeneratorPageState extends State<AiQuestionGeneratorPage> {
                                           ),
                                         ),
                                         const SizedBox(height: 6),
-                                        if(q.questionType == 'multipleChoice' && q.options != null)
+                                        if (q.questionType ==
+                                                'multipleChoice' &&
+                                            q.options != null)
                                           Column(
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.start,
@@ -278,22 +283,28 @@ class _AiQuestionGeneratorPageState extends State<AiQuestionGeneratorPage> {
                                         const SizedBox(height: 8),
                                         OutlinedButton(
                                           onPressed: () {
+
+                                            QuizItemModel quizItemModel =
+                                                QuizItemModel(
+                                                  id: const Uuid().v4(),
+                                                  type: QuizItemType.values
+                                                      .firstWhere(
+                                                        (e) =>
+                                                            e.name ==
+                                                            q.questionType,
+                                                        orElse: () =>
+                                                            QuizItemType
+                                                                .shortAnswer,
+                                                      ),
+                                                  options: q.options ?? [],
+                                                  question: q.question,
+                                                  answerKey: q.answer,
+                                                  points: 1,
+                                                  createdAt: DateTime.now(),
+                                                );
+
                                             quizEditorController.addQuestion(
-                                              QuizItemModel(
-                                                id: const Uuid().v4(),
-                                                type: QuizItemType.values.firstWhere(
-                                                  (e) =>
-                                                      e.name ==
-                                                      q.questionType,
-                                                  orElse: () =>
-                                                      QuizItemType.shortAnswer,
-                                                ),
-                                                options: q.options ?? [],
-                                                question: q.question,
-                                                answerKey: q.answer,
-                                                points: 1,
-                                                createdAt: DateTime.now(),
-                                              ),
+                                              quizItemModel,
                                             );
 
                                             //Example; For multi-choice
@@ -308,17 +319,27 @@ class _AiQuestionGeneratorPageState extends State<AiQuestionGeneratorPage> {
                                             //   ),
                                             // );
 
-                                            Get.snackbar(
-                                              'Added',
-                                              'Question added to Quiz Editor',
-                                            );
+                                            quizEditorController
+                                                .setCurrentQuizItem(
+                                                  quizItem: quizItemModel,
+                                                );
 
                                             menuController.changeActiveItemTo(
                                               Routes.quizEditorDisplayName,
                                               Routes.quizEditorRoute,
                                             );
 
-                                            navigationController.navigateTo(Routes.quizEditorRoute);
+                                            navigationController.navigateTo(
+                                              Routes.quizEditorRoute,
+                                            );
+
+                                            Future.delayed(
+                                              Duration(milliseconds: 800),
+                                              () => Get.snackbar(
+                                                'Added',
+                                                'Question added to Quiz Editor',
+                                              ),
+                                            );
                                           },
                                           style: OutlinedButton.styleFrom(
                                             padding: const EdgeInsets.symmetric(
