@@ -1,7 +1,10 @@
 import 'package:classroom_quiz_admin_portal/core/global/custom_button.dart';
 import 'package:classroom_quiz_admin_portal/core/global/custom_text.dart';
 import 'package:classroom_quiz_admin_portal/core/theme/colors.dart';
+import 'package:classroom_quiz_admin_portal/features/quizzes/data/models/published_quiz_template.dart';
+import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/controllers/templates_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class TemplatesPage extends StatefulWidget {
   const TemplatesPage({super.key});
@@ -11,6 +14,8 @@ class TemplatesPage extends StatefulWidget {
 }
 
 class _TemplatesPageState extends State<TemplatesPage> {
+  final templatesController = TemplatesController.instance;
+
   // ---- Design tokens ----
   static const _card = Colors.white;
   static const _ink = Color(0xFF111827);
@@ -46,95 +51,98 @@ class _TemplatesPageState extends State<TemplatesPage> {
   String _selectedType = 'All Types';
   String _selectedLevel = 'All Levels';
   String _search = '';
-
-  // ---- Fake template data ----
-  final List<_Template> _allTemplates = [
-    _Template(
-      title: 'Weekly Check-In',
-      description: '10-question formative assessment for weekly topics.',
-      subject: 'Mathematics',
-      type: 'Quiz',
-      level: 'Intro',
-      questionCount: 10,
-      estimatedMinutes: 15,
-      lastUsed: '2 days ago',
-      tags: const ['Formative', 'Auto-graded'],
-    ),
-    _Template(
-      title: 'Unit Test – Algebra',
-      description: 'End-of-unit summative assessment on linear equations.',
-      subject: 'Mathematics',
-      type: 'Exam',
-      level: 'Intermediate',
-      questionCount: 25,
-      estimatedMinutes: 45,
-      lastUsed: '1 week ago',
-      tags: const ['Summative', 'Mixed types'],
-    ),
-    _Template(
-      title: 'Reading Comprehension',
-      description: 'Passage-based questions with short answers and MCQs.',
-      subject: 'English',
-      type: 'Quiz',
-      level: 'Intro',
-      questionCount: 12,
-      estimatedMinutes: 25,
-      lastUsed: '3 days ago',
-      tags: const ['Reading', 'Short answer'],
-    ),
-    _Template(
-      title: 'Midterm Exam – General Science',
-      description: 'Mixed MCQ, T/F, and short answer items.',
-      subject: 'Science',
-      type: 'Exam',
-      level: 'Advanced',
-      questionCount: 40,
-      estimatedMinutes: 60,
-      lastUsed: 'Last term',
-      tags: const ['Midterm', 'Graded'],
-    ),
-  ];
+  //
+  // // ---- Fake template data ----
+  // final List<_Template> _allTemplates = [
+  //   _Template(
+  //     title: 'Weekly Check-In',
+  //     description: '10-question formative assessment for weekly topics.',
+  //     subject: 'Mathematics',
+  //     type: 'Quiz',
+  //     level: 'Intro',
+  //     questionCount: 10,
+  //     estimatedMinutes: 15,
+  //     lastUsed: '2 days ago',
+  //     tags: const ['Formative', 'Auto-graded'],
+  //   ),
+  //   _Template(
+  //     title: 'Unit Test – Algebra',
+  //     description: 'End-of-unit summative assessment on linear equations.',
+  //     subject: 'Mathematics',
+  //     type: 'Exam',
+  //     level: 'Intermediate',
+  //     questionCount: 25,
+  //     estimatedMinutes: 45,
+  //     lastUsed: '1 week ago',
+  //     tags: const ['Summative', 'Mixed types'],
+  //   ),
+  //   _Template(
+  //     title: 'Reading Comprehension',
+  //     description: 'Passage-based questions with short answers and MCQs.',
+  //     subject: 'English',
+  //     type: 'Quiz',
+  //     level: 'Intro',
+  //     questionCount: 12,
+  //     estimatedMinutes: 25,
+  //     lastUsed: '3 days ago',
+  //     tags: const ['Reading', 'Short answer'],
+  //   ),
+  //   _Template(
+  //     title: 'Midterm Exam – General Science',
+  //     description: 'Mixed MCQ, T/F, and short answer items.',
+  //     subject: 'Science',
+  //     type: 'Exam',
+  //     level: 'Advanced',
+  //     questionCount: 40,
+  //     estimatedMinutes: 60,
+  //     lastUsed: 'Last term',
+  //     tags: const ['Midterm', 'Graded'],
+  //   ),
+  // ];
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    return Obx((){
+      final allTemplates = templatesController.publishedTemplates;
 
-    // ---- Apply filters & search ----
-    final filtered = _allTemplates.where((t) {
-      final subjectOk =
-          _selectedSubject == 'All Subjects' || t.subject == _selectedSubject;
-      final typeOk = _selectedType == 'All Types' || t.type == _selectedType;
-      final levelOk =
-          _selectedLevel == 'All Levels' || t.level == _selectedLevel;
-      final searchOk =
-          _search.isEmpty ||
-          t.title.toLowerCase().contains(_search.toLowerCase()) ||
-          t.description.toLowerCase().contains(_search.toLowerCase());
-      return subjectOk && typeOk && levelOk && searchOk;
-    }).toList();
+      final filtered = allTemplates.where((t) {
+        final subjectOk =
+            _selectedSubject == 'All Subjects' || t.subject == _selectedSubject;
+        final typeOk = _selectedType == 'All Types' || t.type == _selectedType;
+        final levelOk =
+            _selectedLevel == 'All Levels' || t.level == _selectedLevel;
+        final searchOk =
+            _search.isEmpty ||
+                t.title.toLowerCase().contains(_search.toLowerCase()) ||
+                t.description.toLowerCase().contains(_search.toLowerCase());
 
-    // Responsive columns for grid
-    int columns = 3;
-    if (width < 900) {
-      columns = 1;
-    } else if (width < 1200) {
-      columns = 2;
-    }
+        return subjectOk && typeOk && levelOk && searchOk;
+      }).toList();
 
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildHeader(),
-          const SizedBox(height: 16),
-          _buildFiltersRow(width),
-          const SizedBox(height: 16),
-          _buildSummaryRow(),
-          const SizedBox(height: 16),
-          _buildTemplatesGrid(filtered, columns),
-        ],
-      ),
-    );
+      final width = MediaQuery.of(context).size.width;
+
+      int columns = 3;
+      if (width < 900) {
+        columns = 1;
+      } else if (width < 1200) {
+        columns = 2;
+      }
+
+      return SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildHeader(),
+            const SizedBox(height: 16),
+            _buildFiltersRow(width),
+            const SizedBox(height: 16),
+            _buildSummaryRow(filtered),
+            const SizedBox(height: 16),
+            _buildTemplatesGrid(filtered, columns),
+          ],
+        ),
+      );
+    });
   }
 
   // ---------- Header ----------
@@ -304,18 +312,18 @@ class _TemplatesPageState extends State<TemplatesPage> {
 
   // ---------- Summary row (optional stats) ----------
 
-  Widget _buildSummaryRow() {
-    final total = _allTemplates.length;
-    final quizCount = _allTemplates.where((t) => t.type == 'Quiz').length;
-    final examCount = _allTemplates.where((t) => t.type == 'Exam').length;
+  Widget _buildSummaryRow(List<PublishedQuizTemplate> templates) {
+    final total = templates.length;
+    final quizCount = templates.where((t) => t.type == 'Quiz').length;
+    final examCount = templates.where((t) => t.type == 'Exam').length;
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
         Expanded(child: _summaryCard('Total Templates', total.toString())),
-        SizedBox(width: 12),
+        const SizedBox(width: 12),
         Expanded(child: _summaryCard('Quizzes', quizCount.toString())),
-        SizedBox(width: 12),
+        const SizedBox(width: 12),
         Expanded(child: _summaryCard('Exams', examCount.toString())),
       ],
     );
@@ -359,7 +367,7 @@ class _TemplatesPageState extends State<TemplatesPage> {
 
   // ---------- Templates grid ----------
 
-  Widget _buildTemplatesGrid(List<_Template> templates, int columns) {
+  Widget _buildTemplatesGrid(List<PublishedQuizTemplate> templates, int columns) {
     if (templates.isEmpty) {
       return Container(
         width: double.infinity,
@@ -393,7 +401,7 @@ class _TemplatesPageState extends State<TemplatesPage> {
     );
   }
 
-  Widget _templateCard(_Template t) {
+  Widget _templateCard(PublishedQuizTemplate t) {
     return Container(
       decoration: BoxDecoration(
         color: _card,
@@ -543,14 +551,14 @@ class _TemplatesPageState extends State<TemplatesPage> {
     ).showSnackBar(const SnackBar(content: Text('New Template tapped')));
   }
 
-  void _onUseTemplate(_Template t) {
+  void _onUseTemplate(PublishedQuizTemplate t) {
     // TODO: open quiz editor pre-filled from template
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(SnackBar(content: Text('Use template: ${t.title}')));
   }
 
-  void _onMenuAction(String action, _Template t) {
+  void _onMenuAction(String action, PublishedQuizTemplate t) {
     // Stub actions
     ScaffoldMessenger.of(
       context,
@@ -559,27 +567,27 @@ class _TemplatesPageState extends State<TemplatesPage> {
 }
 
 // ---- Simple template model ----
-
-class _Template {
-  final String title;
-  final String description;
-  final String subject;
-  final String type;
-  final String level;
-  final int questionCount;
-  final int estimatedMinutes;
-  final String lastUsed;
-  final List<String> tags;
-
-  _Template({
-    required this.title,
-    required this.description,
-    required this.subject,
-    required this.type,
-    required this.level,
-    required this.questionCount,
-    required this.estimatedMinutes,
-    required this.lastUsed,
-    required this.tags,
-  });
-}
+//
+// class _Template {
+//   final String title;
+//   final String description;
+//   final String subject;
+//   final String type;
+//   final String level;
+//   final int questionCount;
+//   final int estimatedMinutes;
+//   final String lastUsed;
+//   final List<String> tags;
+//
+//   _Template({
+//     required this.title,
+//     required this.description,
+//     required this.subject,
+//     required this.type,
+//     required this.level,
+//     required this.questionCount,
+//     required this.estimatedMinutes,
+//     required this.lastUsed,
+//     required this.tags,
+//   });
+// }

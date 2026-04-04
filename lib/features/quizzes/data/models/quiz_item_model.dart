@@ -6,7 +6,7 @@ class QuizItemModel {
   String id;
   QuizItemType type;
   String question;
-  final String? answerKey;
+  String? answerKey;
 
   // Lists are no longer final so they can be modified in the editor
   List<String> options;
