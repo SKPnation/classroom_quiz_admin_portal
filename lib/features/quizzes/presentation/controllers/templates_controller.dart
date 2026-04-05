@@ -1,3 +1,5 @@
+import 'package:classroom_quiz_admin_portal/core/global/custom_snackbar.dart';
+import 'package:classroom_quiz_admin_portal/core/utils/helpers/pdf_service.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/data/models/published_quiz_template.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/data/models/quiz_item_model.dart';
 import 'package:get/get.dart';
@@ -40,5 +42,13 @@ class TemplatesController extends GetxController {
 
   void deleteTemplate(String id) {
     publishedTemplates.removeWhere((t) => t.id == id);
+  }
+
+  void exportTemplate(PublishedQuizTemplate template) async {
+    try {
+      await QuizPdfService.shareTemplatePdf(template);
+    } catch (e) {
+      CustomSnackBar.errorSnackBar('Failed to export PDF: $e');
+    }
   }
 }
