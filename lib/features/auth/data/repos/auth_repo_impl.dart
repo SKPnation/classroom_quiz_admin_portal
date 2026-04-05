@@ -3,7 +3,6 @@ import 'package:classroom_quiz_admin_portal/core/data/local/get_store_keys.dart'
 import 'package:classroom_quiz_admin_portal/core/navigation/app_routes.dart';
 import 'package:classroom_quiz_admin_portal/features/auth/domain/repos/auth_repo.dart';
 import 'package:classroom_quiz_admin_portal/features/find_school/data/models/school_model.dart';
-import 'package:classroom_quiz_admin_portal/features/find_school/data/repos/find_school_repo_impl.dart';
 import 'package:classroom_quiz_admin_portal/features/find_school/presentation/controllers/find_school_controller.dart';
 import 'package:classroom_quiz_admin_portal/features/resources/data/model/user_model.dart';
 import 'package:classroom_quiz_admin_portal/features/resources/data/repos/user_repo_impl.dart';
@@ -11,7 +10,7 @@ import 'package:classroom_quiz_admin_portal/features/resources/presentation/cont
 import 'package:classroom_quiz_admin_portal/main.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
-import 'dart:html' as html;
+import 'package:web/web.dart' as web;
 
 class AuthRepoImpl extends AuthRepo {
   final auth = FirebaseAuth.instance;
@@ -33,8 +32,8 @@ class AuthRepoImpl extends AuthRepo {
     try {
       // 2. IMPORTANT: Save the email locally
       // This allows the app to complete sign-in automatically when the user clicks the link
-      html.window.localStorage['emailForSignIn'] = email;
 
+      web.window.localStorage.setItem('token', '123');
       // 3. Send the link
       await auth.sendSignInLinkToEmail(
         email: email,
