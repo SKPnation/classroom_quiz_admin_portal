@@ -1,12 +1,10 @@
 import 'package:classroom_quiz_admin_portal/core/global/custom_button.dart';
 import 'package:classroom_quiz_admin_portal/core/navigation/app_routes.dart';
 import 'package:classroom_quiz_admin_portal/core/navigation/navigation_controller.dart';
-import 'package:classroom_quiz_admin_portal/core/utils/config.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/data/models/question_model.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/data/models/quiz_item_model.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/controllers/quiz_editor_controller.dart';
 import 'package:classroom_quiz_admin_portal/features/site_layout/presentation/controllers/menu_controller.dart';
-import 'package:dart_openai/dart_openai.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:uuid/uuid.dart';
