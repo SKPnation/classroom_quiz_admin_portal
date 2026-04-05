@@ -101,6 +101,10 @@ class _QuizEditorPageState extends State<QuizEditorPage> {
                     border: InputBorder.none,
                     isDense: true,
                   ),
+                  onChanged: (val) {
+                    quizEditorController.currentDraftTitle.value =
+                    val.trim().isEmpty ? 'Untitled Quiz' : val.trim();
+                  },
                 ),
               ),
               const SizedBox(width: 12),
@@ -128,54 +132,5 @@ class _QuizEditorPageState extends State<QuizEditorPage> {
     );
   }
 
-  // Widget _buildHeader() {
-  //   return Row(
-  //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-  //     children: [
-  //       const Column(
-  //         crossAxisAlignment: CrossAxisAlignment.start,
-  //         children: [
-  //           Text(
-  //             'Quiz Editor',
-  //             style: TextStyle(
-  //               fontSize: 22,
-  //               fontWeight: FontWeight.w700,
-  //               color: _ink,
-  //             ),
-  //           ),
-  //           SizedBox(height: 4),
-  //           Text(
-  //             'Build questions, set answers & points, then publish.',
-  //             style: TextStyle(fontSize: 13, color: sub),
-  //           ),
-  //         ],
-  //       ),
-  //       Row(
-  //         children: [
-  //           QuizEditorHeaderBtn(label: 'Preview'),
-  //           const SizedBox(width: 8),
-  //           QuizEditorHeaderBtn(label: 'Save Draft'),
-  //           const SizedBox(width: 8),
-  //           // _headerButton('Publish', primary: true, onTap: _onPublish),
-  //         ],
-  //       ),
-  //     ],
-  //   );
-  // }
 
-  //  void _onPublish() {
-  //    final questions = quizEditorController.items;
-  //    // For now just print payload
-  //    debugPrint('Quiz payload:');
-  //    for (final q in questions) {
-  //      debugPrint(
-  //        '${_typeLabel(q.type)} | ${q.points} pts | required=${q.required} | prompt="${q.prompt}"',
-  //      );
-  //    }
-  //    ScaffoldMessenger.of(context).showSnackBar(
-  //      const SnackBar(
-  //        content: Text('Quiz saved (mock). Check console for payload.'),
-  //      ),
-  //    );
-  //  }
 }

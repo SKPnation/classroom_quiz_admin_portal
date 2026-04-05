@@ -3,6 +3,8 @@ import 'package:classroom_quiz_admin_portal/core/global/custom_text.dart';
 import 'package:classroom_quiz_admin_portal/core/theme/colors.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/data/models/published_quiz_template.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/controllers/templates_controller.dart';
+import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/widgets/template_card.dart';
+import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/widgets/templates_grid.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -51,54 +53,7 @@ class _TemplatesPageState extends State<TemplatesPage> {
   String _selectedType = 'All Types';
   String _selectedLevel = 'All Levels';
   String _search = '';
-  //
-  // // ---- Fake template data ----
-  // final List<_Template> _allTemplates = [
-  //   _Template(
-  //     title: 'Weekly Check-In',
-  //     description: '10-question formative assessment for weekly topics.',
-  //     subject: 'Mathematics',
-  //     type: 'Quiz',
-  //     level: 'Intro',
-  //     questionCount: 10,
-  //     estimatedMinutes: 15,
-  //     lastUsed: '2 days ago',
-  //     tags: const ['Formative', 'Auto-graded'],
-  //   ),
-  //   _Template(
-  //     title: 'Unit Test – Algebra',
-  //     description: 'End-of-unit summative assessment on linear equations.',
-  //     subject: 'Mathematics',
-  //     type: 'Exam',
-  //     level: 'Intermediate',
-  //     questionCount: 25,
-  //     estimatedMinutes: 45,
-  //     lastUsed: '1 week ago',
-  //     tags: const ['Summative', 'Mixed types'],
-  //   ),
-  //   _Template(
-  //     title: 'Reading Comprehension',
-  //     description: 'Passage-based questions with short answers and MCQs.',
-  //     subject: 'English',
-  //     type: 'Quiz',
-  //     level: 'Intro',
-  //     questionCount: 12,
-  //     estimatedMinutes: 25,
-  //     lastUsed: '3 days ago',
-  //     tags: const ['Reading', 'Short answer'],
-  //   ),
-  //   _Template(
-  //     title: 'Midterm Exam – General Science',
-  //     description: 'Mixed MCQ, T/F, and short answer items.',
-  //     subject: 'Science',
-  //     type: 'Exam',
-  //     level: 'Advanced',
-  //     questionCount: 40,
-  //     estimatedMinutes: 60,
-  //     lastUsed: 'Last term',
-  //     tags: const ['Midterm', 'Graded'],
-  //   ),
-  // ];
+  
 
   @override
   Widget build(BuildContext context) {
@@ -369,19 +324,7 @@ class _TemplatesPageState extends State<TemplatesPage> {
 
   Widget _buildTemplatesGrid(List<PublishedQuizTemplate> templates, int columns) {
     if (templates.isEmpty) {
-      return Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          color: _card,
-          borderRadius: BorderRadius.circular(_radius),
-          border: Border.all(color: _border),
-        ),
-        child: const Text(
-          'No templates match your filters yet.',
-          style: TextStyle(color: _sub),
-        ),
-      );
+      return TemplatesGrid(templates: templates, columns: columns);
     }
 
     return GridView.builder(
@@ -396,149 +339,8 @@ class _TemplatesPageState extends State<TemplatesPage> {
       ),
       itemBuilder: (context, index) {
         final t = templates[index];
-        return _templateCard(t);
+        return TemplateCard( t: t,);
       },
-    );
-  }
-
-  Widget _templateCard(PublishedQuizTemplate t) {
-    return Container(
-      decoration: BoxDecoration(
-        color: _card,
-        borderRadius: BorderRadius.circular(_radius),
-        border: Border.all(color: _border),
-        boxShadow: const [
-          BoxShadow(
-            blurRadius: 3,
-            offset: Offset(0, 1),
-            color: Color.fromARGB(10, 0, 0, 0),
-          ),
-        ],
-      ),
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Title row
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Text(
-                  t.title,
-                  style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
-                    color: _ink,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              PopupMenuButton<String>(
-                padding: EdgeInsets.zero,
-                itemBuilder: (ctx) => const [
-                  PopupMenuItem(value: 'rename', child: Text('Rename')),
-                  PopupMenuItem(value: 'duplicate', child: Text('Duplicate')),
-                  PopupMenuItem(
-                    value: 'delete',
-                    child: Text('Delete', style: TextStyle(color: Colors.red)),
-                  ),
-                ],
-                onSelected: (value) => _onMenuAction(value, t),
-                icon: const Icon(Icons.more_vert, size: 18),
-              ),
-            ],
-          ),
-          const SizedBox(height: 4),
-          Text(
-            '${t.subject} • ${t.type} • ${t.level}',
-            style: const TextStyle(fontSize: 11, color: _sub),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            t.description,
-            style: const TextStyle(fontSize: 13, color: _ink),
-            maxLines: 3,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const Spacer(),
-          Row(
-            children: [
-              Text(
-                '${t.questionCount} questions • ~${t.estimatedMinutes} min',
-                style: const TextStyle(fontSize: 11, color: _sub),
-              ),
-              const Spacer(),
-              Text(
-                'Last used ${t.lastUsed}',
-                style: const TextStyle(fontSize: 10, color: _sub),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              Wrap(
-                spacing: 6,
-                runSpacing: 4,
-                children: t.tags
-                    .map(
-                      (tag) => Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 3,
-                        ),
-                        decoration: BoxDecoration(
-                          color: _chipBg,
-                          borderRadius: BorderRadius.circular(999),
-                        ),
-                        child: Text(
-                          tag,
-                          style: const TextStyle(fontSize: 11, color: _ink),
-                        ),
-                      ),
-                    )
-                    .toList(),
-              ),
-              const Spacer(),
-
-              SizedBox(
-                height: 32,
-                width: 120,
-                child: CustomButton(
-                  radius: 100,
-                  borderColor: _purple,
-                  bgColor: Colors.transparent,
-                  onPressed: () => _onUseTemplate(t),
-                  text: 'Use template',
-                  textColor: AppColors.purple,
-                  fontWeight: FontWeight.w600,
-                  showBorder: true,
-                  borderWidth: 1.5,
-                  fontSize: 12,
-                ),
-
-                // OutlinedButton(
-                //   style: OutlinedButton.styleFrom(
-                //     side: const BorderSide(color: _purple),
-                //     foregroundColor: _purple,
-                //     padding: const EdgeInsets.symmetric(horizontal: 12),
-                //     shape: RoundedRectangleBorder(
-                //       borderRadius: BorderRadius.circular(999),
-                //     ),
-                //   ),
-                //   onPressed: () => _onUseTemplate(t),
-                //   child: const Text(
-                //     'Use template',
-                //     style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
-                //   ),
-                // ),
-              ),
-            ],
-          ),
-        ],
-      ),
     );
   }
 
@@ -551,43 +353,7 @@ class _TemplatesPageState extends State<TemplatesPage> {
     ).showSnackBar(const SnackBar(content: Text('New Template tapped')));
   }
 
-  void _onUseTemplate(PublishedQuizTemplate t) {
-    // TODO: open quiz editor pre-filled from template
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text('Use template: ${t.title}')));
-  }
 
-  void _onMenuAction(String action, PublishedQuizTemplate t) {
-    // Stub actions
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text('$action tapped for ${t.title}')));
-  }
+
+ 
 }
-
-// ---- Simple template model ----
-//
-// class _Template {
-//   final String title;
-//   final String description;
-//   final String subject;
-//   final String type;
-//   final String level;
-//   final int questionCount;
-//   final int estimatedMinutes;
-//   final String lastUsed;
-//   final List<String> tags;
-//
-//   _Template({
-//     required this.title,
-//     required this.description,
-//     required this.subject,
-//     required this.type,
-//     required this.level,
-//     required this.questionCount,
-//     required this.estimatedMinutes,
-//     required this.lastUsed,
-//     required this.tags,
-//   });
-// }
