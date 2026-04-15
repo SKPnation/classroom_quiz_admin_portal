@@ -1,5 +1,6 @@
 import 'package:classroom_quiz_admin_portal/core/global/custom_button.dart';
 import 'package:classroom_quiz_admin_portal/core/theme/colors.dart';
+import 'package:classroom_quiz_admin_portal/core/utils/services/functions_service.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/data/models/published_quiz_template.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/controllers/templates_controller.dart';
 import 'package:flutter/material.dart';
@@ -60,15 +61,16 @@ class TemplateCard extends StatelessWidget {
                 itemBuilder: (ctx) => const [
                   PopupMenuItem(value: 'rename', child: Text('Rename')),
                   PopupMenuItem(value: 'duplicate', child: Text('Duplicate')),
-                  PopupMenuItem(value: 'export_pdf', child: Text('Export to PDF')),
+                  PopupMenuItem(value: 'to_google_forms', child: Text('Export to google forms')),
                   PopupMenuItem(
                     value: 'delete',
                     child: Text('Delete', style: TextStyle(color: Colors.red)),
                   ),
                 ],
-                onSelected: (value) {
-                  if (value == 'export_pdf') {
-                    templatesController.exportTemplate(t);
+                onSelected: (value) async{
+                  if (value == 'to_google_forms') {
+                    await templatesController.handleGoogleFormsExport(template: t);
+                    // templatesController.exportTemplate(t);
                     return;
                   }else if(value == 'delete'){
                     templatesController.deleteTemplate(t.id);

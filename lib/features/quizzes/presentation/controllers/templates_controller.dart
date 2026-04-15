@@ -1,7 +1,9 @@
 import 'package:classroom_quiz_admin_portal/core/global/custom_snackbar.dart';
 import 'package:classroom_quiz_admin_portal/core/utils/helpers/pdf_service.dart';
+import 'package:classroom_quiz_admin_portal/core/utils/services/functions_service.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/data/models/published_quiz_template.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/data/models/quiz_item_model.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_state_manager/src/simple/get_controllers.dart';
 
@@ -49,6 +51,31 @@ class TemplatesController extends GetxController {
       await QuizPdfService.shareTemplatePdf(template);
     } catch (e) {
       CustomSnackBar.errorSnackBar('Failed to export PDF: $e');
+    }
+  }
+
+  Future<void> handleGoogleFormsExport({required PublishedQuizTemplate template}) async {
+    try {
+      final payload = {
+        "title": template.title,
+        "description": template.description,
+        "questions": template.items.map((q) => {
+          "type": q.type.name,
+          "question": q.question,
+          "options": q.options,
+          "correctOptionIndexes": q.correctOptionIndexes,
+          "answerKey": q.answerKey,
+          "points": q.points,
+          "required": true,
+        }).toList(),
+      };
+
+      final data = await FunctionsService().exportToGoogleForms(payload);
+
+      debugPrint('FUNCTION SUCCESS: $data');
+    } catch (e, s) {
+      debugPrint('FUNCTION ERROR: $e');
+      debugPrint('$s');
     }
   }
 }
