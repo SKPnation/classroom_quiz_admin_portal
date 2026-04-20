@@ -69,7 +69,7 @@ class TemplateCard extends StatelessWidget {
                 ],
                 onSelected: (value) async{
                   if (value == 'to_google_forms') {
-                    await templatesController.handleGoogleFormsExport(template: t);
+                    await templatesController.createGoogleForm(context: context, template: t);
                     // templatesController.exportTemplate(t);
                     return;
                   }else if(value == 'delete'){

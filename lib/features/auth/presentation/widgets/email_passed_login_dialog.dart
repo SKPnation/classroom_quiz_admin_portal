@@ -16,9 +16,9 @@ class EmailPasswordLoginDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final domain = (school.allowedDomains.isNotEmpty)
-        ? school.allowedDomains.first.trim().toLowerCase()
-        : '';
+    // final domain = (school.allowedDomains.isNotEmpty)
+    //     ? school.allowedDomains.first.trim().toLowerCase()
+    //     : '';
 
     return AlertDialog(
       title: const Text('Sign In'),
@@ -88,7 +88,7 @@ class EmailPasswordLoginDialog extends StatelessWidget {
         TextButton(onPressed: () => Get.back(), child: const Text('Cancel')),
         Obx(() {
           final email = controller.typedEmail.value.trim().toLowerCase();
-          final isEmailValid = email.endsWith('@$domain');
+          // final isEmailValid = email.endsWith('@$domain');
 
           return ElevatedButton(
             style: ElevatedButton.styleFrom(
@@ -98,7 +98,7 @@ class EmailPasswordLoginDialog extends StatelessWidget {
             onPressed: controller.loading.value
                 ? null
                 : () =>
-                      _handleLogin(isEmailValid: isEmailValid, school: school),
+                      _handleLogin(school: school),
             child: controller.loading.value
                 ? const SizedBox(
                     height: 20,
@@ -116,16 +116,18 @@ class EmailPasswordLoginDialog extends StatelessWidget {
   }
 
   void _handleLogin({
-    required bool isEmailValid,
     required SchoolModel school,
   }) async {
     controller.dialogErrorMessage.value = "";
 
-    print("is email valid: $isEmailValid ");
-    if (isEmailValid) {
-      await controller.signInWithEmailPassword(school: school);
-    } else {
-      controller.dialogErrorMessage.value = "Invalid email address";
-    }
+    await controller.signInWithEmailPassword(school: school);
+
+
+    // print("is email valid: $isEmailValid ");
+    // if (isEmailValid) {
+    //   await controller.signInWithEmailPassword(school: school);
+    // } else {
+    //   controller.dialogErrorMessage.value = "Invalid email address";
+    // }
   }
 }
