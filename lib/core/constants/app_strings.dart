@@ -56,4 +56,8 @@ class AppStrings {
   static const String users = "users";
   static const String organisations = "orgs";
 
+  ///------ GOOGLE APPS SCRIPT API VARIABLES
+  static const deploymentID = "AKfycbzzrUpivyuG2k_sMMkKB_Ot1zKh39WxDhaO_zVCDdWIcN3di3XwsvldWM15nE4EdivRBw";
+  static const webAppUrl = "https://script.google.com/macros/s/AKfycbzzrUpivyuG2k_sMMkKB_Ot1zKh39WxDhaO_zVCDdWIcN3di3XwsvldWM15nE4EdivRBw/exec";
+  static const libraryUrl = "https://script.google.com/macros/library/d/1CvzhW2oQ7X3Zklt4cFqkt4YaYo24YNpxjmyWLTl4B08YkFYGoJ0obKQo/1";
 }
