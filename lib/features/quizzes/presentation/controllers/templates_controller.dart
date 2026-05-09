@@ -5,8 +5,10 @@ import 'package:classroom_quiz_admin_portal/core/global/custom_snackbar.dart';
 import 'package:classroom_quiz_admin_portal/core/theme/colors.dart';
 import 'package:classroom_quiz_admin_portal/core/utils/helpers/pdf_service.dart';
 import 'package:classroom_quiz_admin_portal/core/utils/services/functions_service.dart';
+import 'package:classroom_quiz_admin_portal/features/find_school/presentation/controllers/find_school_controller.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/data/models/published_quiz_template.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/data/models/quiz_item_model.dart';
+import 'package:classroom_quiz_admin_portal/features/quizzes/data/repos/quiz_repo_impl.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -16,6 +18,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 class TemplatesController extends GetxController {
   static TemplatesController get instance => Get.find<TemplatesController>();
+  QuizRepoImpl quizRepo = QuizRepoImpl();
   final String scriptUrl = AppStrings.webAppUrl;
   RxBool isLoading = false.obs;
 
@@ -37,7 +40,9 @@ class TemplatesController extends GetxController {
     }).toList();
   }
 
-  void publishTemplate(PublishedQuizTemplate template) {
+  void publishTemplate(PublishedQuizTemplate template) async {
+    final findSchoolController = FindSchoolController.instance;
+
     final existingIndex = publishedTemplates.indexWhere(
       (t) => t.id == template.id,
     );
@@ -49,6 +54,12 @@ class TemplatesController extends GetxController {
     }
 
     publishedTemplates.refresh();
+
+    //SAVE THE TEMPLATE TO FIRESTORE
+    await quizRepo.addToTemplates(
+      template: template,
+      orgId: findSchoolController.selectedOrgId.value,
+    );
   }
 
   void deleteTemplate(String id) {
@@ -207,5 +218,18 @@ class TemplatesController extends GetxController {
     } finally {
       isLoading.value = false;
     }
+  }
+
+  Future<void> loadTemplates() {
+    final findSchoolController = FindSchoolController.instance;
+
+    return quizRepo
+        .getTemplates(orgId: findSchoolController.selectedOrgId.value)
+        .then((templates) {
+          publishedTemplates.assignAll(templates);
+        })
+        .catchError((e) {
+          CustomSnackBar.errorSnackBar('Failed to load templates: $e');
+        });
   }
 }

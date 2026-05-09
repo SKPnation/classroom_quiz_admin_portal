@@ -27,38 +27,40 @@ class _TemplatesPageState extends State<TemplatesPage> {
   static final Color _chipBg = AppColors.purple.withValues(alpha: 0.12);
   static const _radius = 16.0;
 
-  // ---- Filters ----
-  final _subjectOptions = const [
-    'All Subjects',
-    'Mathematics',
-    'Science',
-    'English',
-    'History',
-  ];
-  final _typeOptions = const [
-    'All Types',
-    'Quiz',
-    'Exam',
-    'Practice',
-    'Homework',
-  ];
-  final _levelOptions = const [
-    'All Levels',
-    'Intro',
-    'Intermediate',
-    'Advanced',
-  ];
-
   String _selectedSubject = 'All Subjects';
   String _selectedType = 'All Types';
   String _selectedLevel = 'All Levels';
   String _search = '';
-  
+
+  @override
+  void initState() {
+    templatesController.loadTemplates();
+
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Obx((){
+    return Obx(() {
       final allTemplates = templatesController.publishedTemplates;
+
+      final subjectOptions = _buildOptions(
+        templates: allTemplates,
+        allLabel: 'All Subjects',
+        selector: (t) => t.subject,
+      );
+
+      final typeOptions = _buildOptions(
+        templates: allTemplates,
+        allLabel: 'All Types',
+        selector: (t) => t.type,
+      );
+
+      final levelOptions = _buildOptions(
+        templates: allTemplates,
+        allLabel: 'All Levels',
+        selector: (t) => t.level,
+      );
 
       final filtered = allTemplates.where((t) {
         final subjectOk =
@@ -68,8 +70,8 @@ class _TemplatesPageState extends State<TemplatesPage> {
             _selectedLevel == 'All Levels' || t.level == _selectedLevel;
         final searchOk =
             _search.isEmpty ||
-                t.title.toLowerCase().contains(_search.toLowerCase()) ||
-                t.description.toLowerCase().contains(_search.toLowerCase());
+            t.title.toLowerCase().contains(_search.toLowerCase()) ||
+            t.description.toLowerCase().contains(_search.toLowerCase());
 
         return subjectOk && typeOk && levelOk && searchOk;
       }).toList();
@@ -89,7 +91,7 @@ class _TemplatesPageState extends State<TemplatesPage> {
           children: [
             _buildHeader(),
             const SizedBox(height: 16),
-            _buildFiltersRow(width),
+            _buildFiltersRow(width, subjectOptions, typeOptions, levelOptions),
             const SizedBox(height: 16),
             _buildSummaryRow(filtered),
             const SizedBox(height: 16),
@@ -98,6 +100,22 @@ class _TemplatesPageState extends State<TemplatesPage> {
         ),
       );
     });
+  }
+
+  List<String> _buildOptions({
+    required List<PublishedQuizTemplate> templates,
+    required String allLabel,
+    required String Function(PublishedQuizTemplate template) selector,
+  }) {
+    final values =
+        templates
+            .map(selector)
+            .where((e) => e.trim().isNotEmpty)
+            .toSet()
+            .toList()
+          ..sort();
+
+    return [allLabel, ...values];
   }
 
   // ---------- Header ----------
@@ -125,28 +143,44 @@ class _TemplatesPageState extends State<TemplatesPage> {
 
   // ---------- Filters row ----------
 
-  Widget _buildFiltersRow(double width) {
+  Widget _buildFiltersRow(
+      double width,
+      List<String> subjectOptions,
+      List<String> typeOptions,
+      List<String> levelOptions,
+      ) {
     final isNarrow = width < 900;
 
     final widgets = <Widget>[
       _dropdownFilter(
         label: 'Subject',
-        value: _selectedSubject,
-        items: _subjectOptions,
-        onChanged: (v) =>
-            setState(() => _selectedSubject = v ?? _selectedSubject),
+        value: subjectOptions.contains(_selectedSubject)
+            ? _selectedSubject
+            : 'All Subjects',
+        items: subjectOptions,
+        onChanged: (v) {
+          setState(() => _selectedSubject = v ?? 'All Subjects');
+        },
       ),
       _dropdownFilter(
         label: 'Type',
-        value: _selectedType,
-        items: _typeOptions,
-        onChanged: (v) => setState(() => _selectedType = v ?? _selectedType),
+        value: typeOptions.contains(_selectedType)
+            ? _selectedType
+            : 'All Types',
+        items: typeOptions,
+        onChanged: (v) {
+          setState(() => _selectedType = v ?? 'All Types');
+        },
       ),
       _dropdownFilter(
         label: 'Level',
-        value: _selectedLevel,
-        items: _levelOptions,
-        onChanged: (v) => setState(() => _selectedLevel = v ?? _selectedLevel),
+        value: levelOptions.contains(_selectedLevel)
+            ? _selectedLevel
+            : 'All Levels',
+        items: levelOptions,
+        onChanged: (v) {
+          setState(() => _selectedLevel = v ?? 'All Levels');
+        },
       ),
       Expanded(
         child: SizedBox(
@@ -172,16 +206,15 @@ class _TemplatesPageState extends State<TemplatesPage> {
         ),
       ),
       const SizedBox(width: 8),
-
       Btn(
         width: 165,
         primary: true,
         onPressed: _onCreateTemplate,
-        child: Row(
+        child: const Row(
           children: [
-            const Icon(Icons.add, size: 18, color: AppColors.white),
-            const SizedBox(width: 4),
-            const CustomText(text: 'New Template', color: AppColors.white),
+            Icon(Icons.add, size: 18, color: AppColors.white),
+            SizedBox(width: 4),
+            CustomText(text: 'New Template', color: AppColors.white),
           ],
         ),
       ),
@@ -194,11 +227,11 @@ class _TemplatesPageState extends State<TemplatesPage> {
           Wrap(
             spacing: 8,
             runSpacing: 8,
-            children: widgets.take(3).toList(), // 3 dropdowns
+            children: widgets.take(3).toList(),
           ),
           const SizedBox(height: 8),
           Row(
-            children: widgets.sublist(3), // search + button
+            children: widgets.sublist(3),
           ),
         ],
       );
@@ -322,7 +355,10 @@ class _TemplatesPageState extends State<TemplatesPage> {
 
   // ---------- Templates grid ----------
 
-  Widget _buildTemplatesGrid(List<PublishedQuizTemplate> templates, int columns) {
+  Widget _buildTemplatesGrid(
+    List<PublishedQuizTemplate> templates,
+    int columns,
+  ) {
     if (templates.isEmpty) {
       return TemplatesGrid(templates: templates, columns: columns);
     }
@@ -339,7 +375,7 @@ class _TemplatesPageState extends State<TemplatesPage> {
       ),
       itemBuilder: (context, index) {
         final t = templates[index];
-        return TemplateCard( t: t,);
+        return TemplateCard(t: t);
       },
     );
   }
@@ -352,8 +388,4 @@ class _TemplatesPageState extends State<TemplatesPage> {
       context,
     ).showSnackBar(const SnackBar(content: Text('New Template tapped')));
   }
-
-
-
- 
 }
