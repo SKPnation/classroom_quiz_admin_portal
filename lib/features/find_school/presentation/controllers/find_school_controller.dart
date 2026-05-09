@@ -17,7 +17,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class FindSchoolController extends GetxController {
-  static FindSchoolController get instance => Get.find();
+  static FindSchoolController get instance => Get.find<FindSchoolController>();
 
   final emailTEC = TextEditingController();
   final passwordTEC = TextEditingController();

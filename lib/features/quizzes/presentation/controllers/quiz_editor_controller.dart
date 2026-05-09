@@ -1,11 +1,14 @@
 import 'dart:convert';
 
+import 'package:classroom_quiz_admin_portal/core/data/local/get_store_keys.dart';
 import 'package:classroom_quiz_admin_portal/core/global/custom_snackbar.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/data/models/published_quiz_template.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/data/models/question_model.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/data/models/quiz_draft_model.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/data/models/quiz_item_model.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/controllers/templates_controller.dart';
+import 'package:classroom_quiz_admin_portal/features/resources/data/model/user_model.dart';
+import 'package:classroom_quiz_admin_portal/main.dart';
 import 'package:dart_openai/dart_openai.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -244,7 +247,9 @@ Do not include any text outside of the JSON list.
   void saveCurrentDraft() {
     final now = DateTime.now();
 
-    final title = currentDraftTitle.value.trim().isEmpty
+    final title = currentDraftTitle.value
+        .trim()
+        .isEmpty
         ? 'Untitled Quiz'
         : currentDraftTitle.value.trim();
 
@@ -303,41 +308,63 @@ Do not include any text outside of the JSON list.
 
   void publishDraft(QuizDraftModel draft) {
     final templatesController = TemplatesController.instance;
+    final userInfoCache = storage.read(GetStoreKeys.userKey);
+    UserModel userModel = UserModel.fromJson(userInfoCache);
 
     final template = PublishedQuizTemplate(
       id: draft.id,
-      title: draft.title.trim().isEmpty ? 'Untitled Quiz' : draft.title.trim(),
+      title: draft.title
+          .trim()
+          .isEmpty ? 'Untitled Quiz' : draft.title.trim(),
       description: 'Published from saved draft',
       subject: 'Mathematics',
       type: 'Quiz',
       level: 'Intro',
-      items: draft.items.map((q) => q.copyWith(
-        options: List<String>.from(q.options),
-        correctOptionIndexes: List<int>.from(q.correctOptionIndexes),
-      )).toList(),
+      items: draft.items
+          .map(
+            (q) =>
+            q.copyWith(
+              options: List<String>.from(q.options),
+              correctOptionIndexes: List<int>.from(q.correctOptionIndexes),
+            ),
+      )
+          .toList(),
       publishedAt: DateTime.now(),
       tags: const ['Published'],
+      createdBy: userModel.uid,
     );
 
     templatesController.publishTemplate(template);
   }
 
   void publishQuiz() {
+    final userInfoCache = storage.read(GetStoreKeys.userKey);
+    UserModel userModel = UserModel.fromJson(userInfoCache);
+
     if (quizItems.isEmpty) {
-      CustomSnackBar.errorSnackBar('Add at least one question before publishing.');
+      CustomSnackBar.errorSnackBar(
+        'Add at least one question before publishing.',
+      );
       return;
     }
 
-    final hasValidQuestion = quizItems.any((q) => q.question.trim().isNotEmpty);
+    final hasValidQuestion = quizItems.any((q) =>
+    q.question
+        .trim()
+        .isNotEmpty);
 
     if (!hasValidQuestion) {
-      CustomSnackBar.errorSnackBar('Enter at least one question before publishing.');
+      CustomSnackBar.errorSnackBar(
+        'Enter at least one question before publishing.',
+      );
       return;
     }
 
     final templatesController = TemplatesController.instance;
 
-    final title = currentDraftTitle.value.trim().isEmpty
+    final title = currentDraftTitle.value
+        .trim()
+        .isEmpty
         ? 'Untitled Quiz'
         : currentDraftTitle.value.trim();
 
@@ -368,13 +395,13 @@ Do not include any text outside of the JSON list.
         level: 'Intro',
         items: copiedItems,
         publishedAt: DateTime.now(),
+        createdBy: userModel.uid,
         tags: const ['Published'],
       ),
     );
 
     CustomSnackBar.successSnackBar(body: 'Quiz published successfully.');
   }
-
 
   void duplicateDraft(QuizDraftModel draft) {
     final duplicate = QuizDraftModel(
@@ -421,6 +448,4 @@ Do not include any text outside of the JSON list.
 
     quizItems.refresh();
   }
-
-
 }
