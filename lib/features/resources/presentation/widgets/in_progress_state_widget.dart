@@ -75,6 +75,7 @@ class _ProfileInProgressCardState extends State<ProfileInProgressCard> {
     final pctLabel = (widget.percent * 100).round();
 
     return CardShell(
+      height: 635,
       padding: EdgeInsets.zero,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

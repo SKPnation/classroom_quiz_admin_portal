@@ -1,16 +1,18 @@
 import 'package:classroom_quiz_admin_portal/core/data/local/get_store_keys.dart';
 import 'package:classroom_quiz_admin_portal/features/find_school/data/models/school_model.dart';
+import 'package:classroom_quiz_admin_portal/features/resources/data/model/integration_model.dart';
 import 'package:classroom_quiz_admin_portal/features/resources/data/model/user_model.dart';
 import 'package:classroom_quiz_admin_portal/features/resources/presentation/controllers/settings_controller.dart';
 import 'package:classroom_quiz_admin_portal/features/resources/presentation/widgets/completed_state_widget.dart';
 import 'package:classroom_quiz_admin_portal/features/resources/presentation/widgets/in_progress_state_widget.dart';
+import 'package:classroom_quiz_admin_portal/features/resources/presentation/widgets/integrations_card.dart';
 import 'package:classroom_quiz_admin_portal/features/resources/presentation/widgets/preferences_card.dart';
 import 'package:classroom_quiz_admin_portal/features/resources/presentation/widgets/security_card.dart';
 import 'package:classroom_quiz_admin_portal/main.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class SettingsPage extends StatelessWidget {
+class SettingsPage extends StatefulWidget {
   SettingsPage({
     super.key,
     required this.profileCompleted,
@@ -18,9 +20,21 @@ class SettingsPage extends StatelessWidget {
   });
 
   final bool profileCompleted;
-  final double completionPercent; // 0.0 - 1.0
+  final double completionPercent;
 
+  @override
+  State<SettingsPage> createState() => _SettingsPageState();
+}
+
+class _SettingsPageState extends State<SettingsPage> {
+  // 0.0 - 1.0
   final settingsController = SettingsController.instance;
+
+  @override
+  void initState() {
+    settingsController.loadDefaultIntegrations();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -74,11 +88,11 @@ class SettingsPage extends StatelessWidget {
                 const SizedBox(height: 12),
 
                 // MAIN PROFILE CARD (switch by state)
-                if (profileCompleted)
+                if (widget.profileCompleted)
                   ProfileCompletedCard(user: userModel, school: schoolModel)
                 else
                   ProfileInProgressCard(
-                    percent: completionPercent.clamp(0.0, 1.0),
+                    percent: widget.completionPercent.clamp(0.0, 1.0),
                     user: userModel,
                     school: schoolModel,
                   ),
@@ -86,7 +100,19 @@ class SettingsPage extends StatelessWidget {
                 const SizedBox(height: 16),
 
                 // Preferences Card (same on both)
-                const PreferencesCard(),
+                Row(
+                  children: [
+                    Expanded(child: const PreferencesCard()),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Obx(
+                        () => IntegrationsCard(
+                          integrations: settingsController.integrations.toList(),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
                 const SizedBox(height: 16),
 
                 // Security Card (same on both)

@@ -12,6 +12,7 @@ class PreferencesCard extends StatelessWidget {
     const border = Color(0xFFE5E7EB);
 
     return CardShell(
+      height: 400,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -38,7 +39,7 @@ class PreferencesCard extends StatelessWidget {
             subtitle: 'America/Chicago',
             onTap: () {},
           ),
-          const SizedBox(height: 4),
+          Expanded(child: Container()),
           const Text(
             'Tip: Defaults here can pre-fill Create Quiz and Scheduling.',
             style: TextStyle(fontSize: 12.5, color: sub),
