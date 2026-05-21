@@ -5,9 +5,11 @@ class CardShell extends StatelessWidget {
     super.key,
     required this.child,
     this.padding = const EdgeInsets.all(18),
+    required this.height,
   });
 
   final Widget child;
+  final double height;
   final EdgeInsets padding;
 
   @override
@@ -15,6 +17,7 @@ class CardShell extends StatelessWidget {
     const border = Color(0xFFE5E7EB);
 
     return Container(
+      height: height,
       width: double.infinity,
       padding: padding,
       decoration: BoxDecoration(

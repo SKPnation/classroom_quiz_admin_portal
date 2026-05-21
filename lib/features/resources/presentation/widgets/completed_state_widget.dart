@@ -25,6 +25,7 @@ class ProfileCompletedCard extends StatelessWidget {
     const border = Color(0xFFE5E7EB);
 
     return CardShell(
+      height: 450,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
