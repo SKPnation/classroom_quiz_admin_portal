@@ -1,6 +1,5 @@
 import 'package:classroom_quiz_admin_portal/core/global/custom_button.dart';
 import 'package:classroom_quiz_admin_portal/core/theme/colors.dart';
-import 'package:classroom_quiz_admin_portal/core/utils/services/functions_service.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/data/models/published_quiz_template.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/controllers/templates_controller.dart';
 import 'package:flutter/material.dart';
@@ -73,7 +72,7 @@ class TemplateCard extends StatelessWidget {
                     // templatesController.exportTemplate(t);
                     return;
                   }else if(value == 'delete'){
-                    templatesController.deleteTemplate(t.id);
+                    templatesController.deleteTemplate(t);
                     return;
                   }
                   _onMenuAction(value, t, context);

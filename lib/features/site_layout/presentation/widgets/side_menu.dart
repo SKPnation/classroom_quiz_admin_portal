@@ -92,30 +92,31 @@ class SideMenu extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: primaryMenuItemRoutes
-                      .map(
-                        (item) => SideMenuItem(
-                          itemName: item.name,
-                          onTap: () {
-                            if (!menController.isActive(item.name)) {
-                              menController.changeActiveItemTo(
-                                item.name,
-                                item.route,
-                              );
-                              if (ResponsiveWidget.isSmallScreen(context)) {
-                                Get.back();
-                              }
-                              navigationController.navigateTo(item.route);
-                            }
-                          },
-                        ),
-                      )
-                      .toList(),
-                ),
-
-                SizedBox(height: 16),
+                ///PRIMARY ROUTES
+                // Column(
+                //   crossAxisAlignment: CrossAxisAlignment.start,
+                //   children: primaryMenuItemRoutes
+                //       .map(
+                //         (item) => SideMenuItem(
+                //           itemName: item.name,
+                //           onTap: () {
+                //             if (!menController.isActive(item.name)) {
+                //               menController.changeActiveItemTo(
+                //                 item.name,
+                //                 item.route,
+                //               );
+                //               if (ResponsiveWidget.isSmallScreen(context)) {
+                //                 Get.back();
+                //               }
+                //               navigationController.navigateTo(item.route);
+                //             }
+                //           },
+                //         ),
+                //       )
+                //       .toList(),
+                // ),
+                //
+                // SizedBox(height: 16),
 
                 CustomText(
                   text: AppStrings.quizzesTitle,

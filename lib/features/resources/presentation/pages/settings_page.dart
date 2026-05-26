@@ -32,7 +32,13 @@ class _SettingsPageState extends State<SettingsPage> {
 
   @override
   void initState() {
-    settingsController.loadDefaultIntegrations();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final userInfoCache = storage.read(GetStoreKeys.userKey);
+      UserModel userModel = UserModel.fromJson(userInfoCache);
+
+      settingsController.loadDefaultIntegrations(userModel);
+    });
+
     super.initState();
   }
 

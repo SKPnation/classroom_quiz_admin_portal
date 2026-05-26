@@ -10,7 +10,7 @@ import 'package:classroom_quiz_admin_portal/features/resources/presentation/cont
 import 'package:classroom_quiz_admin_portal/features/site_layout/presentation/controllers/menu_controller.dart';
 import 'package:get/get.dart';
 
-class AllControllerBinding extends Bindings{
+class AllControllerBinding extends Bindings {
   @override
   void dependencies() {
     Get.lazyPut(() => DashboardController());
@@ -19,8 +19,13 @@ class AllControllerBinding extends Bindings{
     Get.lazyPut(() => QuizEditorController());
     Get.lazyPut(() => ScheduleController());
     Get.lazyPut(() => SettingsController());
-    Get.lazyPut(() => TemplatesController());
-    Get.lazyPut(() => FindSchoolController(findSchoolRepo: FindSchoolRepoImpl(), authRepo: AuthRepoImpl()));
+    Get.lazyPut(() => TemplatesController(), fenix: true);
+    Get.lazyPut(
+      () => FindSchoolController(
+        findSchoolRepo: FindSchoolRepoImpl(),
+        authRepo: AuthRepoImpl(),
+      ),
+      fenix: true,
+    );
   }
 }
-

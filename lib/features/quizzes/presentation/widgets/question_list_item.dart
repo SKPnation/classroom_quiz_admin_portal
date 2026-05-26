@@ -94,11 +94,11 @@ class _QuestionListItemState extends State<QuestionListItem> {
                   quizEditorController.duplicateQuestion(widget.question.id),
               splashRadius: 18,
             ),
-            IconButton(
-              icon: const Text('🗑️'),
-              onPressed: () => quizEditorController.deleteQuestion(widget.question.id),
-              splashRadius: 18,
-            ),
+            // IconButton(
+            //   icon: const Text('🗑️'),
+            //   onPressed: () => quizEditorController.deleteQuestion(widget.question.id),
+            //   splashRadius: 18,
+            // ),
           ],
         ),
       );

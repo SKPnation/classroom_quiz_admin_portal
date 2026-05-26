@@ -85,6 +85,8 @@ class _TemplatesPageState extends State<TemplatesPage> {
         columns = 2;
       }
 
+      // return SizedBox();
+
       return SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

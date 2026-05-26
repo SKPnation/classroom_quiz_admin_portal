@@ -38,10 +38,10 @@ abstract class AppPages {
 
 Route<dynamic> generateRoute(RouteSettings settings) {
   switch (settings.name) {
-    case Routes.dashboardRoute:
-      return _getPageRoute(Dashboard());
-    case Routes.createQuizRoute:
-      return _getPageRoute(CreateQuizPage());
+    // case Routes.dashboardRoute:
+    //   return _getPageRoute(Dashboard());
+    // case Routes.createQuizRoute:
+    //   return _getPageRoute(CreateQuizPage());
     case Routes.aiGeneratorRoute:
       return _getPageRoute(AiQuestionGeneratorPage());
     case Routes.quizEditorRoute:
@@ -87,11 +87,11 @@ abstract class Routes {
   static const finishSignInRoute = "/finish-sign-in";
 
   ///PRIMARY
-  static const dashboardDisplayName = AppStrings.dashboardTitle;
-  static const dashboardRoute = "/dashboard";
-
-  static const createQuizDisplayName = AppStrings.createQuizTitle;
-  static const createQuizRoute = "/create-quiz";
+  // static const dashboardDisplayName = AppStrings.dashboardTitle;
+  // static const dashboardRoute = "/dashboard";
+  //
+  // static const createQuizDisplayName = AppStrings.createQuizTitle;
+  // static const createQuizRoute = "/create-quiz";
 
   //QUIZZES
   static const aiGeneratorDisplayName = AppStrings.aiGeneratorTitle;
@@ -142,10 +142,10 @@ class MenuItem {
   MenuItem(this.name, this.route);
 }
 
-List<MenuItem> primaryMenuItemRoutes = [
-  MenuItem(Routes.dashboardDisplayName, Routes.dashboardRoute),
-  MenuItem(Routes.createQuizDisplayName, Routes.createQuizRoute),
-];
+// List<MenuItem> primaryMenuItemRoutes = [
+//   // MenuItem(Routes.dashboardDisplayName, Routes.dashboardRoute),
+//   // MenuItem(Routes.createQuizDisplayName, Routes.createQuizRoute),
+// ];
 
 List<MenuItem> quizMenuItemRoutes = [
   MenuItem(Routes.aiGeneratorDisplayName, Routes.aiGeneratorRoute),

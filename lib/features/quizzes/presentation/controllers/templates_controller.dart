@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:classroom_quiz_admin_portal/core/constants/app_strings.dart';
+import 'package:classroom_quiz_admin_portal/core/data/local/get_store_keys.dart';
 import 'package:classroom_quiz_admin_portal/core/global/custom_snackbar.dart';
 import 'package:classroom_quiz_admin_portal/core/theme/colors.dart';
 import 'package:classroom_quiz_admin_portal/core/utils/helpers/pdf_service.dart';
@@ -9,6 +10,8 @@ import 'package:classroom_quiz_admin_portal/features/find_school/presentation/co
 import 'package:classroom_quiz_admin_portal/features/quizzes/data/models/published_quiz_template.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/data/models/quiz_item_model.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/data/repos/quiz_repo_impl.dart';
+import 'package:classroom_quiz_admin_portal/features/resources/data/model/user_model.dart';
+import 'package:classroom_quiz_admin_portal/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -21,6 +24,7 @@ class TemplatesController extends GetxController {
   QuizRepoImpl quizRepo = QuizRepoImpl();
   final String scriptUrl = AppStrings.webAppUrl;
   RxBool isLoading = false.obs;
+  final userInfoCache = storage.read(GetStoreKeys.userKey);
 
   final RxList<PublishedQuizTemplate> publishedTemplates =
       <PublishedQuizTemplate>[].obs;
@@ -41,8 +45,6 @@ class TemplatesController extends GetxController {
   }
 
   void publishTemplate(PublishedQuizTemplate template) async {
-    final findSchoolController = FindSchoolController.instance;
-
     final existingIndex = publishedTemplates.indexWhere(
       (t) => t.id == template.id,
     );
@@ -55,32 +57,79 @@ class TemplatesController extends GetxController {
 
     publishedTemplates.refresh();
 
+    UserModel userModel = UserModel.fromJson(userInfoCache);
+
     //SAVE THE TEMPLATE TO FIRESTORE
-    await quizRepo.addToTemplates(
-      template: template,
-      orgId: findSchoolController.selectedOrgId.value,
-    );
+    await quizRepo.addToTemplates(template: template, orgId: userModel.orgId);
   }
 
-  void deleteTemplate(String id) {
-    publishedTemplates.removeWhere((t) => t.id == id);
+  void deleteTemplate(PublishedQuizTemplate template) {
+    var title = template.title;
+    UserModel userModel = UserModel.fromJson(userInfoCache);
+    publishedTemplates.removeWhere((t) => t.id == template.id);
+    quizRepo.deleteTemplate(templateId: template.id, orgId: userModel.orgId);
+
+    CustomSnackBar.successSnackBar(body: "$title deleted successfully");
   }
 
-  void exportTemplate(PublishedQuizTemplate template) async {
-    try {
-      await QuizPdfService.shareTemplatePdf(template);
-    } catch (e) {
-      CustomSnackBar.errorSnackBar('Failed to export PDF: $e');
-    }
-  }
+  // void exportTemplate(PublishedQuizTemplate template) async {
+  //   try {
+  //     await QuizPdfService.shareTemplatePdf(template);
+  //   } catch (e) {
+  //     CustomSnackBar.errorSnackBar('Failed to export PDF: $e');
+  //   }
+  // }
 
-  Future<void> handleGoogleFormsExport({
+  // Future<void> handleGoogleFormsExport({
+  //   required PublishedQuizTemplate template,
+  // }) async {
+  //   try {
+  //     final payload = {
+  //       "title": template.title,
+  //       "description": template.description,
+  //       "questions": template.items
+  //           .map(
+  //             (q) => {
+  //               "type": q.type.name,
+  //               "question": q.question,
+  //               "options": q.options,
+  //               "correctOptionIndexes": q.correctOptionIndexes,
+  //               "answerKey": q.answerKey,
+  //               "points": q.points,
+  //               "required": true,
+  //             },
+  //           )
+  //           .toList(),
+  //     };
+  //
+  //     final data = await FunctionsService().exportToGoogleForms({
+  //       "title": "Minimal Test",
+  //       "description": "If this works, the API is fine",
+  //       "questions": [],
+  //     });
+  //
+  //     debugPrint('FUNCTION SUCCESS: $data');
+  //   } catch (e, s) {
+  //     debugPrint('FUNCTION ERROR: $e');
+  //     debugPrint('$s');
+  //   }
+  // }
+
+  Future<void> createGoogleForm({
+    required BuildContext context,
     required PublishedQuizTemplate template,
   }) async {
+    isLoading.value = true;
+
     try {
+      UserModel userModel = UserModel.fromJson(userInfoCache);
+
       final payload = {
+        'orgId': userModel.orgId, // pvamu
+        'createdBy': userModel.uid,
         "title": template.title,
         "description": template.description,
+        'templateId': template.id,
         "questions": template.items
             .map(
               (q) => {
@@ -96,49 +145,20 @@ class TemplatesController extends GetxController {
             .toList(),
       };
 
-      final data = await FunctionsService().exportToGoogleForms({
-        "title": "Minimal Test",
-        "description": "If this works, the API is fine",
-        "questions": [],
-      });
+      print("payload: $payload");
 
-      debugPrint('FUNCTION SUCCESS: $data');
-    } catch (e, s) {
-      debugPrint('FUNCTION ERROR: $e');
-      debugPrint('$s');
-    }
-  }
-
-  Future<void> createGoogleForm({
-    required BuildContext context,
-    required PublishedQuizTemplate template,
-  }) async {
-    isLoading.value = true;
-
-    try {
       final response = await http.post(
         Uri.parse(scriptUrl),
-        body: jsonEncode({
-          'title': template.title,
-          'description': template.description,
-          "questions": template.items
-              .map(
-                (q) => {
-                  "type": q.type.name,
-                  "question": q.question,
-                  "options": q.options,
-                  "correctOptionIndexes": q.correctOptionIndexes,
-                  "answerKey": q.answerKey,
-                  "points": q.points,
-                  "required": true,
-                },
-              )
-              .toList(),
-        }),
+        body: jsonEncode(payload),
       );
 
-      final result = jsonDecode(response.body);
+      final decoded = jsonDecode(response.body);
 
+      if (decoded == null || decoded is! Map<String, dynamic>) {
+        throw Exception("Invalid response from Apps Script: ${response.body}");
+      }
+
+      final result = decoded;
       // 1. Check if the 'status' from your Apps Script is actually 'success'
       if (result['status'] == 'success' && result['publishedUrl'] != null) {
         String publishedUrl = result['publishedUrl'].toString();

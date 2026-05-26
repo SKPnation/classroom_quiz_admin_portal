@@ -28,12 +28,10 @@ class _QuizEditorPageState extends State<QuizEditorPage> {
 
   final quizEditorController = QuizEditorController.instance;
 
-
   @override
   void dispose() {
-    quizEditorController.promptController.dispose();
     quizEditorController.shortKeywordsController.dispose();
-    quizEditorController.essayRubricController.dispose();
+    // quizEditorController.essayRubricController.dispose();
     quizEditorController.essayMaxWordsController.dispose();
     super.dispose();
   }

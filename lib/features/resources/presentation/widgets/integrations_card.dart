@@ -1,4 +1,5 @@
 import 'package:classroom_quiz_admin_portal/features/resources/data/model/integration_model.dart';
+import 'package:classroom_quiz_admin_portal/features/resources/data/model/user_model.dart';
 import 'package:classroom_quiz_admin_portal/features/resources/presentation/widgets/cardshell_widget.dart';
 import 'package:classroom_quiz_admin_portal/features/resources/presentation/widgets/integration_tile.dart';
 import 'package:flutter/material.dart';

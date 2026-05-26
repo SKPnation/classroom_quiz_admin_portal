@@ -4,4 +4,5 @@ abstract class UserRepo {
   Future<void> getUserProfile(); //Get from users collection using uid, return if it exists or not.
   Future<void> saveProfile(UserModel userModel, String orgId);
   Future<void> addAsMemberToOrg(UserModel userModel, String orgId);
+  Future<List<Map<String, dynamic>>> getMyIntegrations(String orgId, String userId);
 }

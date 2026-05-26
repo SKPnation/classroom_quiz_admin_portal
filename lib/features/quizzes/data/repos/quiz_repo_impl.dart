@@ -20,6 +20,9 @@ class QuizRepoImpl extends QuizRepo {
     required PublishedQuizTemplate template,
     required String orgId,
   }) async {
+
+    print('Adding template to Firestore: ${template.title} for orgId: $orgId');
+
     await orgsCollections
         .doc(orgId)
         .collection(AppStrings.templates)
@@ -28,15 +31,32 @@ class QuizRepoImpl extends QuizRepo {
   }
 
   @override
-  Future<List<PublishedQuizTemplate>> getTemplates({required String orgId}) {
+  Future<List<PublishedQuizTemplate>> getTemplates({
+    required String orgId,
+  }) async {
+    if (orgId.trim().isEmpty) {
+      // throw Exception('orgId is empty. Cannot load templates.');
+      return [];
+    }
+
+    final snapshot = await orgsCollections
+        .doc(orgId)
+        .collection(AppStrings.templates)
+        .get();
+
+    return snapshot.docs
+        .map(
+          (doc) => PublishedQuizTemplate.fromMap({...doc.data(), 'id': doc.id}),
+        )
+        .toList();
+  }
+
+  @override
+  Future<void> deleteTemplate({required String templateId, required String orgId}) {
     return orgsCollections
         .doc(orgId)
         .collection(AppStrings.templates)
-        .get()
-        .then((snapshot) {
-          return snapshot.docs.map((doc) {
-            return PublishedQuizTemplate.fromMap({...doc.data(), 'id': doc.id});
-          }).toList();
-        });
+        .doc(templateId)
+        .delete();
   }
 }

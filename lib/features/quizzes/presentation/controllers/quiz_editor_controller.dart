@@ -17,18 +17,18 @@ import 'package:uuid/uuid.dart';
 class QuizEditorController extends GetxController {
   static QuizEditorController get instance => Get.find();
 
-  final TextEditingController promptController = TextEditingController();
-  final TextEditingController shortKeywordsController = TextEditingController();
-  final TextEditingController essayRubricController = TextEditingController();
-  final TextEditingController essayMaxWordsController = TextEditingController(
+  final promptController = TextEditingController();
+  final shortKeywordsController = TextEditingController();
+  final essayRubricController = TextEditingController();
+  final essayMaxWordsController = TextEditingController(
     text: '400',
   );
 
   var isLoading = false.obs;
 
-  final TextEditingController questionController = TextEditingController();
-  final TextEditingController pointsController = TextEditingController();
-  final TextEditingController draftTitleController = TextEditingController();
+  final questionController = TextEditingController();
+  final pointsController = TextEditingController();
+  final draftTitleController = TextEditingController();
 
   RxList<GeneratedQuestion> generatedQuestions = <GeneratedQuestion>[].obs;
   var quizItems = <QuizItemModel>[].obs;
@@ -84,6 +84,12 @@ class QuizEditorController extends GetxController {
 You are a helpful assistant that generates quiz questions.
 Respond with a valid JSON list of objects.
 Each object must have two keys: "question" (string), "answer" (string), if multi-choice, list the options, question_type (shortAnswer, multipleChoice, trueFalse, essay). 
+Every question object MUST include:
+- question: string
+- answer: string
+- question_type: one of ["shortAnswer", "essay", "trueFalse", "multipleChoice"]
+- options: array of strings, required for multipleChoice and trueFalse
+- points: number
 Do not include any text outside of the JSON list.
 ''';
 
@@ -141,7 +147,7 @@ Do not include any text outside of the JSON list.
             options: item['options'] != null
                 ? List<String>.from(item['options'])
                 : null,
-            questionType: item['question_type'],
+            questionType: item['question_type'] as String? ?? 'shortAnswer'
           );
         }).toList();
 
@@ -195,19 +201,15 @@ Do not include any text outside of the JSON list.
     _loadCurrentIntoControllers();
   }
 
-  void deleteQuestion(String id) {
-    // if (quizItems.length == 1) {
-    //   CustomSnackBar.errorSnackBar('Keep at least one question.')
-    //   return;
-    // }
-    final idx = quizItems.indexWhere((q) => q.id == id);
-    if (idx == -1) return;
-    quizItems.removeAt(idx);
-    if (activeId.value == id) {
-      activeId.value = quizItems[(idx - 1).clamp(0, quizItems.length - 1)].id;
-      _loadCurrentIntoControllers();
-    }
-  }
+  // void deleteQuestion(String id) {
+  //   final idx = quizItems.indexWhere((q) => q.id == id);
+  //   if (idx == -1) return;
+  //   quizItems.removeAt(idx);
+  //   if (activeId.value == id) {
+  //     activeId.value = quizItems[(idx - 1).clamp(0, quizItems.length - 1)].id;
+  //     _loadCurrentIntoControllers();
+  //   }
+  // }
 
   void _loadCurrentIntoControllers() {
     final q = activeQuestion;

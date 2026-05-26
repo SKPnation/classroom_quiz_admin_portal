@@ -9,4 +9,5 @@ abstract class QuizRepo {
   });
 
   Future<List<PublishedQuizTemplate>> getTemplates({required String orgId});
+  Future<void> deleteTemplate({required String templateId, required String orgId});
 }
