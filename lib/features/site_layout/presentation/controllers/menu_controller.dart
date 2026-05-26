@@ -31,14 +31,14 @@ class MenController extends GetxController {
 
   Widget returnIconFor(String itemName) {
     switch (itemName) {
-      case Routes.dashboardDisplayName:
-        return _customIcon(SvgElements.svgDashboard, itemName);
-      case Routes.createQuizDisplayName:
-        return _customIcon(SvgElements.svgCreateQuiz, itemName);
-      case Routes.aiGeneratorDisplayName:
-        return _customIcon(SvgElements.svgAiGenerator, itemName);
+      // case Routes.dashboardDisplayName:
+      //   return _customIcon(SvgElements.svgDashboard, itemName);
+      // case Routes.createQuizDisplayName:
+      //   return _customIcon(SvgElements.svgCreateQuiz, itemName);
       case Routes.quizEditorDisplayName:
         return _customIcon(SvgElements.svgQuizEditor, itemName);
+      case Routes.aiGeneratorDisplayName:
+        return _customIcon(SvgElements.svgAiGenerator, itemName);
       case Routes.questionBankDisplayName:
         return _customIcon(SvgElements.svgQuestionBank, itemName);
       case Routes.templatesDisplayName:
@@ -62,14 +62,14 @@ class MenController extends GetxController {
 
   String returnRouteName() {
     switch (activePageRoute.value) {
-      case Routes.dashboardRoute:
-        return Routes.dashboardDisplayName;
-      case Routes.createQuizRoute:
-        return Routes.createQuizDisplayName;
-      case Routes.aiGeneratorRoute:
-        return Routes.aiGeneratorDisplayName;
+      // case Routes.dashboardRoute:
+      //   return Routes.dashboardDisplayName;
+      // case Routes.createQuizRoute:
+      //   return Routes.createQuizDisplayName;
       case Routes.quizEditorRoute:
         return Routes.quizEditorDisplayName;
+      case Routes.aiGeneratorRoute:
+        return Routes.aiGeneratorDisplayName;
       case Routes.questionBankRoute:
         return Routes.questionBankDisplayName;
       case Routes.templatesRoute:
@@ -89,7 +89,7 @@ class MenController extends GetxController {
       case Routes.settingsRoute:
         return Routes.settingsDisplayName;
       default:
-        return Routes.dashboardDisplayName;
+        return Routes.quizEditorDisplayName;
     }
   }
 

@@ -17,6 +17,7 @@ class UserRepoImpl extends UserRepo {
           .collection(AppStrings.organisations)
           .doc(orgId)
           .collection(AppStrings.members);
+
   final orgsRef = FirebaseFirestore.instance.collection(
     AppStrings.organisations,
   );
@@ -70,9 +71,19 @@ class UserRepoImpl extends UserRepo {
       "isActive": true,
     };
 
-    await membersRef(orgId).doc(userModel.uid).set(
-        member,
-        SetOptions(merge: true)
-    );
+    await membersRef(
+      orgId,
+    ).doc(userModel.uid).set(member, SetOptions(merge: true));
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> getMyIntegrations(
+    String orgId,
+    String userId,
+  ) async {
+    var integrations = await membersRef(
+      orgId,
+    ).doc(userId).collection(AppStrings.integrations).get();
+    return integrations.docs.map((doc) => doc.data()).toList();
   }
 }

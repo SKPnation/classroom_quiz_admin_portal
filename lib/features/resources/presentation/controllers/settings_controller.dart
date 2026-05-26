@@ -26,42 +26,76 @@ class SettingsController extends GetxController {
 
   final RxList<IntegrationModel> integrations = <IntegrationModel>[].obs;
 
-  void loadDefaultIntegrations() {
+  // void getAllIntegrations(){
+  //
+  // }
+
+  void loadDefaultIntegrations(UserModel user) async {
+    var list = userRepo.getMyIntegrations(user.orgId, user.uid);
+
+    googleExists() => list.then(
+      (integrations) =>
+          integrations.any((integration) => integration['id'] == 'google'),
+    );
+    canvasExists() => list.then(
+      (integrations) =>
+          integrations.any((integration) => integration['id'] == 'canvas'),
+    );
+    zoomExists() => list.then(
+      (integrations) =>
+          integrations.any((integration) => integration['id'] == 'zoom'),
+    );
+
+    bool isGoogleConnected = await googleExists();
+    bool isCanvasConnected = await canvasExists();
+    bool isZoomConnected = await zoomExists();
+
     integrations.assignAll([
       IntegrationModel(
         id: 'google',
         name: 'Google',
         description: 'Create Google Forms, connect Sheets, and more.',
         icon: Icons.g_mobiledata_rounded,
-        connected: false,
-        actionText: 'Connect Google',
-        // onTap: () =>GoogleIntegrationService().connectGoogle(orgId: storage.read(GetStoreKeys.orgKey)['id']),
-        onTap: () async{
-          var org = storage.read(GetStoreKeys.orgKey);
-          var orgId = org['code'].toLowerCase();
+        connected: isGoogleConnected,
+        actionText: isGoogleConnected ? '' : 'Connect Google',
+        onTap: () => isGoogleConnected
+            ? null
+            : () async {
+                var org = storage.read(GetStoreKeys.orgKey);
+                var orgId = org['code'].toLowerCase();
 
-          await GoogleIntegrationService().connectGoogle(
-            orgId: orgId
-          );
-        }
+                await GoogleIntegrationService().connectGoogle(orgId: orgId);
+              },
       ),
       IntegrationModel(
         id: 'canvas',
         name: 'Canvas LMS',
         description: 'Sync quizzes with Canvas courses.',
         icon: Icons.school_outlined,
-        connected: false,
-        actionText: 'Connect Canvas',
-        onTap: () {},
+        connected: isCanvasConnected,
+        actionText: isCanvasConnected ? '' : 'Connect Canvas',
+        onTap: () => isCanvasConnected
+            ? null
+            : {
+                debugPrint(
+                  'Canvas integration tapped. Implement connection flow here.',
+                ),
+              },
       ),
       IntegrationModel(
         id: 'zoom',
         name: 'Zoom',
         description: 'Schedule and share class meetings.',
         icon: Icons.videocam_outlined,
-        connected: false,
-        actionText: 'Connect Zoom',
-        onTap: () {},
+        connected: isZoomConnected,
+        actionText: isZoomConnected ? '' : 'Connect Zoom',
+        onTap: () => isZoomConnected
+            ? null
+            : {
+                debugPrint(
+                  'Zoom integration tapped. Implement connection flow here.',
+                ),
+              },
       ),
     ]);
   }

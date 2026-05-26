@@ -4,4 +4,4 @@ admin.initializeApp();
 
 export {connectGoogle} from "./google/connectGoogle";
 export {googleOAuthCallback} from "./google/googleOAuthCallback";
-export {exportToGoogleForms} from "./google/exportToGoogleForms";
+export {saveGradedAttempt} from "./saveGradedAttempt";
