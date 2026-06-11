@@ -2,21 +2,21 @@ import 'package:classroom_quiz_admin_portal/core/global/custom_button.dart';
 import 'package:classroom_quiz_admin_portal/core/global/custom_text.dart';
 import 'package:classroom_quiz_admin_portal/core/theme/colors.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/data/models/published_quiz_template.dart';
-import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/controllers/templates_controller.dart';
-import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/widgets/template_card.dart';
-import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/widgets/templates_grid.dart';
+import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/controllers/published_quizzes_controller.dart';
+import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/widgets/published_quiz_card.dart';
+import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/widgets/published_quizzes_grid.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class TemplatesPage extends StatefulWidget {
-  const TemplatesPage({super.key});
+class PublishedQuizzesPage extends StatefulWidget {
+  const PublishedQuizzesPage({super.key});
 
   @override
-  State<TemplatesPage> createState() => _TemplatesPageState();
+  State<PublishedQuizzesPage> createState() => _PublishedQuizzesPageState();
 }
 
-class _TemplatesPageState extends State<TemplatesPage> {
-  final templatesController = TemplatesController.instance;
+class _PublishedQuizzesPageState extends State<PublishedQuizzesPage> {
+  final pubQuizzesController = PublishedQuizzesController.instance;
 
   // ---- Design tokens ----
   static const _card = Colors.white;
@@ -34,7 +34,7 @@ class _TemplatesPageState extends State<TemplatesPage> {
 
   @override
   void initState() {
-    templatesController.loadTemplates();
+    pubQuizzesController.loadTemplates();
 
     super.initState();
   }
@@ -42,7 +42,7 @@ class _TemplatesPageState extends State<TemplatesPage> {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      final allTemplates = templatesController.publishedTemplates;
+      final allTemplates = pubQuizzesController.publishedTemplates;
 
       final subjectOptions = _buildOptions(
         templates: allTemplates,
@@ -85,21 +85,36 @@ class _TemplatesPageState extends State<TemplatesPage> {
         columns = 2;
       }
 
-      // return SizedBox();
+      return Stack(
+        children: [
+          SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildHeader(),
+                const SizedBox(height: 16),
+                _buildFiltersRow(
+                  width,
+                  subjectOptions,
+                  typeOptions,
+                  levelOptions,
+                ),
+                const SizedBox(height: 16),
+                _buildSummaryRow(filtered),
+                const SizedBox(height: 16),
+                _buildTemplatesGrid(filtered, columns),
+              ],
+            ),
+          ),
 
-      return SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildHeader(),
-            const SizedBox(height: 16),
-            _buildFiltersRow(width, subjectOptions, typeOptions, levelOptions),
-            const SizedBox(height: 16),
-            _buildSummaryRow(filtered),
-            const SizedBox(height: 16),
-            _buildTemplatesGrid(filtered, columns),
-          ],
-        ),
+          if (pubQuizzesController.isLoading.value)
+            Positioned.fill(
+              child: Container(
+                color: Colors.black.withValues(alpha: 0.3),
+                child: const Center(child: CircularProgressIndicator()),
+              ),
+            ),
+        ],
       );
     });
   }
@@ -146,11 +161,11 @@ class _TemplatesPageState extends State<TemplatesPage> {
   // ---------- Filters row ----------
 
   Widget _buildFiltersRow(
-      double width,
-      List<String> subjectOptions,
-      List<String> typeOptions,
-      List<String> levelOptions,
-      ) {
+    double width,
+    List<String> subjectOptions,
+    List<String> typeOptions,
+    List<String> levelOptions,
+  ) {
     final isNarrow = width < 900;
 
     final widgets = <Widget>[
@@ -226,15 +241,9 @@ class _TemplatesPageState extends State<TemplatesPage> {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: widgets.take(3).toList(),
-          ),
+          Wrap(spacing: 8, runSpacing: 8, children: widgets.take(3).toList()),
           const SizedBox(height: 8),
-          Row(
-            children: widgets.sublist(3),
-          ),
+          Row(children: widgets.sublist(3)),
         ],
       );
     }
@@ -362,7 +371,7 @@ class _TemplatesPageState extends State<TemplatesPage> {
     int columns,
   ) {
     if (templates.isEmpty) {
-      return TemplatesGrid(templates: templates, columns: columns);
+      return PublishedQuizzesGrid(templates: templates, columns: columns);
     }
 
     return GridView.builder(
@@ -377,7 +386,7 @@ class _TemplatesPageState extends State<TemplatesPage> {
       ),
       itemBuilder: (context, index) {
         final t = templates[index];
-        return TemplateCard(t: t);
+        return PublishedQuizCard(t: t);
       },
     );
   }

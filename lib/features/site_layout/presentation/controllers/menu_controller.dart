@@ -41,7 +41,7 @@ class MenController extends GetxController {
         return _customIcon(SvgElements.svgAiGenerator, itemName);
       case Routes.questionBankDisplayName:
         return _customIcon(SvgElements.svgQuestionBank, itemName);
-      case Routes.templatesDisplayName:
+      case Routes.publishedQuizzesDisplayName:
         return _customIcon(SvgElements.svgTemplates, itemName);
       case Routes.schedulesDisplayName:
         return _customIcon(SvgElements.svgSchedules, itemName);
@@ -72,8 +72,8 @@ class MenController extends GetxController {
         return Routes.aiGeneratorDisplayName;
       case Routes.questionBankRoute:
         return Routes.questionBankDisplayName;
-      case Routes.templatesRoute:
-        return Routes.templatesDisplayName;
+      case Routes.publishedQuizzesRoute:
+        return Routes.publishedQuizzesDisplayName;
       case Routes.schedulesRoute:
         return Routes.schedulesDisplayName;
       case Routes.classesRoute:

@@ -19,12 +19,11 @@ import 'package:get/get_state_manager/src/simple/get_controllers.dart';
 import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
 
-class TemplatesController extends GetxController {
-  static TemplatesController get instance => Get.find<TemplatesController>();
+class PublishedQuizzesController extends GetxController {
+  static PublishedQuizzesController get instance => Get.find<PublishedQuizzesController>();
   QuizRepoImpl quizRepo = QuizRepoImpl();
   final String scriptUrl = AppStrings.webAppUrl;
   RxBool isLoading = false.obs;
-  final userInfoCache = storage.read(GetStoreKeys.userKey);
 
   final RxList<PublishedQuizTemplate> publishedTemplates =
       <PublishedQuizTemplate>[].obs;
@@ -44,9 +43,11 @@ class TemplatesController extends GetxController {
     }).toList();
   }
 
-  void publishTemplate(PublishedQuizTemplate template) async {
+  Future<void> publishTemplate(PublishedQuizTemplate template) async {
+    final userInfoCache = storage.read(GetStoreKeys.userKey);
+
     final existingIndex = publishedTemplates.indexWhere(
-      (t) => t.id == template.id,
+          (t) => t.id == template.id,
     );
 
     if (existingIndex != -1) {
@@ -57,13 +58,17 @@ class TemplatesController extends GetxController {
 
     publishedTemplates.refresh();
 
-    UserModel userModel = UserModel.fromJson(userInfoCache);
+    final userModel = UserModel.fromJson(userInfoCache);
 
-    //SAVE THE TEMPLATE TO FIRESTORE
-    await quizRepo.addToTemplates(template: template, orgId: userModel.orgId);
+    await quizRepo.addToTemplates(
+      template: template,
+      orgId: userModel.orgId,
+    );
   }
 
   void deleteTemplate(PublishedQuizTemplate template) {
+    final userInfoCache = storage.read(GetStoreKeys.userKey);
+
     var title = template.title;
     UserModel userModel = UserModel.fromJson(userInfoCache);
     publishedTemplates.removeWhere((t) => t.id == template.id);
@@ -119,6 +124,8 @@ class TemplatesController extends GetxController {
     required BuildContext context,
     required PublishedQuizTemplate template,
   }) async {
+    final userInfoCache = storage.read(GetStoreKeys.userKey);
+
     isLoading.value = true;
 
     try {
@@ -241,10 +248,12 @@ class TemplatesController extends GetxController {
   }
 
   Future<void> loadTemplates() {
-    final findSchoolController = FindSchoolController.instance;
+    final userInfoCache = storage.read(GetStoreKeys.userKey);
+
+    UserModel userModel = UserModel.fromJson(userInfoCache);
 
     return quizRepo
-        .getTemplates(orgId: findSchoolController.selectedOrgId.value)
+        .getTemplates(orgId: userModel.orgId)
         .then((templates) {
           publishedTemplates.assignAll(templates);
         })

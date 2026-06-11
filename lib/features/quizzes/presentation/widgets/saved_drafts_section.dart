@@ -1,4 +1,5 @@
 import 'package:classroom_quiz_admin_portal/core/global/custom_snackbar.dart';
+import 'package:classroom_quiz_admin_portal/core/navigation/navigation_controller.dart';
 import 'package:classroom_quiz_admin_portal/core/theme/colors.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/controllers/quiz_editor_controller.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/widgets/draft_card.dart';
@@ -6,12 +7,13 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class SavedDraftsSection extends StatelessWidget {
-  const SavedDraftsSection({
+  SavedDraftsSection({
     super.key,
     required this.quizEditorController,
   });
 
   final QuizEditorController quizEditorController;
+  final navigationController = NavigationController.instance;
 
   static const _card = Colors.white;
   static const _border = Color(0xFFE5E7EB);
@@ -184,7 +186,7 @@ class SavedDraftsSection extends StatelessWidget {
                           CustomSnackBar.successSnackBar(body: 'Draft deleted');
                         },
                         onPublish: () {
-                          quizEditorController.publishDraft(draft);
+                          quizEditorController.publishDraft(draft, navigationController);
                           CustomSnackBar.successSnackBar(body: 'Quiz published');
                         },
                       );

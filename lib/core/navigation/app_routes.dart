@@ -10,9 +10,9 @@ import 'package:classroom_quiz_admin_portal/features/grading_insights/presentati
 import 'package:classroom_quiz_admin_portal/features/delivery/presentation/pages/students_page.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/pages/ai_generator.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/pages/create_quiz.dart';
+import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/pages/published_quizzes.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/pages/question_bank.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/pages/quiz_editor.dart';
-import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/pages/templates.dart';
 import 'package:classroom_quiz_admin_portal/features/resources/presentation/controllers/settings_controller.dart';
 import 'package:classroom_quiz_admin_portal/features/resources/presentation/pages/media_library.dart';
 import 'package:classroom_quiz_admin_portal/features/resources/presentation/pages/settings_page.dart';
@@ -48,8 +48,8 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       return _getPageRoute(QuizEditorPage());
     case Routes.questionBankRoute:
       return _getPageRoute(QuestionBankPage());
-    case Routes.templatesRoute:
-      return _getPageRoute(TemplatesPage());
+    case Routes.publishedQuizzesRoute:
+      return _getPageRoute(PublishedQuizzesPage());
     case Routes.resultsRoute:
       return _getPageRoute(ResultsPage());
     case Routes.schedulesRoute:
@@ -100,8 +100,8 @@ abstract class Routes {
   static const quizEditorRoute = "/quiz-editor";
   static const questionBankDisplayName = AppStrings.questionBankTitle;
   static const questionBankRoute = "/question-bank";
-  static const templatesDisplayName = AppStrings.templatesTitle;
-  static const templatesRoute = "/templates";
+  static const publishedQuizzesDisplayName = AppStrings.publishedQuizzesTitle;
+  static const publishedQuizzesRoute = "/published-quizzes";
 
   //DELIVERY
   static const schedulesDisplayName = AppStrings.schedulesTitle;
@@ -151,7 +151,7 @@ List<MenuItem> quizMenuItemRoutes = [
   MenuItem(Routes.aiGeneratorDisplayName, Routes.aiGeneratorRoute),
   MenuItem(Routes.quizEditorDisplayName, Routes.quizEditorRoute),
   MenuItem(Routes.questionBankDisplayName, Routes.questionBankRoute),
-  MenuItem(Routes.templatesDisplayName, Routes.templatesRoute),
+  MenuItem(Routes.publishedQuizzesDisplayName, Routes.publishedQuizzesRoute),
 ];
 
 List<MenuItem> deliveryMenuItemRoutes = [
