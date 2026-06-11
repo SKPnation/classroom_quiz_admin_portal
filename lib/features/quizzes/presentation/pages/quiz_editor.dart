@@ -1,3 +1,4 @@
+import 'package:classroom_quiz_admin_portal/core/navigation/local_navigator.dart';
 import 'package:classroom_quiz_admin_portal/core/theme/colors.dart';
 import 'package:classroom_quiz_admin_portal/core/utils/functions.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/data/models/quiz_item_model.dart';
@@ -109,7 +110,13 @@ class _QuizEditorPageState extends State<QuizEditorPage> {
               SizedBox(
                 height: 40,
                 child: ElevatedButton(
-                  onPressed: quizEditorController.publishQuiz,
+                  onPressed:() async {
+                  print("Publishing quiz with title: ${quizEditorController.currentDraftTitle.value}");
+                  quizEditorController.publishQuiz(navigationController);
+                  /*
+
+                  */
+                  },
                   child: const Text('Publish Quiz'),
                 ),
               ),

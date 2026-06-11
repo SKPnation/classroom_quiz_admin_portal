@@ -2,11 +2,13 @@ import 'dart:convert';
 
 import 'package:classroom_quiz_admin_portal/core/data/local/get_store_keys.dart';
 import 'package:classroom_quiz_admin_portal/core/global/custom_snackbar.dart';
+import 'package:classroom_quiz_admin_portal/core/navigation/app_routes.dart';
+import 'package:classroom_quiz_admin_portal/core/navigation/navigation_controller.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/data/models/published_quiz_template.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/data/models/question_model.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/data/models/quiz_draft_model.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/data/models/quiz_item_model.dart';
-import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/controllers/templates_controller.dart';
+import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/controllers/published_quizzes_controller.dart';
 import 'package:classroom_quiz_admin_portal/features/resources/data/model/user_model.dart';
 import 'package:classroom_quiz_admin_portal/main.dart';
 import 'package:dart_openai/dart_openai.dart';
@@ -20,9 +22,7 @@ class QuizEditorController extends GetxController {
   final promptController = TextEditingController();
   final shortKeywordsController = TextEditingController();
   final essayRubricController = TextEditingController();
-  final essayMaxWordsController = TextEditingController(
-    text: '400',
-  );
+  final essayMaxWordsController = TextEditingController(text: '400');
 
   var isLoading = false.obs;
 
@@ -48,7 +48,7 @@ class QuizEditorController extends GetxController {
 
     // 2. Try to find the active question
     return quizItems.firstWhere(
-          (q) => q.id == activeId.value,
+      (q) => q.id == activeId.value,
       // 3. Fallback to the first item only if the list isn't empty
       orElse: () => quizItems.first,
     );
@@ -147,7 +147,7 @@ Do not include any text outside of the JSON list.
             options: item['options'] != null
                 ? List<String>.from(item['options'])
                 : null,
-            questionType: item['question_type'] as String? ?? 'shortAnswer'
+            questionType: item['question_type'] as String? ?? 'shortAnswer',
           );
         }).toList();
 
@@ -201,15 +201,15 @@ Do not include any text outside of the JSON list.
     _loadCurrentIntoControllers();
   }
 
-  // void deleteQuestion(String id) {
-  //   final idx = quizItems.indexWhere((q) => q.id == id);
-  //   if (idx == -1) return;
-  //   quizItems.removeAt(idx);
-  //   if (activeId.value == id) {
-  //     activeId.value = quizItems[(idx - 1).clamp(0, quizItems.length - 1)].id;
-  //     _loadCurrentIntoControllers();
-  //   }
-  // }
+  void deleteQuestion(String id) {
+    final idx = quizItems.indexWhere((q) => q.id == id);
+    if (idx == -1) return;
+    quizItems.removeAt(idx);
+    if (activeId.value == id) {
+      activeId.value = quizItems[(idx - 1).clamp(0, quizItems.length - 1)].id;
+      _loadCurrentIntoControllers();
+    }
+  }
 
   void _loadCurrentIntoControllers() {
     final q = activeQuestion;
@@ -249,9 +249,7 @@ Do not include any text outside of the JSON list.
   void saveCurrentDraft() {
     final now = DateTime.now();
 
-    final title = currentDraftTitle.value
-        .trim()
-        .isEmpty
+    final title = currentDraftTitle.value.trim().isEmpty
         ? 'Untitled Quiz'
         : currentDraftTitle.value.trim();
 
@@ -308,40 +306,42 @@ Do not include any text outside of the JSON list.
     quizItems.refresh();
   }
 
-  void publishDraft(QuizDraftModel draft) {
-    final templatesController = TemplatesController.instance;
+  Future<void> publishDraft(QuizDraftModel draft, NavigationController navigationController) async {
+    final templatesController = PublishedQuizzesController.instance;
     final userInfoCache = storage.read(GetStoreKeys.userKey);
-    UserModel userModel = UserModel.fromJson(userInfoCache);
+    final userModel = UserModel.fromJson(userInfoCache);
 
     final template = PublishedQuizTemplate(
       id: draft.id,
-      title: draft.title
-          .trim()
-          .isEmpty ? 'Untitled Quiz' : draft.title.trim(),
+      title: draft.title.trim().isEmpty ? 'Untitled Quiz' : draft.title.trim(),
       description: 'Published from saved draft',
       subject: 'Mathematics',
       type: 'Quiz',
       level: 'Intro',
-      items: draft.items
-          .map(
-            (q) =>
-            q.copyWith(
-              options: List<String>.from(q.options),
-              correctOptionIndexes: List<int>.from(q.correctOptionIndexes),
-            ),
-      )
-          .toList(),
+      items: draft.items.map((q) {
+        return q.copyWith(
+          options: List<String>.from(q.options),
+          correctOptionIndexes: List<int>.from(q.correctOptionIndexes),
+        );
+      }).toList(),
       publishedAt: DateTime.now(),
       tags: const ['Published'],
       createdBy: userModel.uid,
     );
 
-    templatesController.publishTemplate(template);
+    await templatesController.publishTemplate(template);
+
+    navigationController.navigateTo(Routes.publishedQuizzesRoute);
+
+    Future.delayed(
+      Duration(milliseconds: 800),
+      () => Get.snackbar('Added', 'Question added to Quiz Editor'),
+    );
   }
 
-  void publishQuiz() {
+  Future<void> publishQuiz(NavigationController navigationController) async {
     final userInfoCache = storage.read(GetStoreKeys.userKey);
-    UserModel userModel = UserModel.fromJson(userInfoCache);
+    final userModel = UserModel.fromJson(userInfoCache);
 
     if (quizItems.isEmpty) {
       CustomSnackBar.errorSnackBar(
@@ -350,10 +350,7 @@ Do not include any text outside of the JSON list.
       return;
     }
 
-    final hasValidQuestion = quizItems.any((q) =>
-    q.question
-        .trim()
-        .isNotEmpty);
+    final hasValidQuestion = quizItems.any((q) => q.question.trim().isNotEmpty);
 
     if (!hasValidQuestion) {
       CustomSnackBar.errorSnackBar(
@@ -362,11 +359,9 @@ Do not include any text outside of the JSON list.
       return;
     }
 
-    final templatesController = TemplatesController.instance;
+    final templatesController = PublishedQuizzesController.instance;
 
-    final title = currentDraftTitle.value
-        .trim()
-        .isEmpty
+    final title = currentDraftTitle.value.trim().isEmpty
         ? 'Untitled Quiz'
         : currentDraftTitle.value.trim();
 
@@ -387,22 +382,28 @@ Do not include any text outside of the JSON list.
       );
     }).toList();
 
-    templatesController.publishTemplate(
-      PublishedQuizTemplate(
-        id: templateId,
-        title: title,
-        description: 'Published from quiz editor',
-        subject: 'Mathematics',
-        type: 'Quiz',
-        level: 'Intro',
-        items: copiedItems,
-        publishedAt: DateTime.now(),
-        createdBy: userModel.uid,
-        tags: const ['Published'],
-      ),
+    final template = PublishedQuizTemplate(
+      id: templateId,
+      title: title,
+      description: 'Published from quiz editor',
+      subject: 'Mathematics',
+      type: 'Quiz',
+      level: 'Intro',
+      items: copiedItems,
+      publishedAt: DateTime.now(),
+      createdBy: userModel.uid,
+      tags: const ['Published'],
     );
 
-    CustomSnackBar.successSnackBar(body: 'Quiz published successfully.');
+    await templatesController.publishTemplate(template);
+
+    navigationController.navigateTo(Routes.publishedQuizzesRoute);
+
+    Future.delayed(
+      Duration(milliseconds: 800),
+      () =>
+          CustomSnackBar.successSnackBar(body: 'Quiz published successfully.'),
+    );
   }
 
   void duplicateDraft(QuizDraftModel draft) {

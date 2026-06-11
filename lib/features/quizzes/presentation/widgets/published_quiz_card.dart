@@ -1,11 +1,11 @@
 import 'package:classroom_quiz_admin_portal/core/global/custom_button.dart';
 import 'package:classroom_quiz_admin_portal/core/theme/colors.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/data/models/published_quiz_template.dart';
-import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/controllers/templates_controller.dart';
+import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/controllers/published_quizzes_controller.dart';
 import 'package:flutter/material.dart';
 
-class TemplateCard extends StatelessWidget {
-  TemplateCard({super.key, required this.t});
+class PublishedQuizCard extends StatelessWidget {
+  PublishedQuizCard({super.key, required this.t});
 
   final PublishedQuizTemplate t;
 
@@ -18,7 +18,7 @@ class TemplateCard extends StatelessWidget {
   static final Color _chipBg = AppColors.purple.withValues(alpha: 0.12);
   static const _radius = 16.0;
 
-  final templatesController = TemplatesController.instance;
+  final pubQuizzesController = PublishedQuizzesController.instance;
 
   @override
   Widget build(BuildContext context) {
@@ -68,11 +68,11 @@ class TemplateCard extends StatelessWidget {
                 ],
                 onSelected: (value) async{
                   if (value == 'to_google_forms') {
-                    await templatesController.createGoogleForm(context: context, template: t);
+                    await pubQuizzesController.createGoogleForm(context: context, template: t);
                     // templatesController.exportTemplate(t);
                     return;
                   }else if(value == 'delete'){
-                    templatesController.deleteTemplate(t);
+                    pubQuizzesController.deleteTemplate(t);
                     return;
                   }
                   _onMenuAction(value, t, context);

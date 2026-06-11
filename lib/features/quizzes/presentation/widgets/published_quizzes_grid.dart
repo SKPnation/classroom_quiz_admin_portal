@@ -1,8 +1,8 @@
 import 'package:classroom_quiz_admin_portal/features/quizzes/data/models/published_quiz_template.dart';
 import 'package:flutter/material.dart';
 
-class TemplatesGrid extends StatelessWidget {
-  const TemplatesGrid({super.key, required this.templates, required this.columns});
+class PublishedQuizzesGrid extends StatelessWidget {
+  const PublishedQuizzesGrid({super.key, required this.templates, required this.columns});
 
   final List<PublishedQuizTemplate> templates;
   final int columns;

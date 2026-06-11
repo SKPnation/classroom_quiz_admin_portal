@@ -7,7 +7,7 @@ class AppStrings {
   static const String aiGeneratorTitle = "AI Generator";
   static const String quizEditorTitle = "Quiz Editor";
   static const String questionBankTitle = "Question Bank";
-  static const String templatesTitle = "Templates";
+  static const String publishedQuizzesTitle = "Published Quizzes";
 
   //DELIVERY
   static const String schedulesTitle = "Schedules/Assignments";
@@ -58,12 +58,10 @@ class AppStrings {
   static String get templates => 'templates';
   static String get integrations => "integrations";
 
-
   ///------ GOOGLE APPS SCRIPT API VARIABLES
   static const deploymentID = "AKfycbxd2WreMjt7amycvkHE2eG9lfe5AtA61951nHk7oWoeMiHZ-hgRTzXs9r7MW3jMP3wYrw";
   static const webAppUrl = "https://script.google.com/macros/s/AKfycbxd2WreMjt7amycvkHE2eG9lfe5AtA61951nHk7oWoeMiHZ-hgRTzXs9r7MW3jMP3wYrw/exec";
   static const libraryUrl = "https://script.google.com/macros/library/d/1CvzhW2oQ7X3Zklt4cFqkt4YaYo24YNpxjmyWLTl4B08YkFYGoJ0obKQo/1";
-
 
   ///------
 }
