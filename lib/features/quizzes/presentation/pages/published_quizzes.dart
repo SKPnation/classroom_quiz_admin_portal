@@ -120,9 +120,9 @@ class _PublishedQuizzesPageState extends State<PublishedQuizzesPage> {
   }
 
   List<String> _buildOptions({
-    required List<PublishedQuizTemplate> templates,
+    required List<PublishedQuiz> templates,
     required String allLabel,
-    required String Function(PublishedQuizTemplate template) selector,
+    required String Function(PublishedQuiz template) selector,
   }) {
     final values =
         templates
@@ -311,7 +311,7 @@ class _PublishedQuizzesPageState extends State<PublishedQuizzesPage> {
 
   // ---------- Summary row (optional stats) ----------
 
-  Widget _buildSummaryRow(List<PublishedQuizTemplate> templates) {
+  Widget _buildSummaryRow(List<PublishedQuiz> templates) {
     final total = templates.length;
     final quizCount = templates.where((t) => t.type == 'Quiz').length;
     final examCount = templates.where((t) => t.type == 'Exam').length;
@@ -367,7 +367,7 @@ class _PublishedQuizzesPageState extends State<PublishedQuizzesPage> {
   // ---------- Templates grid ----------
 
   Widget _buildTemplatesGrid(
-    List<PublishedQuizTemplate> templates,
+    List<PublishedQuiz> templates,
     int columns,
   ) {
     if (templates.isEmpty) {

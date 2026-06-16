@@ -55,13 +55,14 @@ class AppStrings {
   static const String members = "members";
   static const String users = "users";
   static const String organisations = "orgs";
+  static const String gradedAttempts = "gradedAttempts";
   static String get templates => 'templates';
   static String get integrations => "integrations";
 
   ///------ GOOGLE APPS SCRIPT API VARIABLES
-  static const deploymentID = "AKfycbxd2WreMjt7amycvkHE2eG9lfe5AtA61951nHk7oWoeMiHZ-hgRTzXs9r7MW3jMP3wYrw";
-  static const webAppUrl = "https://script.google.com/macros/s/AKfycbxd2WreMjt7amycvkHE2eG9lfe5AtA61951nHk7oWoeMiHZ-hgRTzXs9r7MW3jMP3wYrw/exec";
-  static const libraryUrl = "https://script.google.com/macros/library/d/1CvzhW2oQ7X3Zklt4cFqkt4YaYo24YNpxjmyWLTl4B08YkFYGoJ0obKQo/1";
+  static const deploymentID = "AKfycbxLuu9c9ytkir-ZCfJnfZ4ssllm7Q0W_2VdgsJQiKF4zukj04QOwthmYAU4zgSp_4Gx";
+  static const webAppUrl = "https://script.google.com/macros/s/AKfycbxLuu9c9ytkir-ZCfJnfZ4ssllm7Q0W_2VdgsJQiKF4zukj04QOwthmYAU4zgSp_4Gx/exec";
+  static const libraryUrl = "https://script.google.com/macros/library/d/1CvzhW2oQ7X3Zklt4cFqkt4YaYo24YNpxjmyWLTl4B08YkFYGoJ0obKQo/11";
 
   ///------
 }

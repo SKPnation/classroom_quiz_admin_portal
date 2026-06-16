@@ -1,6 +1,7 @@
-
 import 'package:classroom_quiz_admin_portal/core/theme/colors.dart';
+import 'package:classroom_quiz_admin_portal/features/grading_insights/presentation/controllers/grading_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class ResultsPage extends StatefulWidget {
   const ResultsPage({super.key});
@@ -10,6 +11,8 @@ class ResultsPage extends StatefulWidget {
 }
 
 class _ResultsPageState extends State<ResultsPage> {
+  final controller = GradingInsightsController.instance;
+
   // Colors from the HTML design
   static const _bg = Color(0xFFF6F7FB);
   static const _card = Colors.white;
@@ -21,58 +24,16 @@ class _ResultsPageState extends State<ResultsPage> {
   static const _red = Color(0xFFDC2626);
   static const _radius = 14.0;
 
-  // Mock filters
-  final List<String> _quizzes = const [
-    'All Quizzes',
-    'Week 3 – Data Structures',
-    'Unit 2 – Algorithms',
-  ];
-  final List<String> _classes = const [
-    'All Classes',
-    'CSE 101 – A',
-    'CSE 101 – B',
-  ];
-
   String _selectedQuiz = 'All Quizzes';
   String _selectedClass = 'All Classes';
 
-  // Mock stats (you can compute these from results list later)
-  int totalStudents = 32;
-  int avgScore = 78;
-  int aiAccuracy = 93;
-  int manualOverrides = 2;
+  @override
+  void initState() {
+    controller.loadGradingInsights();
 
-  // Mock results data
-  final List<_ResultRow> _results = [
-    _ResultRow(
-      student: 'Jane Doe',
-      className: 'CSE 101 – A',
-      score: 89,
-      status: 'Graded',
-      aiConfidence: 95,
-    ),
-    _ResultRow(
-      student: 'Michael Lee',
-      className: 'CSE 101 – A',
-      score: 61,
-      status: 'Graded',
-      aiConfidence: 88,
-    ),
-    _ResultRow(
-      student: 'Sofia Torres',
-      className: 'CSE 101 – B',
-      score: 92,
-      status: 'Graded',
-      aiConfidence: 97,
-    ),
-    _ResultRow(
-      student: 'David Smith',
-      className: 'CSE 101 – B',
-      score: 48,
-      status: 'Needs Review',
-      aiConfidence: 62,
-    ),
-  ];
+    super.initState();
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -84,7 +45,7 @@ class _ResultsPageState extends State<ResultsPage> {
             children: [
               _buildHeader(),
               const SizedBox(height: 16),
-              _buildStatsGrid(constraints.maxWidth),
+              _buildStatsGrid(controller),
               const SizedBox(height: 16),
               _buildResultsCard(),
             ],
@@ -111,10 +72,7 @@ class _ResultsPageState extends State<ResultsPage> {
         SizedBox(height: 4),
         Text(
           'View AI-graded results, performance, and make manual score adjustments if necessary.',
-          style: TextStyle(
-            fontSize: 13,
-            color: _sub,
-          ),
+          style: TextStyle(fontSize: 13, color: _sub),
         ),
       ],
     );
@@ -122,19 +80,41 @@ class _ResultsPageState extends State<ResultsPage> {
 
   // ---------- Stats ----------
 
-  Widget _buildStatsGrid(double maxWidth) {
+  Widget _buildStatsGrid(GradingInsightsController controller) {
     // Use a simple Wrap to behave like CSS grid auto-fit
-    return Row(
-      children: [
-        Expanded(child: _statCard(label: 'Total Students', value: '$totalStudents')),
-        SizedBox(width: 12),
-        Expanded(child: _statCard(label: 'Average Score', value: '$avgScore%')),
-        SizedBox(width: 12),
-        Expanded(child: _statCard(label: 'AI Accuracy', value: '$aiAccuracy%')),
-        SizedBox(width: 12),
-        Expanded(child: _statCard(label: 'Manual Overrides', value: '$manualOverrides'))
-      ],
-    );
+    return Obx(() {
+      return Row(
+        children: [
+          Expanded(
+            child: _statCard(
+              label: 'Total Students',
+              value: '${controller.totalStudents}',
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: _statCard(
+              label: 'Average Score',
+              value: '${controller.averageScore.toStringAsFixed(0)}%',
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: _statCard(
+              label: 'AI Accuracy',
+              value: '${(controller.averageAiConfidence * 100).toStringAsFixed(0)}%',
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: _statCard(
+              label: 'Manual Overrides',
+              value: '${controller.manualOverrides}',
+            ),
+          ),
+        ],
+      );
+    });
   }
 
   Widget _statCard({required String label, required String value}) {
@@ -157,10 +137,7 @@ class _ResultsPageState extends State<ResultsPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              label,
-              style: const TextStyle(fontSize: 13, color: _sub),
-            ),
+            Text(label, style: const TextStyle(fontSize: 13, color: _sub)),
             const SizedBox(height: 6),
             Text(
               value,
@@ -206,6 +183,20 @@ class _ResultsPageState extends State<ResultsPage> {
   }
 
   Widget _buildFiltersRow() {
+    final quizzes = [
+      'All Quizzes',
+      ...controller.results
+          .map((e) => e.quizTitle)
+          .toSet()
+          .toList(),
+    ];
+    final classes = [
+      'All Classes',
+      ...controller.results
+          .map((e) => e.quizTitle) // Assuming quizTitle represents class for demo
+          .toSet()
+          .toList(),
+    ];
     return Wrap(
       spacing: 10,
       runSpacing: 10,
@@ -216,7 +207,7 @@ class _ResultsPageState extends State<ResultsPage> {
           child: _dropdown(
             label: null,
             value: _selectedQuiz,
-            items: _quizzes,
+            items: quizzes,
             onChanged: (val) {
               if (val == null) return;
               setState(() {
@@ -231,7 +222,7 @@ class _ResultsPageState extends State<ResultsPage> {
           child: _dropdown(
             label: null,
             value: _selectedClass,
-            items: _classes,
+            items: classes,
             onChanged: (val) {
               if (val == null) return;
               setState(() {
@@ -245,8 +236,7 @@ class _ResultsPageState extends State<ResultsPage> {
           style: ElevatedButton.styleFrom(
             backgroundColor: _purple,
             foregroundColor: Colors.white,
-            padding:
-            const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8),
             ),
@@ -271,10 +261,7 @@ class _ResultsPageState extends State<ResultsPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (label != null) ...[
-          Text(
-            label,
-            style: const TextStyle(fontSize: 12, color: _sub),
-          ),
+          Text(label, style: const TextStyle(fontSize: 12, color: _sub)),
           const SizedBox(height: 4),
         ],
         Container(
@@ -291,10 +278,10 @@ class _ResultsPageState extends State<ResultsPage> {
               items: items
                   .map(
                     (item) => DropdownMenuItem<String>(
-                  value: item,
-                  child: Text(item),
-                ),
-              )
+                      value: item,
+                      child: Text(item),
+                    ),
+                  )
                   .toList(),
               onChanged: onChanged,
             ),
@@ -306,11 +293,10 @@ class _ResultsPageState extends State<ResultsPage> {
 
   Widget _buildResultsTable() {
     // Basic filtering (optional)
-    final filtered = _results.where((r) {
-      final quizOk = true; // hook your quiz filter here if needed
-      final classOk = _selectedClass == 'All Classes' ||
-          r.className == _selectedClass;
-      return quizOk && classOk;
+    final filtered = controller.results.where((attempt) {
+      final classOk = _selectedClass == 'All Classes';
+
+      return classOk;
     }).toList();
 
     return LayoutBuilder(
@@ -320,18 +306,39 @@ class _ResultsPageState extends State<ResultsPage> {
           child: ConstrainedBox(
             constraints: BoxConstraints(minWidth: constraints.maxWidth),
             child: DataTable(
-              headingRowColor:
-              WidgetStateProperty.all(const Color(0xFFF9FAFB)),
+              headingRowColor: WidgetStateProperty.all(const Color(0xFFF9FAFB)),
               columnSpacing: 32,
               columns: const [
                 DataColumn(label: Text('Student')),
-                DataColumn(label: Text('Class')),
+                DataColumn(label: Text('Quiz')),
                 DataColumn(label: Text('Score')),
                 DataColumn(label: Text('Status')),
                 DataColumn(label: Text('AI Confidence')),
                 DataColumn(label: Text('Actions')),
               ],
-              rows: filtered.map(_buildDataRow).toList(),
+              rows: filtered.map((attempt) {
+                return DataRow(
+                  cells: [
+                    DataCell(Text(attempt.studentName)),
+                    DataCell(Text(attempt.quizTitle)),
+                    DataCell(Text('${attempt.percentage.toStringAsFixed(0)}%')),
+                    DataCell(Text(attempt.status)),
+                    DataCell(
+                      Text('${(attempt.aiConfidence * 100).toStringAsFixed(0)}%'),
+                    ),
+                    DataCell(
+                      OutlinedButton(
+                        onPressed: () {},
+                        child: Text(
+                          attempt.status == 'needs_review'
+                              ? 'Review'
+                              : 'Override',
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              }).toList(),
             ),
           ),
         );
@@ -339,48 +346,43 @@ class _ResultsPageState extends State<ResultsPage> {
     );
   }
 
-  DataRow _buildDataRow(_ResultRow row) {
-    final bool isGood = row.score >= 75;
-    final TextStyle scoreStyle = TextStyle(
-      fontWeight: FontWeight.w600,
-      color: isGood ? _green : _red,
-    );
-
-    final String actionLabel =
-    row.status == 'Needs Review' ? 'Review' : 'Override';
-
-    return DataRow(
-      cells: [
-        DataCell(Text(row.student)),
-        DataCell(Text(row.className)),
-        DataCell(Text('${row.score}%', style: scoreStyle)),
-        DataCell(Text(row.status)),
-        DataCell(Text('${row.aiConfidence}%')),
-        DataCell(
-          OutlinedButton(
-            style: OutlinedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 10,
-                vertical: 6,
-              ),
-              side: const BorderSide(color: _border),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-            onPressed: () => _onRowAction(row),
-            child: Text(
-              actionLabel,
-              style: const TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
+  // DataRow _buildDataRow(_ResultRow row) {
+  //   final bool isGood = row.score >= 75;
+  //   final TextStyle scoreStyle = TextStyle(
+  //     fontWeight: FontWeight.w600,
+  //     color: isGood ? _green : _red,
+  //   );
+  //
+  //   final String actionLabel = row.status == 'Needs Review'
+  //       ? 'Review'
+  //       : 'Override';
+  //
+  //   return DataRow(
+  //     cells: [
+  //       DataCell(Text(row.student)),
+  //       DataCell(Text(row.className)),
+  //       DataCell(Text('${row.score}%', style: scoreStyle)),
+  //       DataCell(Text(row.status)),
+  //       DataCell(Text('${row.aiConfidence}%')),
+  //       DataCell(
+  //         OutlinedButton(
+  //           style: OutlinedButton.styleFrom(
+  //             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+  //             side: const BorderSide(color: _border),
+  //             shape: RoundedRectangleBorder(
+  //               borderRadius: BorderRadius.circular(8),
+  //             ),
+  //           ),
+  //           onPressed: () => _onRowAction(row),
+  //           child: Text(
+  //             actionLabel,
+  //             style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+  //           ),
+  //         ),
+  //       ),
+  //     ],
+  //   );
+  // }
 
   void _exportCsv() {
     // Replace with real export logic
@@ -393,9 +395,9 @@ class _ResultsPageState extends State<ResultsPage> {
     // You can navigate to a detailed view or open a dialog here
     if (row.status == 'Needs Review') {
       // open review flow
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Reviewing ${row.student}...')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Reviewing ${row.student}...')));
     } else {
       // open override flow
       ScaffoldMessenger.of(context).showSnackBar(

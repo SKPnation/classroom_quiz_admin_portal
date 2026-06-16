@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 class PublishedQuizCard extends StatelessWidget {
   PublishedQuizCard({super.key, required this.t});
 
-  final PublishedQuizTemplate t;
+  final PublishedQuiz t;
 
   // ---- Design tokens ----
   static const _card = Colors.white;
@@ -68,7 +68,7 @@ class PublishedQuizCard extends StatelessWidget {
                 ],
                 onSelected: (value) async{
                   if (value == 'to_google_forms') {
-                    await pubQuizzesController.createGoogleForm(context: context, template: t);
+                    await pubQuizzesController.createGoogleForm(context: context, publishedQuiz: t);
                     // templatesController.exportTemplate(t);
                     return;
                   }else if(value == 'delete'){
@@ -136,13 +136,13 @@ class PublishedQuizCard extends StatelessWidget {
 
               SizedBox(
                 height: 32,
-                width: 120,
+                width: 160,
                 child: CustomButton(
                   radius: 100,
                   borderColor: _purple,
                   bgColor: Colors.transparent,
                   onPressed: () => _onUseTemplate(t, context),
-                  text: 'Use template',
+                  text: 'Sync with Canvas',
                   textColor: AppColors.purple,
                   fontWeight: FontWeight.w600,
                   showBorder: true,
@@ -173,14 +173,14 @@ class PublishedQuizCard extends StatelessWidget {
     );
   }
 
-  void _onMenuAction(String action, PublishedQuizTemplate t, BuildContext context) {
+  void _onMenuAction(String action, PublishedQuiz t, BuildContext context) {
     // Stub actions
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(SnackBar(content: Text('$action tapped for ${t.title}')));
   }
 
-  void _onUseTemplate(PublishedQuizTemplate t, BuildContext context) {
+  void _onUseTemplate(PublishedQuiz t, BuildContext context) {
     // TODO: open quiz editor pre-filled from template
     ScaffoldMessenger.of(
       context,

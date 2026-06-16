@@ -311,7 +311,7 @@ Do not include any text outside of the JSON list.
     final userInfoCache = storage.read(GetStoreKeys.userKey);
     final userModel = UserModel.fromJson(userInfoCache);
 
-    final template = PublishedQuizTemplate(
+    final template = PublishedQuiz(
       id: draft.id,
       title: draft.title.trim().isEmpty ? 'Untitled Quiz' : draft.title.trim(),
       description: 'Published from saved draft',
@@ -382,7 +382,7 @@ Do not include any text outside of the JSON list.
       );
     }).toList();
 
-    final template = PublishedQuizTemplate(
+    final template = PublishedQuiz(
       id: templateId,
       title: title,
       description: 'Published from quiz editor',

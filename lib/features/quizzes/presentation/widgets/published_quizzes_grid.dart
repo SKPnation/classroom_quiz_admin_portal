@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 class PublishedQuizzesGrid extends StatelessWidget {
   const PublishedQuizzesGrid({super.key, required this.templates, required this.columns});
 
-  final List<PublishedQuizTemplate> templates;
+  final List<PublishedQuiz> templates;
   final int columns;
 
   static const _card = Colors.white;

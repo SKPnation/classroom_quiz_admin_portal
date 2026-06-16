@@ -6,7 +6,7 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 
 class QuizPdfService {
-  static Future<Uint8List> buildTemplatePdf(PublishedQuizTemplate template) async {
+  static Future<Uint8List> buildTemplatePdf(PublishedQuiz template) async {
     final pdf = pw.Document();
 
     pdf.addPage(
@@ -127,14 +127,14 @@ class QuizPdfService {
     return pdf.save();
   }
 
-  static Future<void> exportTemplateToPdf(PublishedQuizTemplate template) async {
+  static Future<void> exportTemplateToPdf(PublishedQuiz template) async {
     await Printing.layoutPdf(
       name: '${template.title}.pdf',
       onLayout: (PdfPageFormat format) async => buildTemplatePdf(template),
     );
   }
 
-  static Future<void> shareTemplatePdf(PublishedQuizTemplate template) async {
+  static Future<void> shareTemplatePdf(PublishedQuiz template) async {
     final bytes = await buildTemplatePdf(template);
     await Printing.sharePdf(
       bytes: bytes,
