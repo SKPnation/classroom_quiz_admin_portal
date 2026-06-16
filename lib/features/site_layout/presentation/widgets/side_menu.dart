@@ -118,6 +118,7 @@ class SideMenu extends StatelessWidget {
                 //
                 // SizedBox(height: 16),
 
+                ///QUIZZES ROUTES
                 CustomText(
                   text: AppStrings.quizzesTitle,
                   color: AppColors.grey[900],
@@ -149,37 +150,40 @@ class SideMenu extends StatelessWidget {
 
                 SizedBox(height: 16),
 
-                CustomText(
-                  text: AppStrings.deliveryTitle,
-                  color: AppColors.grey[900],
-                  weight: FontWeight.w600,
-                ),
-                SizedBox(height: 8),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: deliveryMenuItemRoutes
-                      .map(
-                        (item) => SideMenuItem(
-                          itemName: item.name,
-                          onTap: () {
-                            if (!menController.isActive(item.name)) {
-                              menController.changeActiveItemTo(
-                                item.name,
-                                item.route,
-                              );
-                              if (ResponsiveWidget.isSmallScreen(context)) {
-                                Get.back();
-                              }
-                              navigationController.navigateTo(item.route);
-                            }
-                          },
-                        ),
-                      )
-                      .toList(),
-                ),
+                ///DELIVERY ROUTES
+                // CustomText(
+                //   text: AppStrings.deliveryTitle,
+                //   color: AppColors.grey[900],
+                //   weight: FontWeight.w600,
+                // ),
+                // SizedBox(height: 8),
+                //
+                // Column(
+                //   crossAxisAlignment: CrossAxisAlignment.start,
+                //   children: deliveryMenuItemRoutes
+                //       .map(
+                //         (item) => SideMenuItem(
+                //           itemName: item.name,
+                //           onTap: () {
+                //             if (!menController.isActive(item.name)) {
+                //               menController.changeActiveItemTo(
+                //                 item.name,
+                //                 item.route,
+                //               );
+                //               if (ResponsiveWidget.isSmallScreen(context)) {
+                //                 Get.back();
+                //               }
+                //               navigationController.navigateTo(item.route);
+                //             }
+                //           },
+                //         ),
+                //       )
+                //       .toList(),
+                // ),
+                //
+                // SizedBox(height: 16),
 
-                SizedBox(height: 16),
-
+                ///GRADING ROUTES
                 CustomText(
                   text: AppStrings.gradingInsightsTitle,
                   color: AppColors.grey[900],
@@ -211,6 +215,7 @@ class SideMenu extends StatelessWidget {
 
                 SizedBox(height: 16),
 
+                ///RESOURCES ROUTES
                 CustomText(
                   text: AppStrings.resourcesTitle,
                   color: AppColors.grey[900],

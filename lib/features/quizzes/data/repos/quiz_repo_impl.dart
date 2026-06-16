@@ -10,14 +10,8 @@ class QuizRepoImpl extends QuizRepo {
       .collection(AppStrings.templates);
 
   @override
-  Future<void> createQuiz() {
-    // TODO: implement createQuiz
-    throw UnimplementedError();
-  }
-
-  @override
   Future<void> addToTemplates({
-    required PublishedQuizTemplate template,
+    required PublishedQuiz template,
     required String orgId,
   }) async {
 
@@ -31,7 +25,7 @@ class QuizRepoImpl extends QuizRepo {
   }
 
   @override
-  Future<List<PublishedQuizTemplate>> getTemplates({
+  Future<List<PublishedQuiz>> getTemplates({
     required String orgId,
   }) async {
     if (orgId.trim().isEmpty) {
@@ -46,7 +40,7 @@ class QuizRepoImpl extends QuizRepo {
 
     return snapshot.docs
         .map(
-          (doc) => PublishedQuizTemplate.fromMap({...doc.data(), 'id': doc.id}),
+          (doc) => PublishedQuiz.fromMap({...doc.data(), 'id': doc.id}),
         )
         .toList();
   }

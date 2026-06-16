@@ -25,8 +25,8 @@ class PublishedQuizzesController extends GetxController {
   final String scriptUrl = AppStrings.webAppUrl;
   RxBool isLoading = false.obs;
 
-  final RxList<PublishedQuizTemplate> publishedTemplates =
-      <PublishedQuizTemplate>[].obs;
+  final RxList<PublishedQuiz> publishedTemplates =
+      <PublishedQuiz>[].obs;
 
   List<QuizItemModel> cloneQuizItems(List<QuizItemModel> source) {
     return source.map((q) {
@@ -43,7 +43,7 @@ class PublishedQuizzesController extends GetxController {
     }).toList();
   }
 
-  Future<void> publishTemplate(PublishedQuizTemplate template) async {
+  Future<void> publishTemplate(PublishedQuiz template) async {
     final userInfoCache = storage.read(GetStoreKeys.userKey);
 
     final existingIndex = publishedTemplates.indexWhere(
@@ -66,7 +66,7 @@ class PublishedQuizzesController extends GetxController {
     );
   }
 
-  void deleteTemplate(PublishedQuizTemplate template) {
+  void deleteTemplate(PublishedQuiz template) {
     final userInfoCache = storage.read(GetStoreKeys.userKey);
 
     var title = template.title;
@@ -122,7 +122,7 @@ class PublishedQuizzesController extends GetxController {
 
   Future<void> createGoogleForm({
     required BuildContext context,
-    required PublishedQuizTemplate template,
+    required PublishedQuiz publishedQuiz,
   }) async {
     final userInfoCache = storage.read(GetStoreKeys.userKey);
 
@@ -134,10 +134,10 @@ class PublishedQuizzesController extends GetxController {
       final payload = {
         'orgId': userModel.orgId, // pvamu
         'createdBy': userModel.uid,
-        "title": template.title,
-        "description": template.description,
-        'templateId': template.id,
-        "questions": template.items
+        "title": publishedQuiz.title,
+        "description": publishedQuiz.description,
+        'publishedQuizId': publishedQuiz.id,
+        "questions": publishedQuiz.items
             .map(
               (q) => {
                 "type": q.type.name,

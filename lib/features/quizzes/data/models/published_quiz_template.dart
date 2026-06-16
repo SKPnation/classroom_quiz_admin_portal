@@ -2,7 +2,7 @@ import 'package:classroom_quiz_admin_portal/features/quizzes/data/models/quiz_it
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class PublishedQuizTemplate {
+class PublishedQuiz {
   final String id;
   final String title;
   final String description;
@@ -14,7 +14,7 @@ class PublishedQuizTemplate {
   final String createdBy;
   final List<String> tags;
 
-  PublishedQuizTemplate({
+  PublishedQuiz({
     required this.id,
     required this.title,
     required this.description,
@@ -56,8 +56,8 @@ class PublishedQuizTemplate {
     };
   }
 
-  factory PublishedQuizTemplate.fromMap(Map<String, dynamic> map) {
-    return PublishedQuizTemplate(
+  factory PublishedQuiz.fromMap(Map<String, dynamic> map) {
+    return PublishedQuiz(
       id: map['id'] ?? '',
       title: map['title'] ?? '',
       description: map['description'] ?? '',
@@ -76,7 +76,7 @@ class PublishedQuizTemplate {
     );
   }
 
-  PublishedQuizTemplate copyWith({
+  PublishedQuiz copyWith({
     String? id,
     String? title,
     String? description,
@@ -88,7 +88,7 @@ class PublishedQuizTemplate {
     String? createdBy,
     List<String>? tags,
   }) {
-    return PublishedQuizTemplate(
+    return PublishedQuiz(
       id: id ?? this.id,
       title: title ?? this.title,
       description: description ?? this.description,
