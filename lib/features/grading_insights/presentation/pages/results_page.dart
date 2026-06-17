@@ -34,13 +34,12 @@ class _ResultsPageState extends State<ResultsPage> {
     super.initState();
   }
 
-
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
         return SingleChildScrollView(
-          child: Column(
+          child: Obx(()=>Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildHeader(),
@@ -49,7 +48,7 @@ class _ResultsPageState extends State<ResultsPage> {
               const SizedBox(height: 16),
               _buildResultsCard(),
             ],
-          ),
+          )),
         );
       },
     );
@@ -81,40 +80,38 @@ class _ResultsPageState extends State<ResultsPage> {
   // ---------- Stats ----------
 
   Widget _buildStatsGrid(GradingInsightsController controller) {
-    // Use a simple Wrap to behave like CSS grid auto-fit
-    return Obx(() {
-      return Row(
-        children: [
-          Expanded(
-            child: _statCard(
-              label: 'Total Students',
-              value: '${controller.totalStudents}',
-            ),
+    return Row(
+      children: [
+        Expanded(
+          child: _statCard(
+            label: 'Total Students',
+            value: '${controller.totalStudents}',
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: _statCard(
-              label: 'Average Score',
-              value: '${controller.averageScore.toStringAsFixed(0)}%',
-            ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: _statCard(
+            label: 'Average Score',
+            value: '${controller.averageScore.toStringAsFixed(0)}%',
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: _statCard(
-              label: 'AI Accuracy',
-              value: '${(controller.averageAiConfidence * 100).toStringAsFixed(0)}%',
-            ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: _statCard(
+            label: 'AI Accuracy',
+            value:
+            '${(controller.averageAiConfidence * 100).toStringAsFixed(0)}%',
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: _statCard(
-              label: 'Manual Overrides',
-              value: '${controller.manualOverrides}',
-            ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: _statCard(
+            label: 'Manual Overrides',
+            value: '${controller.manualOverrides}',
           ),
-        ],
-      );
-    });
+        ),
+      ],
+    );
   }
 
   Widget _statCard({required String label, required String value}) {
@@ -185,15 +182,14 @@ class _ResultsPageState extends State<ResultsPage> {
   Widget _buildFiltersRow() {
     final quizzes = [
       'All Quizzes',
-      ...controller.results
-          .map((e) => e.quizTitle)
-          .toSet()
-          .toList(),
+      ...controller.results.map((e) => e.quizTitle).toSet().toList(),
     ];
     final classes = [
       'All Classes',
       ...controller.results
-          .map((e) => e.quizTitle) // Assuming quizTitle represents class for demo
+          .map(
+            (e) => e.quizTitle,
+          ) // Assuming quizTitle represents class for demo
           .toSet()
           .toList(),
     ];
@@ -324,7 +320,9 @@ class _ResultsPageState extends State<ResultsPage> {
                     DataCell(Text('${attempt.percentage.toStringAsFixed(0)}%')),
                     DataCell(Text(attempt.status)),
                     DataCell(
-                      Text('${(attempt.aiConfidence * 100).toStringAsFixed(0)}%'),
+                      Text(
+                        '${(attempt.aiConfidence * 100).toStringAsFixed(0)}%',
+                      ),
                     ),
                     DataCell(
                       OutlinedButton(

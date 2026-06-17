@@ -4,6 +4,7 @@ import 'package:classroom_quiz_admin_portal/features/dashboard/presentation/cont
 import 'package:classroom_quiz_admin_portal/features/delivery/presentation/controllers/schedule_controller.dart';
 import 'package:classroom_quiz_admin_portal/features/find_school/data/repos/find_school_repo_impl.dart';
 import 'package:classroom_quiz_admin_portal/features/find_school/presentation/controllers/find_school_controller.dart';
+import 'package:classroom_quiz_admin_portal/features/grading_insights/presentation/controllers/grading_controller.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/controllers/published_quizzes_controller.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/controllers/quiz_editor_controller.dart';
 import 'package:classroom_quiz_admin_portal/features/resources/presentation/controllers/settings_controller.dart';
@@ -27,5 +28,6 @@ class AllControllerBinding extends Bindings {
       ),
       fenix: true,
     );
+    Get.lazyPut(() => GradingInsightsController(), fenix: true);
   }
 }
