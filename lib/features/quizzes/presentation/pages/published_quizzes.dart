@@ -391,6 +391,13 @@ class _PublishedQuizzesPageState extends State<PublishedQuizzesPage> {
     );
   }
 
+  void _onUseTemplate(PublishedQuiz t, BuildContext context) {
+    pubQuizzesController.publishWithDestinationDialog(
+      context: context,
+      publishedQuiz: t,
+    );
+  }
+
   // ---------- Actions ----------
 
   void _onCreateTemplate() {
