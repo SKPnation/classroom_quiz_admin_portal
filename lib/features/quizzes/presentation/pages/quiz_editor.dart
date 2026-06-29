@@ -1,15 +1,16 @@
-import 'package:classroom_quiz_admin_portal/core/navigation/local_navigator.dart';
-import 'package:classroom_quiz_admin_portal/core/theme/colors.dart';
-import 'package:classroom_quiz_admin_portal/core/utils/functions.dart';
-import 'package:classroom_quiz_admin_portal/features/quizzes/data/models/quiz_item_model.dart';
+import 'package:classroom_quiz_admin_portal/core/data/local/get_store_keys.dart';
+import 'package:classroom_quiz_admin_portal/features/quizzes/data/models/published_quiz_template.dart';
+import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/controllers/published_quizzes_controller.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/controllers/quiz_editor_controller.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/widgets/editor_card.dart';
-import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/widgets/question_list_item.dart';
-import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/widgets/quiz_editor_header_btn.dart';
+import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/widgets/generated_questions_panel.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/widgets/quiz_editor_question_card.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/widgets/saved_drafts_section.dart';
+import 'package:classroom_quiz_admin_portal/features/resources/data/model/user_model.dart';
+import 'package:classroom_quiz_admin_portal/main.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:uuid/uuid.dart';
 
 class QuizEditorPage extends StatefulWidget {
   const QuizEditorPage({super.key});
@@ -28,6 +29,7 @@ class _QuizEditorPageState extends State<QuizEditorPage> {
   static const _border = Color(0xFFE5E7EB);
 
   final quizEditorController = QuizEditorController.instance;
+  final publishedQuizController = PublishedQuizzesController.instance;
 
   @override
   void dispose() {
@@ -48,8 +50,27 @@ class _QuizEditorPageState extends State<QuizEditorPage> {
             children: [
               _buildHeader(),
               SavedDraftsSection(quizEditorController: quizEditorController),
-              //TODO: Call the Saved Drafts widget here once it's built, and pass the quizEditorController to it so it can load drafts into the editor
               const SizedBox(height: 16),
+
+              // AI generated questions — visible only when generatedQuestions is non-empty
+              Obx(() {
+                if (quizEditorController.generatedQuestions.isEmpty) {
+                  return const SizedBox.shrink();
+                }
+                return const GeneratedQuestionsPanel();
+              }),
+
+              Obx(
+                () => publishedQuizController.isLoading.value
+                    ? const Center(
+                        child: Padding(
+                          padding: EdgeInsets.all(16.0),
+                          child: CircularProgressIndicator(),
+                        ),
+                      )
+                    : SizedBox.shrink(),
+              ),
+
               isNarrow
                   ? Column(
                       children: [
@@ -102,7 +123,7 @@ class _QuizEditorPageState extends State<QuizEditorPage> {
                   ),
                   onChanged: (val) {
                     quizEditorController.currentDraftTitle.value =
-                    val.trim().isEmpty ? 'Untitled Quiz' : val.trim();
+                        val.trim().isEmpty ? 'Untitled Quiz' : val.trim();
                   },
                 ),
               ),
@@ -110,12 +131,48 @@ class _QuizEditorPageState extends State<QuizEditorPage> {
               SizedBox(
                 height: 40,
                 child: ElevatedButton(
-                  onPressed:() async {
-                  print("Publishing quiz with title: ${quizEditorController.currentDraftTitle.value}");
-                  quizEditorController.publishQuiz(navigationController);
-                  /*
+                  onPressed: () async {
+                    // Build a PublishedQuiz from current editor state, then show destination dialog
+                    if (quizEditorController.quizItems.isEmpty) return;
 
-                  */
+                    final userInfoCache = storage.read(GetStoreKeys.userKey);
+                    final userModel = UserModel.fromJson(userInfoCache);
+                    final title =
+                        quizEditorController.currentDraftTitle.value
+                            .trim()
+                            .isEmpty
+                        ? 'Untitled Quiz'
+                        : quizEditorController.currentDraftTitle.value.trim();
+
+                    final quiz = PublishedQuiz(
+                      id: quizEditorController.currentDraftId.value.isNotEmpty
+                          ? quizEditorController.currentDraftId.value
+                          : const Uuid().v4(),
+                      title: title,
+                      description: 'Published from quiz editor',
+                      subject: 'Mathematics',
+                      type: 'Quiz',
+                      level: 'Intro',
+                      items: quizEditorController.quizItems
+                          .map(
+                            (q) => q.copyWith(
+                              options: List<String>.from(q.options),
+                              correctOptionIndexes: List<int>.from(
+                                q.correctOptionIndexes,
+                              ),
+                            ),
+                          )
+                          .toList(),
+                      publishedAt: DateTime.now(),
+                      createdBy: userModel.uid,
+                      tags: const ['Published'],
+                    );
+
+                    await PublishedQuizzesController.instance
+                        .publishWithDestinationDialog(
+                          context: context,
+                          publishedQuiz: quiz,
+                        );
                   },
                   child: const Text('Publish Quiz'),
                 ),
@@ -127,15 +184,10 @@ class _QuizEditorPageState extends State<QuizEditorPage> {
 
           const Text(
             'Build questions, set answers & points, then publish.',
-            style: TextStyle(
-              fontSize: 12,
-              color: Color(0xFF6B7280),
-            ),
+            style: TextStyle(fontSize: 12, color: Color(0xFF6B7280)),
           ),
         ],
       ),
     );
   }
-
-
 }

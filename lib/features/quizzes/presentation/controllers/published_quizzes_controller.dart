@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:classroom_quiz_admin_portal/core/constants/app_strings.dart';
 import 'package:classroom_quiz_admin_portal/core/data/local/get_store_keys.dart';
 import 'package:classroom_quiz_admin_portal/core/global/custom_snackbar.dart';
+import 'package:classroom_quiz_admin_portal/core/navigation/app_routes.dart';
+import 'package:classroom_quiz_admin_portal/core/navigation/navigation_controller.dart';
 import 'package:classroom_quiz_admin_portal/core/theme/colors.dart';
 import 'package:classroom_quiz_admin_portal/core/utils/helpers/pdf_service.dart';
 import 'package:classroom_quiz_admin_portal/core/utils/services/functions_service.dart';
@@ -10,7 +12,10 @@ import 'package:classroom_quiz_admin_portal/features/find_school/presentation/co
 import 'package:classroom_quiz_admin_portal/features/quizzes/data/models/published_quiz_template.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/data/models/quiz_item_model.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/data/repos/quiz_repo_impl.dart';
+import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/controllers/quiz_editor_controller.dart';
+import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/widgets/publish_destination_dialog.dart';
 import 'package:classroom_quiz_admin_portal/features/resources/data/model/user_model.dart';
+import 'package:classroom_quiz_admin_portal/features/resources/presentation/controllers/settings_controller.dart';
 import 'package:classroom_quiz_admin_portal/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -18,15 +23,16 @@ import 'package:get/get.dart';
 import 'package:get/get_state_manager/src/simple/get_controllers.dart';
 import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
+import 'package:uuid/uuid.dart';
 
 class PublishedQuizzesController extends GetxController {
-  static PublishedQuizzesController get instance => Get.find<PublishedQuizzesController>();
+  static PublishedQuizzesController get instance =>
+      Get.find<PublishedQuizzesController>();
   QuizRepoImpl quizRepo = QuizRepoImpl();
   final String scriptUrl = AppStrings.webAppUrl;
   RxBool isLoading = false.obs;
 
-  final RxList<PublishedQuiz> publishedTemplates =
-      <PublishedQuiz>[].obs;
+  final RxList<PublishedQuiz> publishedTemplates = <PublishedQuiz>[].obs;
 
   List<QuizItemModel> cloneQuizItems(List<QuizItemModel> source) {
     return source.map((q) {
@@ -47,7 +53,7 @@ class PublishedQuizzesController extends GetxController {
     final userInfoCache = storage.read(GetStoreKeys.userKey);
 
     final existingIndex = publishedTemplates.indexWhere(
-          (t) => t.id == template.id,
+      (t) => t.id == template.id,
     );
 
     if (existingIndex != -1) {
@@ -60,10 +66,7 @@ class PublishedQuizzesController extends GetxController {
 
     final userModel = UserModel.fromJson(userInfoCache);
 
-    await quizRepo.addToTemplates(
-      template: template,
-      orgId: userModel.orgId,
-    );
+    await quizRepo.addToTemplates(template: template, orgId: userModel.orgId);
   }
 
   void deleteTemplate(PublishedQuiz template) {
@@ -260,5 +263,135 @@ class PublishedQuizzesController extends GetxController {
         .catchError((e) {
           CustomSnackBar.errorSnackBar('Failed to load templates: $e');
         });
+  }
+
+  /// Shows the "Destination" dialog (Google Forms Only vs Canvas + Google Forms),
+  /// then runs the appropriate publish actions based on what the lecturer picks.
+  /// This is the new entry point — wire your Publish/Sync button to call this
+  /// instead of calling createGoogleForm() directly.
+  Future<void> publishWithDestinationDialog({
+    required BuildContext context,
+    required PublishedQuiz publishedQuiz,
+  }) async {
+    final qEditorController = QuizEditorController.instance;
+
+    final userInfoCache = storage.read(GetStoreKeys.userKey);
+    if (userInfoCache == null) {
+      CustomSnackBar.errorSnackBar('User session not found. Please sign in again.');
+      return;
+    }
+
+    final userModel = UserModel.fromJson(userInfoCache);
+
+    final isCanvasConnected =
+    SettingsController.instance.isIntegrationConnected('canvas');
+
+    final result = await showDialog<PublishDestination>(
+      context: context,
+      builder: (context) => PublishDestinationDialog(
+        isCanvasConnected: isCanvasConnected,
+      ),
+    );
+
+    if (result == null) return;
+
+    if (qEditorController.quizItems.isEmpty) {
+      CustomSnackBar.errorSnackBar('Add at least one question before publishing.');
+      return;
+    }
+
+    isLoading.value = true;
+
+    try {
+      final title = qEditorController.currentDraftTitle.value.trim().isEmpty
+          ? 'Untitled Quiz'
+          : qEditorController.currentDraftTitle.value.trim();
+
+      final publishedQuizId =
+      qEditorController.currentDraftId.value.isNotEmpty
+          ? qEditorController.currentDraftId.value
+          : const Uuid().v4();
+
+      final copiedItems = qEditorController.cloneQuizItems(
+        qEditorController.quizItems,
+      );
+
+      final template = PublishedQuiz(
+        id: publishedQuizId,
+        title: title,
+        description: publishedQuiz.description.isNotEmpty
+            ? publishedQuiz.description
+            : 'Published from quiz editor',
+        subject: publishedQuiz.subject.isNotEmpty
+            ? publishedQuiz.subject
+            : 'General',
+        type: publishedQuiz.type.isNotEmpty
+            ? publishedQuiz.type
+            : 'Quiz',
+        level: publishedQuiz.level.isNotEmpty
+            ? publishedQuiz.level
+            : 'Intro',
+        items: copiedItems,
+        publishedAt: DateTime.now(),
+        tags: const ['Published'],
+        createdBy: userModel.uid,
+      );
+
+      await publishTemplate(template);
+
+      await createGoogleForm(
+        context: context,
+        publishedQuiz: template,
+      );
+
+      if (result == PublishDestination.googleAndCanvas) {
+        await syncToCanvas(
+          context: context,
+          publishedQuiz: template,
+        );
+      }
+
+      NavigationController.instance.navigateTo(
+        Routes.publishedQuizzesRoute,
+      );
+
+      CustomSnackBar.successSnackBar(
+        body: 'Quiz published successfully.',
+      );
+    } catch (e) {
+      debugPrint('Publish failed: $e');
+
+      Get.snackbar(
+        'Publish Failed',
+        e.toString(),
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  /// STUB: Canvas sync is not implemented yet (OAuth flow + API calls are
+  /// the next piece of work). This wires the UI/flow correctly now so the
+  /// dialog and button work end-to-end once the real implementation lands.
+  Future<void> syncToCanvas({
+    required BuildContext context,
+    required PublishedQuiz publishedQuiz,
+  }) async {
+    // TODO: Replace with real Canvas API call once OAuth flow is built.
+    // Will need: stored Canvas access token for this user/org, selected
+    // course + assignment, and a call to create/update the Canvas assignment
+    // (see Canvas Assignments API).
+    debugPrint(
+      'TODO: syncToCanvas — would sync "${publishedQuiz.title}" to Canvas here.',
+    );
+
+    Get.snackbar(
+      'Canvas Sync (Coming Soon)',
+      'Canvas integration is not fully connected yet — Google Form was created successfully.',
+      backgroundColor: Colors.orange,
+      colorText: Colors.white,
+    );
   }
 }

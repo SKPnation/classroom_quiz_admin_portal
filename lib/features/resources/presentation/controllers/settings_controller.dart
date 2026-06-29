@@ -26,10 +26,6 @@ class SettingsController extends GetxController {
 
   final RxList<IntegrationModel> integrations = <IntegrationModel>[].obs;
 
-  // void getAllIntegrations(){
-  //
-  // }
-
   void loadDefaultIntegrations(UserModel user) async {
     var list = userRepo.getMyIntegrations(user.orgId, user.uid);
 
@@ -151,6 +147,15 @@ class SettingsController extends GetxController {
 
   signOut() {
     authRepo.signOut();
+  }
+
+  /// Returns true if the integration with the given id is connected.
+  /// Usage: SettingsController.instance.isIntegrationConnected('canvas')
+  bool isIntegrationConnected(String integrationId) {
+    return integrations
+        .firstWhereOrNull((i) => i.id == integrationId)
+        ?.connected ??
+        false;
   }
 
   @override

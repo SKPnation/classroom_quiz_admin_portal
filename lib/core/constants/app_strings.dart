@@ -56,13 +56,32 @@ class AppStrings {
   static const String users = "users";
   static const String organisations = "orgs";
   static const String gradedAttempts = "gradedAttempts";
+
   static String get templates => 'templates';
+
   static String get integrations => "integrations";
 
   ///------ GOOGLE APPS SCRIPT API VARIABLES
-  static const deploymentID = "AKfycbxLuu9c9ytkir-ZCfJnfZ4ssllm7Q0W_2VdgsJQiKF4zukj04QOwthmYAU4zgSp_4Gx";
-  static const webAppUrl = "https://script.google.com/macros/s/AKfycbxLuu9c9ytkir-ZCfJnfZ4ssllm7Q0W_2VdgsJQiKF4zukj04QOwthmYAU4zgSp_4Gx/exec";
-  static const libraryUrl = "https://script.google.com/macros/library/d/1CvzhW2oQ7X3Zklt4cFqkt4YaYo24YNpxjmyWLTl4B08YkFYGoJ0obKQo/11";
+  static const deploymentID =
+      "AKfycbzNQrmQcCv1l5HDpREvXfTzfM45IBDsfNSa-SpzZQXP0mqcNFeHbqUWqrI3_EjOTIKT5g";
+  static const webAppUrl =
+      "https://script.google.com/macros/s/AKfycbzNQrmQcCv1l5HDpREvXfTzfM45IBDsfNSa-SpzZQXP0mqcNFeHbqUWqrI3_EjOTIKT5g/exec";
+  static const libraryUrl =
+      "https://script.google.com/macros/library/d/1CvzhW2oQ7X3Zklt4cFqkt4YaYo24YNpxjmyWLTl4B08YkFYGoJ0obKQo/16";
 
   ///------
+
+  //instruct the AI to return a JSON list. This makes parsing reliable.
+  static const systemPrompt = '''
+You are a helpful assistant that generates quiz questions.
+Respond with a valid JSON list of objects.
+Each object must have two keys: "question" (string), "answer" (string), if multi-choice, list the options, question_type (shortAnswer, multipleChoice, trueFalse, essay). 
+Every question object MUST include:
+- question: string
+- answer: string
+- question_type: one of ["shortAnswer", "essay", "trueFalse", "multipleChoice"]
+- options: array of strings, required for multipleChoice and trueFalse
+- points: number
+Do not include any text outside of the JSON list.
+''';
 }

@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:classroom_quiz_admin_portal/core/constants/app_strings.dart';
 import 'package:classroom_quiz_admin_portal/core/data/local/get_store_keys.dart';
 import 'package:classroom_quiz_admin_portal/core/global/custom_snackbar.dart';
 import 'package:classroom_quiz_admin_portal/core/navigation/app_routes.dart';
@@ -79,20 +80,6 @@ class QuizEditorController extends GetxController {
     generatedQuestions.clear();
 
     try {
-      // We instruct the AI to return a JSON list. This makes parsing reliable.
-      final systemPrompt = '''
-You are a helpful assistant that generates quiz questions.
-Respond with a valid JSON list of objects.
-Each object must have two keys: "question" (string), "answer" (string), if multi-choice, list the options, question_type (shortAnswer, multipleChoice, trueFalse, essay). 
-Every question object MUST include:
-- question: string
-- answer: string
-- question_type: one of ["shortAnswer", "essay", "trueFalse", "multipleChoice"]
-- options: array of strings, required for multipleChoice and trueFalse
-- points: number
-Do not include any text outside of the JSON list.
-''';
-
       // Create the chat completion request
       final chatCompletion = await OpenAI.instance.chat.create(
         model: 'gpt-3.5-turbo',
@@ -104,7 +91,7 @@ Do not include any text outside of the JSON list.
             role: OpenAIChatMessageRole.system,
             content: [
               OpenAIChatCompletionChoiceMessageContentItemModel.text(
-                systemPrompt,
+                AppStrings.systemPrompt,
               ),
             ],
           ),
@@ -160,6 +147,92 @@ Do not include any text outside of the JSON list.
     } finally {
       // Ensure the loading indicator is always turned off
       isLoading.value = false;
+    }
+  }
+
+  /// Converts a single AI-generated question into the QuizItemModel shape
+  /// used by the editor, and adds it via the existing addQuestion() flow.
+  void addGeneratedQuestionToEditor(GeneratedQuestion gq) {
+    final item = _generatedQuestionToQuizItem(gq);
+    addQuestion(item);
+  }
+
+  /// Adds ALL currently generated questions into the editor at once,
+  /// then clears generatedQuestions so they don't get added twice.
+  void addAllGeneratedQuestionsToEditor() {
+    if (generatedQuestions.isEmpty) {
+      CustomSnackBar.errorSnackBar('No generated questions to add.');
+      return;
+    }
+
+    for (final gq in generatedQuestions) {
+      final item = _generatedQuestionToQuizItem(gq);
+      quizItems.add(item);
+    }
+
+    // Select the last one added so the editor jumps to it
+    if (quizItems.isNotEmpty) {
+      activeId.value = quizItems.last.id;
+    }
+
+    quizItems.refresh();
+
+    final addedCount = generatedQuestions.length;
+    generatedQuestions.clear();
+
+    CustomSnackBar.successSnackBar(
+      body: '$addedCount question(s) added to quiz.',
+    );
+  }
+
+  /// Removes a single question from the generated (AI) list without
+  /// adding it to the editor — lets the lecturer discard ones they don't want.
+  void dismissGeneratedQuestion(GeneratedQuestion gq) {
+    generatedQuestions.remove(gq);
+  }
+
+  /// Internal: maps the AI's GeneratedQuestion shape onto QuizItemModel.
+  QuizItemModel _generatedQuestionToQuizItem(GeneratedQuestion gq) {
+    final type = _quizItemTypeFromString(gq.questionType);
+    final options = gq.options ?? [];
+
+    // For multipleChoice/trueFalse, figure out which option index matches
+    // the AI's "answer" text so correctOptionIndexes is populated correctly.
+    List<int> correctIndexes = [];
+    if ((type == QuizItemType.multipleChoice ||
+            type == QuizItemType.trueFalse) &&
+        options.isNotEmpty) {
+      final matchIndex = options.indexWhere(
+        (opt) => opt.trim().toLowerCase() == gq.answer.trim().toLowerCase(),
+      );
+      if (matchIndex != -1) {
+        correctIndexes = [matchIndex];
+      }
+    }
+
+    return QuizItemModel(
+      id: const Uuid().v4(),
+      type: type,
+      question: gq.question,
+      answerKey: gq.answer,
+      options: List<String>.from(options),
+      correctOptionIndexes: correctIndexes,
+      points: 1,
+      createdAt: DateTime.now(),
+    );
+  }
+
+  QuizItemType _quizItemTypeFromString(String value) {
+    switch (value) {
+      case 'multipleChoice':
+        return QuizItemType.multipleChoice;
+      case 'trueFalse':
+        return QuizItemType.trueFalse;
+      case 'essay':
+        return QuizItemType.essay;
+      case 'shortAnswer':
+      default:
+        return QuizItemType.shortAnswer;
     }
   }
 
@@ -306,7 +379,10 @@ Do not include any text outside of the JSON list.
     quizItems.refresh();
   }
 
-  Future<void> publishDraft(QuizDraftModel draft, NavigationController navigationController) async {
+  Future<void> publishDraft(
+    QuizDraftModel draft,
+    NavigationController navigationController,
+  ) async {
     final templatesController = PublishedQuizzesController.instance;
     final userInfoCache = storage.read(GetStoreKeys.userKey);
     final userModel = UserModel.fromJson(userInfoCache);
