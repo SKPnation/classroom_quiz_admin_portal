@@ -36,10 +36,11 @@ class GradingInsightsController extends GetxController {
   List<GradingAttemptModel> get gradingQueue => attempts
       .where(
         (e) =>
-            e.status == 'needs_review' ||
-            e.status == 'flagged' ||
-            e.aiConfidence < 70,
-      )
+    e.status == GradingStatus.pending ||
+        e.status == GradingStatus.aiSuggested ||
+        e.status == GradingStatus.flagged ||
+        e.aiConfidence < 70,
+  )
       .toList();
 
   int get totalStudents => attempts.map((e) => e.studentId).toSet().length;
