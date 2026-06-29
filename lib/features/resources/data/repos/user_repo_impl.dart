@@ -7,6 +7,7 @@ import 'package:classroom_quiz_admin_portal/features/resources/presentation/cont
 import 'package:classroom_quiz_admin_portal/main.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 
 class UserRepoImpl extends UserRepo {
   final auth = FirebaseAuth.instance;
@@ -31,7 +32,7 @@ class UserRepoImpl extends UserRepo {
         Map<String, dynamic> json = doc.data()!;
         return UserModel.fromJson(json);
       } else {
-        CustomSnackBar.errorSnackBar("User profile not found");
+        // CustomSnackBar.errorSnackBar("User profile not found");
         return null;
       }
     } catch (e) {
@@ -64,8 +65,15 @@ class UserRepoImpl extends UserRepo {
 
   @override
   Future<void> addAsMemberToOrg(UserModel userModel, String orgId) async {
+    final data = userModel.toFirestore();
+
+    debugPrint('Writing member to orgs/$orgId/members/${userModel.uid}');
+    debugPrint('Member data: $data');
+
     final member = <String, dynamic>{
-      "role": AppStrings.lecturer, // or "student"
+      "uid": userModel.uid,
+      "orgId": orgId,
+      "role": AppStrings.lecturer,
       "email": userModel.email,
       "joinedAt": userModel.createdAt,
       "isActive": true,
@@ -85,5 +93,15 @@ class UserRepoImpl extends UserRepo {
       orgId,
     ).doc(userId).collection(AppStrings.integrations).get();
     return integrations.docs.map((doc) => doc.data()).toList();
+  }
+
+  @override
+  Future<void> createUserProfile(UserModel user) async {
+    await usersRef.doc(user.uid).set(
+      user.toFirestore(),
+      SetOptions(merge: true),
+    );
+
+    await addAsMemberToOrg(user, user.orgId);
   }
 }

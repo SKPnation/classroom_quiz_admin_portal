@@ -5,4 +5,5 @@ abstract class UserRepo {
   Future<void> saveProfile(UserModel userModel, String orgId);
   Future<void> addAsMemberToOrg(UserModel userModel, String orgId);
   Future<List<Map<String, dynamic>>> getMyIntegrations(String orgId, String userId);
+  Future<void> createUserProfile(UserModel userModel);
 }

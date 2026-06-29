@@ -44,7 +44,6 @@ class _SettingsPageState extends State<SettingsPage> {
 
   @override
   Widget build(BuildContext context) {
-    const bg = Color(0xFFF1F5F9); // slate-100-ish
     const ink = Color(0xFF111827); // gray-900
 
     final userInfoCache = storage.read(GetStoreKeys.userKey);
@@ -63,7 +62,6 @@ class _SettingsPageState extends State<SettingsPage> {
       SchoolModel schoolModel = SchoolModel.fromJson(orgInfoCache);
 
       return Container(
-        color: bg,
         padding: const EdgeInsets.all(24),
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 920),
