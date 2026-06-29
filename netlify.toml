@@ -3,4 +3,9 @@ command = "if [ ! -d \"flutter\" ]; then git clone --depth 1 --branch stable htt
 publish = "build/web"
 
 [build.environment]
-SECRETS_SCAN_SMART_DETECTION_OMIT_VALUES = "AIza"
+SECRETS_SCAN_SMART_DETECTION_ENABLED = "false"
+
+[[redirects]]
+from = "/*"
+to = "/index.html"
+status = 200
