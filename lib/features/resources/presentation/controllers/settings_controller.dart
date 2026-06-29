@@ -27,24 +27,16 @@ class SettingsController extends GetxController {
   final RxList<IntegrationModel> integrations = <IntegrationModel>[].obs;
 
   void loadDefaultIntegrations(UserModel user) async {
-    var list = userRepo.getMyIntegrations(user.orgId, user.uid);
+    final list = await userRepo.getMyIntegrations(user.orgId, user.uid);
 
-    googleExists() => list.then(
-      (integrations) =>
-          integrations.any((integration) => integration['id'] == 'google'),
-    );
-    canvasExists() => list.then(
-      (integrations) =>
-          integrations.any((integration) => integration['id'] == 'canvas'),
-    );
-    zoomExists() => list.then(
-      (integrations) =>
-          integrations.any((integration) => integration['id'] == 'zoom'),
-    );
+    final isGoogleConnected =
+    list.any((integration) => integration['id'] == 'google');
 
-    bool isGoogleConnected = await googleExists();
-    bool isCanvasConnected = await canvasExists();
-    bool isZoomConnected = await zoomExists();
+    final isCanvasConnected =
+    list.any((integration) => integration['id'] == 'canvas');
+
+    final isZoomConnected =
+    list.any((integration) => integration['id'] == 'zoom');
 
     integrations.assignAll([
       IntegrationModel(
@@ -53,15 +45,15 @@ class SettingsController extends GetxController {
         description: 'Create Google Forms, connect Sheets, and more.',
         icon: Icons.g_mobiledata_rounded,
         connected: isGoogleConnected,
-        actionText: isGoogleConnected ? '' : 'Connect Google',
-        onTap: () => isGoogleConnected
+        actionText: isGoogleConnected ? 'Connected' : 'Connect Google',
+        onTap: isGoogleConnected
             ? null
             : () async {
-                var org = storage.read(GetStoreKeys.orgKey);
-                var orgId = org['code'].toLowerCase();
+          final org = storage.read(GetStoreKeys.orgKey);
+          final orgId = org['code'].toString().toLowerCase();
 
-                await GoogleIntegrationService().connectGoogle(orgId: orgId);
-              },
+          await GoogleIntegrationService().connectGoogle(orgId: orgId);
+        },
       ),
       IntegrationModel(
         id: 'canvas',
@@ -69,14 +61,12 @@ class SettingsController extends GetxController {
         description: 'Sync quizzes with Canvas courses.',
         icon: Icons.school_outlined,
         connected: isCanvasConnected,
-        actionText: isCanvasConnected ? '' : 'Connect Canvas',
-        onTap: () => isCanvasConnected
+        actionText: isCanvasConnected ? 'Connected' : 'Connect Canvas',
+        onTap: isCanvasConnected
             ? null
-            : {
-                debugPrint(
-                  'Canvas integration tapped. Implement connection flow here.',
-                ),
-              },
+            : () async{
+          debugPrint('Canvas integration tapped.');
+        },
       ),
       IntegrationModel(
         id: 'zoom',
@@ -84,14 +74,12 @@ class SettingsController extends GetxController {
         description: 'Schedule and share class meetings.',
         icon: Icons.videocam_outlined,
         connected: isZoomConnected,
-        actionText: isZoomConnected ? '' : 'Connect Zoom',
-        onTap: () => isZoomConnected
+        actionText: isZoomConnected ? 'Connected' : 'Connect Zoom',
+        onTap: isZoomConnected
             ? null
-            : {
-                debugPrint(
-                  'Zoom integration tapped. Implement connection flow here.',
-                ),
-              },
+            : () async{
+          debugPrint('Zoom integration tapped.');
+        },
       ),
     ]);
   }
@@ -167,5 +155,15 @@ class SettingsController extends GetxController {
       updateCompletion(map);
     }
     super.onInit();
+  }
+
+  resetVariables() {
+    fullNameTEC.clear();
+    officeTEC.clear();
+    bioTEC.clear();
+    departmentTEC.clear();
+    profileCompleted.value = false;
+    percentageCompletion.value = 0.0;
+    integrations.clear();
   }
 }

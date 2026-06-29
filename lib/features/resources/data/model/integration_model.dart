@@ -7,7 +7,7 @@ class IntegrationModel {
   final IconData icon;
   final bool connected;
   final String actionText;
-  final VoidCallback onTap;
+  final Future<void> Function()? onTap;
 
   IntegrationModel({
     required this.id,

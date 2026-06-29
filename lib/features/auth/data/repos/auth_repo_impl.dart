@@ -61,7 +61,7 @@ class AuthRepoImpl extends AuthRepo {
 
     //save user info to local storage
     await saveUserToStorage(user);
-    // //Save org  info to local storage
+    //Save org  info to local storage
     saveSchoolToStorage(school);
 
     Get.offNamed(Routes.rootRoute);
@@ -90,39 +90,34 @@ class AuthRepoImpl extends AuthRepo {
   Future saveUserToStorage(User user) async {
     final settingsController = SettingsController.instance;
     final findSchoolController = FindSchoolController.instance;
-    final createdAt = user.metadata.creationTime;
-    print("organisation id: ${findSchoolController.selectedOrgId.value}");
+
+    final orgId = findSchoolController.selectedOrgId.value;
+    final createdAt = user.metadata.creationTime ?? DateTime.now();
 
     UserModel? userModel = await userRepo.getUserProfile();
-    if (userModel?.toFirestore() != null) {
-      //Cache user info
 
-      var data = {
-        ...?userModel?.toCache(),
-        "orgId": findSchoolController.selectedOrgId.value,
-      };
-      storage.write(GetStoreKeys.userKey, data);
-
-      //Update profile completion percentage
-      settingsController.updateCompletion(userModel!.toCache());
-    } else {
-      UserModel userModel = UserModel(
+    if (userModel == null) {
+      userModel = UserModel(
         uid: user.uid,
-        email: user.email!,
+        email: user.email ?? '',
         role: AppStrings.lecturer,
-        orgId: findSchoolController.selectedOrgId.value,
+        orgId: orgId,
         profileCompleted: false,
         isActive: true,
-        createdAt: createdAt!,
+        createdAt: createdAt,
         updatedAt: DateTime.now(),
       );
 
-      //Cache user info
-      storage.write(GetStoreKeys.userKey, userModel.toCache());
-
-      //Update profile completion percentage
-      settingsController.updateCompletion(userModel.toCache());
+      await userRepo.createUserProfile(userModel);
     }
+
+    final data = {
+      ...userModel.toCache(),
+      "orgId": orgId,
+    };
+
+    storage.write(GetStoreKeys.userKey, data);
+    settingsController.updateCompletion(data);
   }
 
   @override
@@ -138,6 +133,9 @@ class AuthRepoImpl extends AuthRepo {
 
       // Clear cached user and organization data
       storage.erase();
+
+      //reset settings controller variables
+      SettingsController.instance.resetVariables();
 
       // Navigate to the login screen
       Get.offAllNamed(Routes.findSchoolRoute);
