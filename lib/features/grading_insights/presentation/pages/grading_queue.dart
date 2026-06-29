@@ -1,5 +1,8 @@
 import 'package:classroom_quiz_admin_portal/core/theme/colors.dart';
+import 'package:classroom_quiz_admin_portal/features/grading_insights/data/models/grading_attempt_model.dart';
+import 'package:classroom_quiz_admin_portal/features/grading_insights/presentation/controllers/grading_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class GradingQueuePage extends StatefulWidget {
   const GradingQueuePage({super.key});
@@ -9,7 +12,8 @@ class GradingQueuePage extends StatefulWidget {
 }
 
 class _GradingQueuePageState extends State<GradingQueuePage> {
-  // ---- Design tokens ----
+  late final GradingInsightsController controller;
+
   static const _bg = Color(0xFFF3F4F6);
   static const _card = Colors.white;
   static const _ink = Color(0xFF111827);
@@ -18,13 +22,7 @@ class _GradingQueuePageState extends State<GradingQueuePage> {
   static const _purple = AppColors.purple;
   static const _radius = 16.0;
 
-  // ---- Filters ----
-  final _quizOptions = const [
-    'All Quizzes',
-    'Week 1 Check-in',
-    'Midterm Exam',
-    'Reading Comprehension',
-  ];
+  final _quizOptions = const ['All Quizzes'];
   final _statusOptions = const [
     'All Statuses',
     'Pending',
@@ -36,46 +34,27 @@ class _GradingQueuePageState extends State<GradingQueuePage> {
   String _selectedQuiz = 'All Quizzes';
   String _selectedStatus = 'All Statuses';
 
-  // ---- Fake data ----
-  final List<_GradingRow> _allRows = [
-    _GradingRow(
-      student: 'Jane Doe',
-      className: 'CSE 101 – A',
-      questionLabel: 'Q3 – Short Answer',
-      aiSuggestion: 'Score: 3/5 (partial)',
-      status: GradingStatus.pending,
-    ),
-    _GradingRow(
-      student: 'Michael Lee',
-      className: 'CSE 101 – A',
-      questionLabel: 'Q5 – Essay',
-      aiSuggestion: 'Score: 8/10',
-      status: GradingStatus.aiSuggested,
-    ),
-    _GradingRow(
-      student: 'Sofia Torres',
-      className: 'ENG 201',
-      questionLabel: 'Q2 – Open Response',
-      aiSuggestion: 'Flagged: off-topic',
-      status: GradingStatus.flagged,
-    ),
-    _GradingRow(
-      student: 'David Smith',
-      className: 'SCI 240',
-      questionLabel: 'Q7 – Explanation',
-      aiSuggestion: 'Score: 5/5',
-      status: GradingStatus.reviewed,
-    ),
-  ];
+  @override
+  void initState() {
+    super.initState();
+
+    controller = Get.isRegistered<GradingInsightsController>()
+        ? GradingInsightsController.instance
+        : Get.put(GradingInsightsController());
+
+    controller.loadGradingInsights();
+  }
 
   @override
   Widget build(BuildContext context) {
-    // Filtered list
-    final filtered = _allRows.where((row) {
-      final quizOk = true; // plug into real quiz mapping later if needed
-      final statusOk = _selectedStatus == 'All Statuses'
-          ? true
-          : _statusLabel(row.status) == _selectedStatus;
+    final filtered = controller.gradingQueue.where((attempt) {
+      final quizOk =
+          _selectedQuiz == 'All Quizzes' || attempt.quizTitle == _selectedQuiz;
+
+      final statusOk =
+          _selectedStatus == 'All Statuses' ||
+          _statusLabel(attempt.status) == _selectedStatus;
+
       return quizOk && statusOk;
     }).toList();
 
@@ -101,8 +80,6 @@ class _GradingQueuePageState extends State<GradingQueuePage> {
     );
   }
 
-  // ---------- Header ----------
-
   Widget _buildHeader() {
     return const Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -124,15 +101,18 @@ class _GradingQueuePageState extends State<GradingQueuePage> {
     );
   }
 
-  // ---------- Stats row ----------
-
   Widget _buildStatsRow() {
-    final pending =
-        _allRows.where((r) => r.status == GradingStatus.pending).length;
-    final flagged =
-        _allRows.where((r) => r.status == GradingStatus.flagged).length;
-    final aiSuggested =
-        _allRows.where((r) => r.status == GradingStatus.aiSuggested).length;
+    final pending = controller.gradingQueue
+        .where((r) => r.status == GradingStatus.pending)
+        .length;
+
+    final flagged = controller.gradingQueue
+        .where((r) => r.status == GradingStatus.flagged)
+        .length;
+
+    final aiSuggested = controller.gradingQueue
+        .where((r) => r.status == GradingStatus.aiSuggested)
+        .length;
 
     return Wrap(
       spacing: 12,
@@ -181,9 +161,7 @@ class _GradingQueuePageState extends State<GradingQueuePage> {
     );
   }
 
-  // ---------- Table card ----------
-
-  Widget _buildTableCard(List<_GradingRow> rows) {
+  Widget _buildTableCard(List<GradingAttemptModel> rows) {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -209,8 +187,7 @@ class _GradingQueuePageState extends State<GradingQueuePage> {
               return SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: ConstrainedBox(
-                  constraints:
-                  BoxConstraints(minWidth: constraints.maxWidth),
+                  constraints: BoxConstraints(minWidth: constraints.maxWidth),
                   child: DataTable(
                     headingRowColor: MaterialStateProperty.all(
                       const Color(0xFFF9FAFB),
@@ -219,12 +196,13 @@ class _GradingQueuePageState extends State<GradingQueuePage> {
                     dataRowMinHeight: 48,
                     dataRowMaxHeight: 64,
                     columns: const [
-                      DataColumn(label: Text('Student')),
-                      DataColumn(label: Text('Class')),
-                      DataColumn(label: Text('Question')),
-                      DataColumn(label: Text('AI Suggestion')),
+                      DataColumn(label: Text('Student Email')),
+                      DataColumn(label: Text('Quiz Title')),
+                      DataColumn(label: Text('Score')),
+                      DataColumn(label: Text('AI Confidence')),
                       DataColumn(label: Text('Status')),
-                      DataColumn(label: Text('Actions')),
+                      DataColumn(label: Text('Submitted At')),
+                      DataColumn(label: Text('Action')),
                     ],
                     rows: rows.map(_buildDataRow).toList(),
                   ),
@@ -237,7 +215,6 @@ class _GradingQueuePageState extends State<GradingQueuePage> {
     );
   }
 
-  // Filters (quiz + status) above table
   Widget _buildTableFiltersRow() {
     return Row(
       children: [
@@ -259,11 +236,8 @@ class _GradingQueuePageState extends State<GradingQueuePage> {
                 style: const TextStyle(fontSize: 13, color: _ink),
                 items: _quizOptions
                     .map(
-                      (q) => DropdownMenuItem<String>(
-                    value: q,
-                    child: Text(q),
-                  ),
-                )
+                      (q) => DropdownMenuItem<String>(value: q, child: Text(q)),
+                    )
                     .toList(),
                 onChanged: (val) {
                   if (val == null) return;
@@ -292,11 +266,8 @@ class _GradingQueuePageState extends State<GradingQueuePage> {
                 style: const TextStyle(fontSize: 13, color: _ink),
                 items: _statusOptions
                     .map(
-                      (s) => DropdownMenuItem<String>(
-                    value: s,
-                    child: Text(s),
-                  ),
-                )
+                      (s) => DropdownMenuItem<String>(value: s, child: Text(s)),
+                    )
                     .toList(),
                 onChanged: (val) {
                   if (val == null) return;
@@ -330,20 +301,19 @@ class _GradingQueuePageState extends State<GradingQueuePage> {
     );
   }
 
-  DataRow _buildDataRow(_GradingRow row) {
+  DataRow _buildDataRow(GradingAttemptModel row) {
     return DataRow(
       cells: [
-        DataCell(Text(row.student)),
-        DataCell(Text(row.className)),
-        DataCell(Text(row.questionLabel)),
-        DataCell(Text(row.aiSuggestion)),
+        DataCell(Text(row.studentEmail ?? 'Unknown')),
+        DataCell(Text(row.quizTitle ?? 'Untitled Quiz')),
+        DataCell(Text('${row.score}/${row.maxScore}')),
+        DataCell(Text('${(row.aiConfidence * 100).toStringAsFixed(0)}%')),
         DataCell(_statusChip(row.status)),
+        DataCell(Text(_formatDate(row.submittedAt))),
         DataCell(_actionsButton(row)),
       ],
     );
   }
-
-  // ---------- Status chip ----------
 
   Widget _statusChip(GradingStatus status) {
     final label = _statusLabel(status);
@@ -353,7 +323,7 @@ class _GradingQueuePageState extends State<GradingQueuePage> {
 
     switch (status) {
       case GradingStatus.pending:
-        color = const Color(0xFFDC2626); // red
+        color = const Color(0xFFDC2626);
         bg = const Color(0xFFFEE2E2);
         break;
       case GradingStatus.aiSuggested:
@@ -361,11 +331,11 @@ class _GradingQueuePageState extends State<GradingQueuePage> {
         bg = const Color(0xFFEEF2FF);
         break;
       case GradingStatus.flagged:
-        color = const Color(0xFFF97316); // orange
+        color = const Color(0xFFF97316);
         bg = const Color(0xFFFFEDD5);
         break;
       case GradingStatus.reviewed:
-        color = const Color(0xFF16A34A); // green
+        color = const Color(0xFF16A34A);
         bg = const Color(0xFFD1FAE5);
         break;
     }
@@ -400,9 +370,7 @@ class _GradingQueuePageState extends State<GradingQueuePage> {
     }
   }
 
-  // ---------- Row actions ----------
-
-  Widget _actionsButton(_GradingRow row) {
+  Widget _actionsButton(GradingAttemptModel row) {
     return SizedBox(
       height: 30,
       child: ElevatedButton(
@@ -423,39 +391,23 @@ class _GradingQueuePageState extends State<GradingQueuePage> {
     );
   }
 
-  // ---------- Actions ----------
-
-  void _onReviewRow(_GradingRow row) {
-    // TODO: navigate to detailed grading screen
+  void _onReviewRow(GradingAttemptModel row) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Reviewing: ${row.student} – ${row.questionLabel}')),
+      SnackBar(
+        content: Text('Reviewing: ${row.studentEmail ?? 'Unknown student'}'),
+      ),
     );
   }
 
   void _onBulkReview() {
-    // TODO: open bulk review flow
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Bulk Review clicked')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Bulk Review clicked')));
   }
-}
 
-// ---------- Model ----------
+  String _formatDate(DateTime? date) {
+    if (date == null) return 'Unknown';
 
-enum GradingStatus { pending, aiSuggested, flagged, reviewed }
-
-class _GradingRow {
-  final String student;
-  final String className;
-  final String questionLabel;
-  final String aiSuggestion;
-  final GradingStatus status;
-
-  _GradingRow({
-    required this.student,
-    required this.className,
-    required this.questionLabel,
-    required this.aiSuggestion,
-    required this.status,
-  });
+    return '${date.month}/${date.day}/${date.year}';
+  }
 }

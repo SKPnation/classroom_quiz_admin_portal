@@ -46,22 +46,22 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       return _getPageRoute(AiQuestionGeneratorPage());
     case Routes.quizEditorRoute:
       return _getPageRoute(QuizEditorPage());
-    case Routes.questionBankRoute:
-      return _getPageRoute(QuestionBankPage());
+    // case Routes.questionBankRoute:
+    //   return _getPageRoute(QuestionBankPage());
     case Routes.publishedQuizzesRoute:
       return _getPageRoute(PublishedQuizzesPage());
     case Routes.resultsRoute:
       return _getPageRoute(ResultsPage());
-    case Routes.schedulesRoute:
-      return _getPageRoute(SchedulesPage());
-    case Routes.classesRoute:
-      return _getPageRoute(ClassesPage());
-    case Routes.studentsRoute:
-      return _getPageRoute(StudentsPage());
+    // case Routes.schedulesRoute:
+    //   return _getPageRoute(SchedulesPage());
+    // case Routes.classesRoute:
+    //   return _getPageRoute(ClassesPage());
+    // case Routes.studentsRoute:
+    //   return _getPageRoute(StudentsPage());
     case Routes.gradingQueueRoute:
       return _getPageRoute(GradingQueuePage());
-    case Routes.mediaLibraryRoute:
-      return _getPageRoute(MediaLibrary());
+    // case Routes.mediaLibraryRoute:
+    //   return _getPageRoute(MediaLibrary());
     default:
       return _getPageRoute(
         Obx(
@@ -98,18 +98,18 @@ abstract class Routes {
   static const aiGeneratorRoute = "/ai-generator";
   static const quizEditorDisplayName = AppStrings.quizEditorTitle;
   static const quizEditorRoute = "/quiz-editor";
-  static const questionBankDisplayName = AppStrings.questionBankTitle;
-  static const questionBankRoute = "/question-bank";
+  // static const questionBankDisplayName = AppStrings.questionBankTitle;
+  // static const questionBankRoute = "/question-bank";
   static const publishedQuizzesDisplayName = AppStrings.publishedQuizzesTitle;
   static const publishedQuizzesRoute = "/published-quizzes";
 
   //DELIVERY
-  static const schedulesDisplayName = AppStrings.schedulesTitle;
-  static const schedulesRoute = "/schedules-assignments";
-  static const classesDisplayName = AppStrings.classesTitle;
-  static const classesRoute = "/classes";
-  static const studentsDisplayName = AppStrings.studentsTitle;
-  static const studentsRoute = "/students";
+  // static const schedulesDisplayName = AppStrings.schedulesTitle;
+  // static const schedulesRoute = "/schedules-assignments";
+  // static const classesDisplayName = AppStrings.classesTitle;
+  // static const classesRoute = "/classes";
+  // static const studentsDisplayName = AppStrings.studentsTitle;
+  // static const studentsRoute = "/students";
 
   ///GRADING & INSIGHTS
   static const resultsDisplayName = AppStrings.resultsTitle;
@@ -118,14 +118,14 @@ abstract class Routes {
   static const gradingQueueRoute = "/grading-queue";
 
   //Analytics
-  static const itemAnalysisDisplayName = AppStrings.itemAnalysisTitle;
-  static const itemAnalysisRoute = "/item-analysis";
-  static const studentProgressDisplayName = AppStrings.studentProgressTitle;
-  static const studentProgressRoute = "/student-progress";
+  // static const itemAnalysisDisplayName = AppStrings.itemAnalysisTitle;
+  // static const itemAnalysisRoute = "/item-analysis";
+  // static const studentProgressDisplayName = AppStrings.studentProgressTitle;
+  // static const studentProgressRoute = "/student-progress";
 
   ///RESOURCES
-  static const mediaLibraryDisplayName = AppStrings.mediaLibraryTitle;
-  static const mediaLibraryRoute = "/media-library";
+  // static const mediaLibraryDisplayName = AppStrings.mediaLibraryTitle;
+  // static const mediaLibraryRoute = "/media-library";
   static const settingsDisplayName = AppStrings.settingsTitle;
   static const settingsRoute = "/settings";
 
@@ -150,14 +150,14 @@ class MenuItem {
 List<MenuItem> quizMenuItemRoutes = [
   MenuItem(Routes.aiGeneratorDisplayName, Routes.aiGeneratorRoute),
   MenuItem(Routes.quizEditorDisplayName, Routes.quizEditorRoute),
-  MenuItem(Routes.questionBankDisplayName, Routes.questionBankRoute),
+  // MenuItem(Routes.questionBankDisplayName, Routes.questionBankRoute),
   MenuItem(Routes.publishedQuizzesDisplayName, Routes.publishedQuizzesRoute),
 ];
 
 List<MenuItem> deliveryMenuItemRoutes = [
-  MenuItem(Routes.schedulesDisplayName, Routes.schedulesRoute),
-  MenuItem(Routes.classesDisplayName, Routes.classesRoute),
-  MenuItem(Routes.studentsDisplayName, Routes.studentsRoute),
+  // MenuItem(Routes.schedulesDisplayName, Routes.schedulesRoute),
+  // MenuItem(Routes.classesDisplayName, Routes.classesRoute),
+  // MenuItem(Routes.studentsDisplayName, Routes.studentsRoute),
 ];
 
 List<MenuItem> gradingMenuItemRoutes = [
@@ -166,6 +166,6 @@ List<MenuItem> gradingMenuItemRoutes = [
 ];
 
 List<MenuItem> resourcesMenuItemRoutes = [
-  MenuItem(Routes.mediaLibraryDisplayName, Routes.mediaLibraryRoute),
+  // MenuItem(Routes.mediaLibraryDisplayName, Routes.mediaLibraryRoute),
   MenuItem(Routes.settingsDisplayName, Routes.settingsRoute),
 ];

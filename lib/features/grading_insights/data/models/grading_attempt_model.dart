@@ -1,5 +1,8 @@
 import 'package:classroom_quiz_admin_portal/features/grading_insights/data/models/question_result_model.dart';
 import 'package:classroom_quiz_admin_portal/features/grading_insights/data/models/student_answer_model.dart';
+import 'package:classroom_quiz_admin_portal/features/grading_insights/presentation/pages/grading_queue.dart';
+
+enum GradingStatus { pending, aiSuggested, flagged, reviewed }
 
 class GradingAttemptModel {
   final String id;
@@ -20,7 +23,7 @@ class GradingAttemptModel {
   final double percentage;
 
   final double aiConfidence;
-  final String status; // graded, needs_review, flagged, pending
+  final GradingStatus status; // graded, needs_review, flagged, pending
   final String feedback;
   final String gradingMethod; // ai, manual, hybrid
 
@@ -68,12 +71,34 @@ class GradingAttemptModel {
       studentLastName: map['studentLastName'] ?? '',
       studentName: map['studentName'] ?? '',
       studentId: map['studentId'] ?? '',
-      studentEmail: map['studentEmail'],
+      studentEmail: map['schoolEmail'],
       score: (map['score'] ?? 0).toDouble(),
       maxScore: (map['maxScore'] ?? 0).toDouble(),
       percentage: (map['percentage'] ?? 0).toDouble(),
       aiConfidence: (map['aiConfidence'] ?? 0).toDouble(),
-      status: map['status'] ?? 'graded',
+      status:  () {
+        final status = map['status'] ?? 'graded';
+
+        switch (status) {
+          case 'graded':
+            return GradingStatus.aiSuggested;
+
+          case 'aiSuggested':
+            return GradingStatus.aiSuggested;
+
+          case 'pending':
+            return GradingStatus.pending;
+
+          case 'flagged':
+            return GradingStatus.flagged;
+
+          case 'reviewed':
+            return GradingStatus.reviewed;
+
+          default:
+            return GradingStatus.pending;
+        }
+      }(),
       feedback: map['feedback'] ?? '',
       gradingMethod: map['gradingMethod'] ?? 'ai',
       questionResults: ((map['questionResults'] ?? []) as List)

@@ -291,8 +291,12 @@ class _ResultsPageState extends State<ResultsPage> {
     // Basic filtering (optional)
     final filtered = controller.results.where((attempt) {
       final classOk = _selectedClass == 'All Classes';
+          // || attempt.className == _selectedClass;
 
-      return classOk;
+      final quizOk = _selectedQuiz == 'All Quizzes'
+          || attempt.quizTitle == _selectedQuiz;
+
+      return classOk && quizOk;
     }).toList();
 
     return LayoutBuilder(
@@ -305,7 +309,7 @@ class _ResultsPageState extends State<ResultsPage> {
               headingRowColor: WidgetStateProperty.all(const Color(0xFFF9FAFB)),
               columnSpacing: 32,
               columns: const [
-                DataColumn(label: Text('Student')),
+                DataColumn(label: Text('School Email')),
                 DataColumn(label: Text('Quiz')),
                 DataColumn(label: Text('Score')),
                 DataColumn(label: Text('Status')),
@@ -315,10 +319,10 @@ class _ResultsPageState extends State<ResultsPage> {
               rows: filtered.map((attempt) {
                 return DataRow(
                   cells: [
-                    DataCell(Text(attempt.studentName)),
+                    DataCell(Text(attempt.studentEmail ?? 'N/A')),
                     DataCell(Text(attempt.quizTitle)),
                     DataCell(Text('${attempt.percentage.toStringAsFixed(0)}%')),
-                    DataCell(Text(attempt.status)),
+                    DataCell(Text(attempt.status.name)),
                     DataCell(
                       Text(
                         '${(attempt.aiConfidence * 100).toStringAsFixed(0)}%',
