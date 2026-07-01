@@ -2,7 +2,7 @@ import 'package:classroom_quiz_admin_portal/features/grading_insights/data/model
 import 'package:classroom_quiz_admin_portal/features/grading_insights/data/models/student_answer_model.dart';
 import 'package:classroom_quiz_admin_portal/features/grading_insights/presentation/pages/grading_queue.dart';
 
-enum GradingStatus { pending, aiSuggested, flagged, reviewed }
+enum GradingStatus { pending, aiSuggested, needsReview, flagged, reviewed }
 
 class GradingAttemptModel {
   final String id;
@@ -88,6 +88,9 @@ class GradingAttemptModel {
 
           case 'pending':
             return GradingStatus.pending;
+
+          case 'needs_review':
+            return GradingStatus.needsReview;
 
           case 'flagged':
             return GradingStatus.flagged;

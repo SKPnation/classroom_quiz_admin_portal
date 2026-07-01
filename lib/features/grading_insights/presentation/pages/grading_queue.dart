@@ -47,33 +47,36 @@ class _GradingQueuePageState extends State<GradingQueuePage> {
 
   @override
   Widget build(BuildContext context) {
-    final filtered = controller.gradingQueue.where((attempt) {
-      final quizOk =
-          _selectedQuiz == 'All Quizzes' || attempt.quizTitle == _selectedQuiz;
-
-      final statusOk =
-          _selectedStatus == 'All Statuses' ||
-          _statusLabel(attempt.status) == _selectedStatus;
-
-      return quizOk && statusOk;
-    }).toList();
-
     return Scaffold(
       backgroundColor: _bg,
       body: SizedBox.expand(
         child: Padding(
           padding: const EdgeInsets.all(24),
           child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildHeader(),
-                const SizedBox(height: 16),
-                _buildStatsRow(),
-                const SizedBox(height: 16),
-                _buildTableCard(filtered),
-              ],
-            ),
+            child: Obx(() {
+              final filtered = controller.gradingQueue.where((attempt) {
+                final quizOk =
+                    _selectedQuiz == 'All Quizzes' ||
+                        attempt.quizTitle == _selectedQuiz;
+
+                final statusOk =
+                    _selectedStatus == 'All Statuses' ||
+                        _statusLabel(attempt.status) == _selectedStatus;
+
+                return quizOk && statusOk;
+              }).toList();
+
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildHeader(),
+                  const SizedBox(height: 16),
+                  _buildStatsRow(),
+                  const SizedBox(height: 16),
+                  _buildTableCard(filtered),
+                ],
+              );
+            }),
           ),
         ),
       ),
@@ -323,15 +326,19 @@ class _GradingQueuePageState extends State<GradingQueuePage> {
 
     switch (status) {
       case GradingStatus.pending:
-        color = const Color(0xFFDC2626);
+        color = Colors.grey;
         bg = const Color(0xFFFEE2E2);
         break;
       case GradingStatus.aiSuggested:
         color = _purple;
         bg = const Color(0xFFEEF2FF);
         break;
+      case GradingStatus.needsReview:
+        color = Color(0xFFF97316);
+        bg = const Color(0xFFEEF2FF);
+        break;
       case GradingStatus.flagged:
-        color = const Color(0xFFF97316);
+        color = Colors.red;
         bg = const Color(0xFFFFEDD5);
         break;
       case GradingStatus.reviewed:
@@ -363,6 +370,8 @@ class _GradingQueuePageState extends State<GradingQueuePage> {
         return 'Pending';
       case GradingStatus.aiSuggested:
         return 'AI Suggested';
+      case GradingStatus.needsReview:
+        return 'Needs Review';
       case GradingStatus.flagged:
         return 'Flagged';
       case GradingStatus.reviewed:
