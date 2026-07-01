@@ -63,11 +63,11 @@ class AppStrings {
 
   ///------ GOOGLE APPS SCRIPT API VARIABLES
   static const deploymentID =
-      "AKfycbzNQrmQcCv1l5HDpREvXfTzfM45IBDsfNSa-SpzZQXP0mqcNFeHbqUWqrI3_EjOTIKT5g";
+      "AKfycbyB_rrVYbi8UxMiIWlxjdVe93GXSRs8Bl8S5nDZW5j-Vhd0ZCktHNFo8LksuXOhRp6o7g";
   static const webAppUrl =
-      "https://script.google.com/macros/s/AKfycbzNQrmQcCv1l5HDpREvXfTzfM45IBDsfNSa-SpzZQXP0mqcNFeHbqUWqrI3_EjOTIKT5g/exec";
+      "https://script.google.com/macros/s/AKfycbyB_rrVYbi8UxMiIWlxjdVe93GXSRs8Bl8S5nDZW5j-Vhd0ZCktHNFo8LksuXOhRp6o7g/exec";
   static const libraryUrl =
-      "https://script.google.com/macros/library/d/1CvzhW2oQ7X3Zklt4cFqkt4YaYo24YNpxjmyWLTl4B08YkFYGoJ0obKQo/16";
+      "https://script.google.com/macros/library/d/1CvzhW2oQ7X3Zklt4cFqkt4YaYo24YNpxjmyWLTl4B08YkFYGoJ0obKQo/17";
 
   ///------
 
