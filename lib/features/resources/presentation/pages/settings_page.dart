@@ -27,36 +27,46 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
-  // 0.0 - 1.0
   final settingsController = SettingsController.instance;
+  bool _signingOut = false; // ← ADD THIS
 
   @override
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final userInfoCache = storage.read(GetStoreKeys.userKey);
+      if (userInfoCache == null) return; // guard against missing data
       UserModel userModel = UserModel.fromJson(userInfoCache);
-
       settingsController.loadDefaultIntegrations(userModel);
     });
-
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    const ink = Color(0xFF111827); // gray-900
+    const ink = Color(0xFF111827);
 
     final userInfoCache = storage.read(GetStoreKeys.userKey);
     final orgInfoCache = storage.read(GetStoreKeys.orgKey);
 
-    // 1. Safety Check: If data is missing, don't try to build the page
-    if (userInfoCache == null || orgInfoCache == null) {
-      Get.back(); // Close the dialog
-      SettingsController.instance.signOut();
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    // If data is missing and we haven't already started signing out
+    if ((userInfoCache == null || orgInfoCache == null) && !_signingOut) {
+      _signingOut = true; // ← prevent re-entry
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return; // ← widget might already be gone
+        SettingsController.instance.signOut();
+      });
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
     }
 
-    // 2. Now it is safe to parse
+    // Already signing out — just show loading, don't do anything else
+    if (_signingOut) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     try {
       UserModel userModel = UserModel.fromJson(userInfoCache);
       SchoolModel schoolModel = SchoolModel.fromJson(orgInfoCache);
@@ -79,8 +89,6 @@ class _SettingsPageState extends State<SettingsPage> {
                   ),
                 ),
                 const SizedBox(height: 16),
-
-                // Title row (like your pages)
                 const Text(
                   'Profile Settings',
                   style: TextStyle(
@@ -90,8 +98,6 @@ class _SettingsPageState extends State<SettingsPage> {
                   ),
                 ),
                 const SizedBox(height: 12),
-
-                // MAIN PROFILE CARD (switch by state)
                 if (widget.profileCompleted)
                   ProfileCompletedCard(user: userModel, school: schoolModel)
                 else
@@ -100,17 +106,14 @@ class _SettingsPageState extends State<SettingsPage> {
                     user: userModel,
                     school: schoolModel,
                   ),
-
                 const SizedBox(height: 16),
-
-                // Preferences Card (same on both)
                 Row(
                   children: [
                     Expanded(child: const PreferencesCard()),
                     const SizedBox(width: 16),
                     Expanded(
                       child: Obx(
-                        () => IntegrationsCard(
+                            () => IntegrationsCard(
                           integrations: settingsController.integrations.toList(),
                         ),
                       ),
@@ -118,13 +121,8 @@ class _SettingsPageState extends State<SettingsPage> {
                   ],
                 ),
                 const SizedBox(height: 16),
-
-                // Security Card (same on both)
                 const SecurityCard(),
-
                 const SizedBox(height: 24),
-
-                // subtle footer space
                 Container(height: 8, color: Colors.transparent),
               ],
             ),
@@ -132,7 +130,6 @@ class _SettingsPageState extends State<SettingsPage> {
         ),
       );
     } catch (e) {
-      // 3. Handle data corruption (e.g., if JSON structure changed)
       return const Scaffold(
         body: Center(child: Text("Error loading profile settings.")),
       );

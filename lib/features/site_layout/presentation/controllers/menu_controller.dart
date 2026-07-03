@@ -62,34 +62,20 @@ class MenController extends GetxController {
 
   String returnRouteName() {
     switch (activePageRoute.value) {
-      // case Routes.dashboardRoute:
-      //   return Routes.dashboardDisplayName;
-      // case Routes.createQuizRoute:
-      //   return Routes.createQuizDisplayName;
       case Routes.quizEditorRoute:
         return Routes.quizEditorDisplayName;
       case Routes.aiGeneratorRoute:
         return Routes.aiGeneratorDisplayName;
-      // case Routes.questionBankRoute:
-      //   return Routes.questionBankDisplayName;
       case Routes.publishedQuizzesRoute:
         return Routes.publishedQuizzesDisplayName;
-      // case Routes.schedulesRoute:
-      //   return Routes.schedulesDisplayName;
-      // case Routes.classesRoute:
-      //   return Routes.classesDisplayName;
-      // case Routes.studentsRoute:
-      //   return Routes.studentsDisplayName;
       case Routes.resultsRoute:
         return Routes.resultsDisplayName;
       case Routes.gradingQueueRoute:
         return Routes.gradingQueueDisplayName;
-      // case Routes.mediaLibraryRoute:
-      //   return Routes.mediaLibraryDisplayName;
       case Routes.settingsRoute:
         return Routes.settingsDisplayName;
       default:
-        return Routes.quizEditorDisplayName;
+        return Routes.aiGeneratorDisplayName; // ← was quizEditorDisplayName
     }
   }
 
@@ -102,5 +88,28 @@ class MenController extends GetxController {
       icon,
       color: isHovering(itemName) ? AppColors.purple : AppColors.grey[900],
     );
+  }
+
+  @override
+  void onInit() {
+    super.onInit();
+    final stored = getStore.get("activePageRoute")?.toString() ?? '';
+
+    // If nothing stored or invalid, default to AI Generator
+    final validRoutes = [
+      Routes.aiGeneratorRoute,
+      Routes.quizEditorRoute,
+      Routes.publishedQuizzesRoute,
+      Routes.resultsRoute,
+      Routes.gradingQueueRoute,
+      Routes.settingsRoute,
+    ];
+
+    if (stored.isEmpty || !validRoutes.contains(stored)) {
+      activePageRoute.value = Routes.aiGeneratorRoute;
+      getStore.set("activePageRoute", Routes.aiGeneratorRoute);
+    } else {
+      activePageRoute.value = stored;
+    }
   }
 }

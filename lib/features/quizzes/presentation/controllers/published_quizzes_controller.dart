@@ -5,6 +5,7 @@ import 'package:classroom_quiz_admin_portal/core/data/local/get_store_keys.dart'
 import 'package:classroom_quiz_admin_portal/core/global/custom_snackbar.dart';
 import 'package:classroom_quiz_admin_portal/core/navigation/app_routes.dart';
 import 'package:classroom_quiz_admin_portal/core/navigation/navigation_controller.dart';
+import 'package:classroom_quiz_admin_portal/core/theme/colors.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/data/models/published_quiz_template.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/data/models/quiz_item_model.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/data/repos/quiz_repo_impl.dart';
@@ -208,13 +209,15 @@ class PublishedQuizzesController extends GetxController {
       // 1. Publish the template first
       await publishTemplate(template);
 
-      // 2. Create the Google Form and get back the updated quiz with formUrl
+      // 2. Create the Google Form — suppress link dialog if going to Classroom
       final updatedQuiz = await createGoogleForm(
         context: context,
         publishedQuiz: template,
+        showLinkDialog:
+            result != PublishDestination.googleFormsAndClassroom, // ADD
       );
 
-      // 3. Now pass the updatedQuiz (which has formUrl) to Classroom
+      // 3. Sync to Classroom
       if (result == PublishDestination.googleFormsAndClassroom) {
         if (updatedQuiz?.formUrl == null) {
           CustomSnackBar.errorSnackBar(
@@ -249,7 +252,6 @@ class PublishedQuizzesController extends GetxController {
     }
   }
 
-
   /// Shows the "Destination" dialog (Google Forms Only vs Canvas + Google Forms),
   /// then runs the appropriate publish actions based on what the lecturer picks.
   /// This is the new entry point — wire your Publish/Sync button to call this
@@ -257,6 +259,7 @@ class PublishedQuizzesController extends GetxController {
   Future<PublishedQuiz?> createGoogleForm({
     required BuildContext context,
     required PublishedQuiz publishedQuiz,
+    bool showLinkDialog = true,
   }) async {
     final userInfoCache = storage.read(GetStoreKeys.userKey);
 
@@ -274,15 +277,15 @@ class PublishedQuizzesController extends GetxController {
         "questions": publishedQuiz.items
             .map(
               (q) => {
-            "type": q.type.name,
-            "question": q.question,
-            "options": q.options,
-            "correctOptionIndexes": q.correctOptionIndexes,
-            "answerKey": q.answerKey,
-            "points": q.points,
-            "required": true,
-          },
-        )
+                "type": q.type.name,
+                "question": q.question,
+                "options": q.options,
+                "correctOptionIndexes": q.correctOptionIndexes,
+                "answerKey": q.answerKey,
+                "points": q.points,
+                "required": true,
+              },
+            )
             .toList(),
       };
 
@@ -303,10 +306,8 @@ class PublishedQuizzesController extends GetxController {
         String publishedUrl = result['publishedUrl'].toString();
         String editUrl = result['formUrl'].toString();
 
-        // Return the updated quiz with formUrl set
         final updatedQuiz = publishedQuiz.copyWith(formUrl: publishedUrl);
 
-        // Save formUrl to Firestore so it persists
         await updateQuizFormUrl(
           quizId: publishedQuiz.id,
           orgId: userModel.orgId,
@@ -314,7 +315,8 @@ class PublishedQuizzesController extends GetxController {
           editUrl: editUrl,
         );
 
-        if (context.mounted) {
+        // Only show the link dialog if not going straight to Classroom
+        if (showLinkDialog && context.mounted) {
           showDialog(
             context: context,
             builder: (context) => AlertDialog(
@@ -391,7 +393,7 @@ class PublishedQuizzesController extends GetxController {
     }
   }
 
-// Helper to persist formUrl on the Firestore quiz document
+  // Helper to persist formUrl on the Firestore quiz document
   Future<void> updateQuizFormUrl({
     required String quizId,
     required String orgId,
@@ -404,10 +406,10 @@ class PublishedQuizzesController extends GetxController {
         .collection('templates')
         .doc(quizId)
         .update({
-      'formUrl': formUrl,
-      'formEditUrl': editUrl,
-      'updatedAt': FieldValue.serverTimestamp(),
-    });
+          'formUrl': formUrl,
+          'formEditUrl': editUrl,
+          'updatedAt': FieldValue.serverTimestamp(),
+        });
   }
 
   /// STUB: Canvas sync is not implemented yet (OAuth flow + API calls are
@@ -466,6 +468,7 @@ class PublishedQuizzesController extends GetxController {
         final selectedCourse = await showDialog<Map>(
           context: context,
           builder: (ctx) => AlertDialog(
+            backgroundColor: AppColors.white,
             title: const Text('Select a Class'),
             content: SizedBox(
               width: double.maxFinite,

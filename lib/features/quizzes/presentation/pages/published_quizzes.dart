@@ -142,7 +142,7 @@ class _PublishedQuizzesPageState extends State<PublishedQuizzesPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: const [
         Text(
-          'Templates',
+          'Published Quizzes & Exams',
           style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.w700,

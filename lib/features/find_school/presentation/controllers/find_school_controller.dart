@@ -104,7 +104,7 @@ class FindSchoolController extends GetxController {
     }
   }
 
-  Future<void> submitCode(String code) async {
+  Future<void> submitCode(String code, BuildContext context) async {
     final c = code.trim();
     if (c.isEmpty) {
       errorMessage.value = 'Please enter a school code.';
@@ -121,7 +121,7 @@ class FindSchoolController extends GetxController {
         return;
       }
 
-      selectSchool(school);
+      selectSchool(school, context);
     } catch (_) {
       errorMessage.value = 'Could not verify code. Try again.';
     } finally {
@@ -129,7 +129,7 @@ class FindSchoolController extends GetxController {
     }
   }
 
-  void selectSchool(SchoolModel school) {
+  void selectSchool(SchoolModel school, BuildContext context) {
     final domain = (school.allowedDomains.isNotEmpty)
         ? school.allowedDomains.first.trim().toLowerCase()
         : '';
@@ -144,7 +144,7 @@ class FindSchoolController extends GetxController {
     selectedOrgId.value = school.id;
 
     ///Login with email and password
-    openEmailPasswordLogin(school);
+    openEmailPasswordLogin(school, context);
 
     ///Passwordless login dialog
     // Get.dialog(
@@ -156,15 +156,17 @@ class FindSchoolController extends GetxController {
     // );
   }
 
-  void openEmailPasswordLogin(SchoolModel school) {
+  void openEmailPasswordLogin(SchoolModel school, BuildContext context) {
     // Clear previous inputs if necessary
     emailTEC.clear();
     passwordTEC.clear();
     dialogErrorMessage.value = '';
 
-    Get.dialog(
-      EmailPasswordLoginDialog(controller: this, school: school),
+    showDialog(
+      context: context,
       barrierDismissible: true,
+      builder: (BuildContext context) =>
+          EmailPasswordLoginDialog(controller: this, school: school),
     );
   }
 
@@ -217,7 +219,7 @@ class FindSchoolController extends GetxController {
     await authRepo.signInWithEmailPassword(
       email: emailTEC.text,
       password: passwordTEC.text,
-      school: school
+      school: school,
     );
   }
 

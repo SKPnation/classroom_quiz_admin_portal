@@ -33,12 +33,6 @@ class _AiQuestionGeneratorPageState extends State<AiQuestionGeneratorPage> {
     super.initState();
   }
 
-  @override
-  void dispose() {
-    quizEditorController.promptController.dispose();
-    super.dispose();
-  }
-
   void _onClear() {
     quizEditorController.promptController.clear();
     quizEditorController.generatedQuestions
