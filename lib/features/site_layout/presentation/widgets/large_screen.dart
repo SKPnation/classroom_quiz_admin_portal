@@ -10,20 +10,23 @@ class LargeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.all(24),
+      padding: const EdgeInsets.all(24),
       child: Row(
         children: [
           Expanded(flex: 2, child: SideMenu(scaffoldKey: scaffoldKey)),
-          SizedBox(width: 16),
+          const SizedBox(width: 16),
           Expanded(
             flex: 7,
             child: Column(
               children: [
-                Expanded(flex: 2, child: localNavigator()),
+                Expanded(
+                  flex: 2,
+                  child: localNavigator(), // now returns cached instance
+                ),
               ],
             ),
           ),
-          SizedBox(width: 24),
+          const SizedBox(width: 24),
         ],
       ),
     );

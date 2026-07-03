@@ -38,44 +38,35 @@ abstract class AppPages {
 
 Route<dynamic> generateRoute(RouteSettings settings) {
   switch (settings.name) {
-    // case Routes.dashboardRoute:
-    //   return _getPageRoute(Dashboard());
-    // case Routes.createQuizRoute:
-    //   return _getPageRoute(CreateQuizPage());
     case Routes.aiGeneratorRoute:
       return _getPageRoute(AiQuestionGeneratorPage());
     case Routes.quizEditorRoute:
       return _getPageRoute(QuizEditorPage());
-    // case Routes.questionBankRoute:
-    //   return _getPageRoute(QuestionBankPage());
     case Routes.publishedQuizzesRoute:
       return _getPageRoute(PublishedQuizzesPage());
     case Routes.resultsRoute:
       return _getPageRoute(ResultsPage());
-    // case Routes.schedulesRoute:
-    //   return _getPageRoute(SchedulesPage());
-    // case Routes.classesRoute:
-    //   return _getPageRoute(ClassesPage());
-    // case Routes.studentsRoute:
-    //   return _getPageRoute(StudentsPage());
     case Routes.gradingQueueRoute:
       return _getPageRoute(GradingQueuePage());
-    // case Routes.mediaLibraryRoute:
-    //   return _getPageRoute(MediaLibrary());
-    default:
+
+  // ADD THIS — settings now has its own explicit case
+    case Routes.settingsRoute:
       return _getPageRoute(
         Obx(
-          () => SettingsPage(
+              () => SettingsPage(
             profileCompleted:
-                SettingsController.instance.profileCompleted.value,
+            SettingsController.instance.profileCompleted.value,
             completionPercent:
-                SettingsController.instance.percentageCompletion.value,
+            SettingsController.instance.percentageCompletion.value,
           ),
         ),
       );
+
+  // DEFAULT now goes to AI Generator, not Settings
+    default:
+      return _getPageRoute(AiQuestionGeneratorPage());
   }
 }
-
 PageRoute _getPageRoute(Widget child) {
   return MaterialPageRoute(builder: (context) => child);
 }

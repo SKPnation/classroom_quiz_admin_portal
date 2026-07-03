@@ -37,7 +37,7 @@ class FindSchoolPage extends StatelessWidget {
 
                           return SchoolListTile(
                             school: school,
-                            onTap: () => c.selectSchool(school),
+                            onTap: () => c.selectSchool(school, context),
                           );
                         },
                       ),

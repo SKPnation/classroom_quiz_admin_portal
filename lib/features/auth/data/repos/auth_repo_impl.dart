@@ -9,6 +9,7 @@ import 'package:classroom_quiz_admin_portal/features/resources/data/repos/user_r
 import 'package:classroom_quiz_admin_portal/features/resources/presentation/controllers/settings_controller.dart';
 import 'package:classroom_quiz_admin_portal/main.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:web/web.dart' as web;
 
@@ -111,10 +112,7 @@ class AuthRepoImpl extends AuthRepo {
       await userRepo.createUserProfile(userModel);
     }
 
-    final data = {
-      ...userModel.toCache(),
-      "orgId": orgId,
-    };
+    final data = {...userModel.toCache(), "orgId": orgId};
 
     storage.write(GetStoreKeys.userKey, data);
     settingsController.updateCompletion(data);
@@ -128,17 +126,14 @@ class AuthRepoImpl extends AuthRepo {
   @override
   void signOut() {
     try {
-      // Sign out from Firebase Auth
       auth.signOut();
-
-      // Clear cached user and organization data
       storage.erase();
-
-      //reset settings controller variables
       SettingsController.instance.resetVariables();
 
-      // Navigate to the login screen
-      Get.offAllNamed(Routes.findSchoolRoute);
+      // Defer navigation until after the current build frame
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Get.offAllNamed(Routes.findSchoolRoute);
+      });
 
       print("User signed out successfully");
     } catch (e) {

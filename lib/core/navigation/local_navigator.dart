@@ -1,12 +1,14 @@
 import 'package:classroom_quiz_admin_portal/core/navigation/app_routes.dart';
 import 'package:classroom_quiz_admin_portal/core/navigation/navigation_controller.dart';
-import 'package:classroom_quiz_admin_portal/features/site_layout/presentation/controllers/menu_controller.dart';
 import 'package:flutter/material.dart';
 
 NavigationController navigationController = NavigationController.instance;
 
-Navigator localNavigator() => Navigator(
+// Create once — never recreated on rebuild
+final _localNavigator = Navigator(
   key: navigationController.navigatorKey,
   onGenerateRoute: generateRoute,
-  initialRoute: MenController.instance.activePageRoute.value,
+  initialRoute: Routes.aiGeneratorRoute,
 );
+
+Navigator localNavigator() => _localNavigator;
