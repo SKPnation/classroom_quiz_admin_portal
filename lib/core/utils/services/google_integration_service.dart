@@ -6,11 +6,14 @@ class GoogleIntegrationService {
 
   Future<void> connectGoogle({required String orgId}) async {
     final callable = _functions.httpsCallable('connectGoogle');
-
     final result = await callable.call({'orgId': orgId});
-
     final url = result.data['url'];
 
     await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+  }
+
+  Future<void> disconnectGoogle({required String orgId}) async {
+    final callable = _functions.httpsCallable('disconnectGoogle');
+    await callable.call({'orgId': orgId});
   }
 }

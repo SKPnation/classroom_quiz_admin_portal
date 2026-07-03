@@ -168,11 +168,8 @@ class _QuizEditorPageState extends State<QuizEditorPage> {
                       tags: const ['Published'],
                     );
 
-                    await PublishedQuizzesController.instance
-                        .publishWithDestinationDialog(
-                          context: context,
-                          publishedQuiz: quiz,
-                        );
+                    PublishedQuizzesController.instance
+                        .onUseTemplate(quiz, context);
                   },
                   child: const Text('Publish Quiz'),
                 ),

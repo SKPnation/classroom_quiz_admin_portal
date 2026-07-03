@@ -13,6 +13,9 @@ class PublishedQuiz {
   final DateTime publishedAt;
   final String createdBy;
   final List<String> tags;
+  final String? formUrl;
+  final String? classroomCourseId;
+  final String? classroomCourseWorkId;
 
   PublishedQuiz({
     required this.id,
@@ -25,6 +28,9 @@ class PublishedQuiz {
     required this.publishedAt,
     required this.createdBy,
     this.tags = const [],
+    this.formUrl,
+    this.classroomCourseId,
+    this.classroomCourseWorkId,
   });
 
   int get questionCount => items.length;
@@ -53,6 +59,9 @@ class PublishedQuiz {
       'tags': tags,
       'questionCount': questionCount,
       'estimatedMinutes': estimatedMinutes,
+      if (formUrl != null) 'formUrl': formUrl,                            // ADD
+      if (classroomCourseId != null) 'classroomCourseId': classroomCourseId,           // ADD
+      if (classroomCourseWorkId != null) 'classroomCourseWorkId': classroomCourseWorkId, // ADD
     };
   }
 
@@ -73,6 +82,9 @@ class PublishedQuiz {
           : DateTime.now(),
       createdBy: map['createdBy'] ?? '',
       tags: List<String>.from(map['tags'] ?? []),
+      formUrl: map['formUrl'] as String?,               // ADD
+      classroomCourseId: map['classroomCourseId'] as String?,       // ADD
+      classroomCourseWorkId: map['classroomCourseWorkId'] as String?, // ADD
     );
   }
 
@@ -87,6 +99,9 @@ class PublishedQuiz {
     DateTime? publishedAt,
     String? createdBy,
     List<String>? tags,
+    String? formUrl,               // ADD
+    String? classroomCourseId,     // ADD
+    String? classroomCourseWorkId, // ADD
   }) {
     return PublishedQuiz(
       id: id ?? this.id,
@@ -99,6 +114,9 @@ class PublishedQuiz {
       publishedAt: publishedAt ?? this.publishedAt,
       createdBy: createdBy ?? this.createdBy,
       tags: tags ?? this.tags,
+      formUrl: formUrl ?? this.formUrl,                           // ADD
+      classroomCourseId: classroomCourseId ?? this.classroomCourseId,         // ADD
+      classroomCourseWorkId: classroomCourseWorkId ?? this.classroomCourseWorkId, // ADD
     );
   }
 }

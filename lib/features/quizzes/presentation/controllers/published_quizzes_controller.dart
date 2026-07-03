@@ -5,10 +5,6 @@ import 'package:classroom_quiz_admin_portal/core/data/local/get_store_keys.dart'
 import 'package:classroom_quiz_admin_portal/core/global/custom_snackbar.dart';
 import 'package:classroom_quiz_admin_portal/core/navigation/app_routes.dart';
 import 'package:classroom_quiz_admin_portal/core/navigation/navigation_controller.dart';
-import 'package:classroom_quiz_admin_portal/core/theme/colors.dart';
-import 'package:classroom_quiz_admin_portal/core/utils/helpers/pdf_service.dart';
-import 'package:classroom_quiz_admin_portal/core/utils/services/functions_service.dart';
-import 'package:classroom_quiz_admin_portal/features/find_school/presentation/controllers/find_school_controller.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/data/models/published_quiz_template.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/data/models/quiz_item_model.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/data/repos/quiz_repo_impl.dart';
@@ -17,10 +13,11 @@ import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/widget
 import 'package:classroom_quiz_admin_portal/features/resources/data/model/user_model.dart';
 import 'package:classroom_quiz_admin_portal/features/resources/presentation/controllers/settings_controller.dart';
 import 'package:classroom_quiz_admin_portal/main.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:get/get_state_manager/src/simple/get_controllers.dart';
 import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
 import 'package:uuid/uuid.dart';
@@ -123,133 +120,6 @@ class PublishedQuizzesController extends GetxController {
   //   }
   // }
 
-  Future<void> createGoogleForm({
-    required BuildContext context,
-    required PublishedQuiz publishedQuiz,
-  }) async {
-    final userInfoCache = storage.read(GetStoreKeys.userKey);
-
-    isLoading.value = true;
-
-    try {
-      UserModel userModel = UserModel.fromJson(userInfoCache);
-
-      final payload = {
-        'orgId': userModel.orgId, // pvamu
-        'createdBy': userModel.uid,
-        "title": publishedQuiz.title,
-        "description": publishedQuiz.description,
-        'publishedQuizId': publishedQuiz.id,
-        "questions": publishedQuiz.items
-            .map(
-              (q) => {
-                "type": q.type.name,
-                "question": q.question,
-                "options": q.options,
-                "correctOptionIndexes": q.correctOptionIndexes,
-                "answerKey": q.answerKey,
-                "points": q.points,
-                "required": true,
-              },
-            )
-            .toList(),
-      };
-
-      print("payload: $payload");
-
-      final response = await http.post(
-        Uri.parse(scriptUrl),
-        body: jsonEncode(payload),
-      );
-
-      final decoded = jsonDecode(response.body);
-
-      if (decoded == null || decoded is! Map<String, dynamic>) {
-        throw Exception("Invalid response from Apps Script: ${response.body}");
-      }
-
-      final result = decoded;
-      // 1. Check if the 'status' from your Apps Script is actually 'success'
-      if (result['status'] == 'success' && result['publishedUrl'] != null) {
-        String publishedUrl = result['publishedUrl'].toString();
-        String editUrl = result['formUrl'].toString();
-
-        print('Success! Form URL: $publishedUrl');
-
-        // 2. Show success dialog
-        showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            backgroundColor: Colors.white,
-            title: const Text("Form Created"),
-            content: Column(
-              // Use Column instead of Row to prevent overflow
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text("Your Google Form is ready:"),
-                const SizedBox(height: 10),
-                InkWell(
-                  onTap: () async {
-                    final Uri uri = Uri.parse(publishedUrl);
-                    if (await canLaunchUrl(uri)) {
-                      await launchUrl(
-                        uri,
-                        mode: LaunchMode.externalApplication,
-                      );
-                    }
-                  },
-                  child: Text(
-                    publishedUrl,
-                    style: const TextStyle(
-                      color: Colors.blue,
-                      decoration: TextDecoration.underline,
-                      fontSize: 12,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            actions: [
-              IconButton(
-                onPressed: () {
-                  Clipboard.setData(ClipboardData(text: publishedUrl));
-                  Navigator.pop(context);
-                  Get.snackbar(
-                    "Copied",
-                    "Link copied to clipboard!",
-                    snackPosition: SnackPosition.BOTTOM,
-                    backgroundColor: Colors.green,
-                    colorText: Colors.white,
-                  );
-                },
-                icon: const Icon(Icons.copy),
-              ),
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text("Close"),
-              ),
-            ],
-          ),
-        );
-      } else {
-        // 3. Handle the case where script failed or returned error status
-        String errorMsg = result['message'] ?? "Unknown error occurred";
-        print("Error from Script: $errorMsg");
-
-        Get.snackbar(
-          "Creation Failed",
-          errorMsg,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-        );
-      }
-    } catch (e) {
-      print('Error: $e');
-    } finally {
-      isLoading.value = false;
-    }
-  }
-
   Future<void> loadTemplates() {
     final userInfoCache = storage.read(GetStoreKeys.userKey);
 
@@ -265,10 +135,6 @@ class PublishedQuizzesController extends GetxController {
         });
   }
 
-  /// Shows the "Destination" dialog (Google Forms Only vs Canvas + Google Forms),
-  /// then runs the appropriate publish actions based on what the lecturer picks.
-  /// This is the new entry point — wire your Publish/Sync button to call this
-  /// instead of calling createGoogleForm() directly.
   Future<void> publishWithDestinationDialog({
     required BuildContext context,
     required PublishedQuiz publishedQuiz,
@@ -277,26 +143,33 @@ class PublishedQuizzesController extends GetxController {
 
     final userInfoCache = storage.read(GetStoreKeys.userKey);
     if (userInfoCache == null) {
-      CustomSnackBar.errorSnackBar('User session not found. Please sign in again.');
+      CustomSnackBar.errorSnackBar(
+        'User session not found. Please sign in again.',
+      );
       return;
     }
 
     final userModel = UserModel.fromJson(userInfoCache);
 
-    final isCanvasConnected =
-    SettingsController.instance.isIntegrationConnected('canvas');
+    final isCanvasConnected = SettingsController.instance
+        .isIntegrationConnected('canvas');
+    final isGoogleConnected = SettingsController.instance
+        .isIntegrationConnected('google');
 
     final result = await showDialog<PublishDestination>(
       context: context,
       builder: (context) => PublishDestinationDialog(
         isCanvasConnected: isCanvasConnected,
+        isGoogleConnected: isGoogleConnected,
       ),
     );
 
     if (result == null) return;
 
     if (qEditorController.quizItems.isEmpty) {
-      CustomSnackBar.errorSnackBar('Add at least one question before publishing.');
+      CustomSnackBar.errorSnackBar(
+        'Add at least one question before publishing.',
+      );
       return;
     }
 
@@ -307,8 +180,7 @@ class PublishedQuizzesController extends GetxController {
           ? 'Untitled Quiz'
           : qEditorController.currentDraftTitle.value.trim();
 
-      final publishedQuizId =
-      qEditorController.currentDraftId.value.isNotEmpty
+      final publishedQuizId = qEditorController.currentDraftId.value.isNotEmpty
           ? qEditorController.currentDraftId.value
           : const Uuid().v4();
 
@@ -325,39 +197,44 @@ class PublishedQuizzesController extends GetxController {
         subject: publishedQuiz.subject.isNotEmpty
             ? publishedQuiz.subject
             : 'General',
-        type: publishedQuiz.type.isNotEmpty
-            ? publishedQuiz.type
-            : 'Quiz',
-        level: publishedQuiz.level.isNotEmpty
-            ? publishedQuiz.level
-            : 'Intro',
+        type: publishedQuiz.type.isNotEmpty ? publishedQuiz.type : 'Quiz',
+        level: publishedQuiz.level.isNotEmpty ? publishedQuiz.level : 'Intro',
         items: copiedItems,
         publishedAt: DateTime.now(),
         tags: const ['Published'],
         createdBy: userModel.uid,
       );
 
+      // 1. Publish the template first
       await publishTemplate(template);
 
-      await createGoogleForm(
+      // 2. Create the Google Form and get back the updated quiz with formUrl
+      final updatedQuiz = await createGoogleForm(
         context: context,
         publishedQuiz: template,
       );
 
-      if (result == PublishDestination.googleAndCanvas) {
-        await syncToCanvas(
+      // 3. Now pass the updatedQuiz (which has formUrl) to Classroom
+      if (result == PublishDestination.googleFormsAndClassroom) {
+        if (updatedQuiz?.formUrl == null) {
+          CustomSnackBar.errorSnackBar(
+            'Google Form was not created. Cannot sync to Classroom.',
+          );
+          return;
+        }
+        await syncToGoogleClassroom(
           context: context,
-          publishedQuiz: template,
+          publishedQuiz: updatedQuiz!,
         );
       }
 
-      NavigationController.instance.navigateTo(
-        Routes.publishedQuizzesRoute,
-      );
+      if (result == PublishDestination.googleAndCanvas) {
+        await syncToCanvas(context: context, publishedQuiz: template);
+      }
 
-      CustomSnackBar.successSnackBar(
-        body: 'Quiz published successfully.',
-      );
+      NavigationController.instance.navigateTo(Routes.publishedQuizzesRoute);
+
+      CustomSnackBar.successSnackBar(body: 'Quiz published successfully.');
     } catch (e) {
       debugPrint('Publish failed: $e');
 
@@ -370,6 +247,167 @@ class PublishedQuizzesController extends GetxController {
     } finally {
       isLoading.value = false;
     }
+  }
+
+
+  /// Shows the "Destination" dialog (Google Forms Only vs Canvas + Google Forms),
+  /// then runs the appropriate publish actions based on what the lecturer picks.
+  /// This is the new entry point — wire your Publish/Sync button to call this
+  /// instead of calling createGoogleForm() directly.
+  Future<PublishedQuiz?> createGoogleForm({
+    required BuildContext context,
+    required PublishedQuiz publishedQuiz,
+  }) async {
+    final userInfoCache = storage.read(GetStoreKeys.userKey);
+
+    isLoading.value = true;
+
+    try {
+      UserModel userModel = UserModel.fromJson(userInfoCache);
+
+      final payload = {
+        'orgId': userModel.orgId,
+        'createdBy': userModel.uid,
+        "title": publishedQuiz.title,
+        "description": publishedQuiz.description,
+        'publishedQuizId': publishedQuiz.id,
+        "questions": publishedQuiz.items
+            .map(
+              (q) => {
+            "type": q.type.name,
+            "question": q.question,
+            "options": q.options,
+            "correctOptionIndexes": q.correctOptionIndexes,
+            "answerKey": q.answerKey,
+            "points": q.points,
+            "required": true,
+          },
+        )
+            .toList(),
+      };
+
+      final response = await http.post(
+        Uri.parse(scriptUrl),
+        body: jsonEncode(payload),
+      );
+
+      final decoded = jsonDecode(response.body);
+
+      if (decoded == null || decoded is! Map<String, dynamic>) {
+        throw Exception("Invalid response from Apps Script: ${response.body}");
+      }
+
+      final result = decoded;
+
+      if (result['status'] == 'success' && result['publishedUrl'] != null) {
+        String publishedUrl = result['publishedUrl'].toString();
+        String editUrl = result['formUrl'].toString();
+
+        // Return the updated quiz with formUrl set
+        final updatedQuiz = publishedQuiz.copyWith(formUrl: publishedUrl);
+
+        // Save formUrl to Firestore so it persists
+        await updateQuizFormUrl(
+          quizId: publishedQuiz.id,
+          orgId: userModel.orgId,
+          formUrl: publishedUrl,
+          editUrl: editUrl,
+        );
+
+        if (context.mounted) {
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              backgroundColor: Colors.white,
+              title: const Text("Form Created"),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text("Your Google Form is ready:"),
+                  const SizedBox(height: 10),
+                  InkWell(
+                    onTap: () async {
+                      final Uri uri = Uri.parse(publishedUrl);
+                      if (await canLaunchUrl(uri)) {
+                        await launchUrl(
+                          uri,
+                          mode: LaunchMode.externalApplication,
+                        );
+                      }
+                    },
+                    child: Text(
+                      publishedUrl,
+                      style: const TextStyle(
+                        color: Colors.blue,
+                        decoration: TextDecoration.underline,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                IconButton(
+                  onPressed: () {
+                    Clipboard.setData(ClipboardData(text: publishedUrl));
+                    Navigator.pop(context);
+                    Get.snackbar(
+                      "Copied",
+                      "Link copied to clipboard!",
+                      snackPosition: SnackPosition.BOTTOM,
+                      backgroundColor: Colors.green,
+                      colorText: Colors.white,
+                    );
+                  },
+                  icon: const Icon(Icons.copy),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text("Close"),
+                ),
+              ],
+            ),
+          );
+        }
+
+        return updatedQuiz; // ← return updated quiz with formUrl
+      } else {
+        String errorMsg = result['message'] ?? "Unknown error occurred";
+
+        Get.snackbar(
+          "Creation Failed",
+          errorMsg,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+
+        return null; // ← form creation failed
+      }
+    } catch (e) {
+      debugPrint('Error creating Google Form: $e');
+      return null; // ← return null on error
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+// Helper to persist formUrl on the Firestore quiz document
+  Future<void> updateQuizFormUrl({
+    required String quizId,
+    required String orgId,
+    required String formUrl,
+    required String editUrl,
+  }) async {
+    await FirebaseFirestore.instance
+        .collection('orgs')
+        .doc(orgId)
+        .collection('templates')
+        .doc(quizId)
+        .update({
+      'formUrl': formUrl,
+      'formEditUrl': editUrl,
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
   }
 
   /// STUB: Canvas sync is not implemented yet (OAuth flow + API calls are
@@ -392,6 +430,105 @@ class PublishedQuizzesController extends GetxController {
       'Canvas integration is not fully connected yet — Google Form was created successfully.',
       backgroundColor: Colors.orange,
       colorText: Colors.white,
+    );
+  }
+
+  Future<void> syncToGoogleClassroom({
+    required BuildContext context,
+    required PublishedQuiz publishedQuiz,
+  }) async {
+    try {
+      final org = storage.read(GetStoreKeys.orgKey);
+      final orgId = org['code'].toString().toLowerCase();
+
+      final callable = FirebaseFunctions.instanceFor(
+        region: 'us-central1',
+      ).httpsCallable('syncToGoogleClassroom');
+
+      // First call — no courseId, fetches list of classes
+      final coursesResult = await callable.call({
+        'orgId': orgId,
+        'quiz': {
+          'id': publishedQuiz.id,
+          'title': publishedQuiz.title,
+          'description': publishedQuiz.description,
+          'maxPoints': publishedQuiz.items.length,
+          'formUrl': publishedQuiz.formUrl,
+        },
+      });
+
+      if (!context.mounted) return;
+
+      // If courses returned, show picker
+      if (coursesResult.data['requiresCourseSelection'] == true) {
+        final courses = List<Map>.from(coursesResult.data['courses']);
+
+        final selectedCourse = await showDialog<Map>(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: const Text('Select a Class'),
+            content: SizedBox(
+              width: double.maxFinite,
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: courses.length,
+                itemBuilder: (_, i) => ListTile(
+                  title: Text(courses[i]['name']),
+                  subtitle: Text(courses[i]['section'] ?? ''),
+                  onTap: () => Navigator.pop(ctx, courses[i]),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        if (selectedCourse == null || !context.mounted) return;
+
+        // Second call — with selected courseId, creates the assignment
+        final syncResult = await callable.call({
+          'orgId': orgId,
+          'courseId': selectedCourse['id'],
+          'quiz': {
+            'id': publishedQuiz.id,
+            'title': publishedQuiz.title,
+            'description': publishedQuiz.description,
+            'maxPoints': publishedQuiz.items.length,
+            'formUrl': publishedQuiz.formUrl,
+          },
+        });
+
+        final classroomUrl = syncResult.data['classroomUrl'] as String?;
+
+        if (context.mounted) {
+          CustomSnackBar.successSnackBar(
+            body: 'Assignment created in Google Classroom.',
+          );
+
+          if (classroomUrl != null) {
+            await launchUrl(
+              Uri.parse(classroomUrl),
+              mode: LaunchMode.externalApplication,
+            );
+          }
+        }
+      }
+    } on FirebaseFunctionsException catch (e) {
+      if (context.mounted) {
+        CustomSnackBar.errorSnackBar(
+          e.message ?? 'Failed to sync to Google Classroom.',
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        CustomSnackBar.errorSnackBar('Something went wrong: $e');
+      }
+    }
+  }
+
+  void onUseTemplate(PublishedQuiz t, BuildContext context) {
+    PublishedQuizzesController.instance.publishWithDestinationDialog(
+      context: context,
+      publishedQuiz: t,
     );
   }
 }

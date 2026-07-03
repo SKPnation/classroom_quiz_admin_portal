@@ -29,14 +29,17 @@ class SettingsController extends GetxController {
   void loadDefaultIntegrations(UserModel user) async {
     final list = await userRepo.getMyIntegrations(user.orgId, user.uid);
 
-    final isGoogleConnected =
-    list.any((integration) => integration['id'] == 'google');
+    final isGoogleConnected = list.any(
+      (integration) => integration['id'] == 'google',
+    );
 
-    final isCanvasConnected =
-    list.any((integration) => integration['id'] == 'canvas');
+    final isCanvasConnected = list.any(
+      (integration) => integration['id'] == 'canvas',
+    );
 
-    final isZoomConnected =
-    list.any((integration) => integration['id'] == 'zoom');
+    final isZoomConnected = list.any(
+      (integration) => integration['id'] == 'zoom',
+    );
 
     integrations.assignAll([
       IntegrationModel(
@@ -45,15 +48,20 @@ class SettingsController extends GetxController {
         description: 'Create Google Forms, connect Sheets, and more.',
         icon: Icons.g_mobiledata_rounded,
         connected: isGoogleConnected,
-        actionText: isGoogleConnected ? 'Connected' : 'Connect Google',
+        actionText: isGoogleConnected ? 'Disconnect' : 'Connect Google',
         onTap: isGoogleConnected
-            ? null
+            ? () async {
+                final org = storage.read(GetStoreKeys.orgKey);
+                final orgId = org['code'].toString().toLowerCase();
+                await GoogleIntegrationService().disconnectGoogle(orgId: orgId);
+                // refresh the settings page after disconnecting
+                SettingsController.instance.loadDefaultIntegrations(user);
+              }
             : () async {
-          final org = storage.read(GetStoreKeys.orgKey);
-          final orgId = org['code'].toString().toLowerCase();
-
-          await GoogleIntegrationService().connectGoogle(orgId: orgId);
-        },
+                final org = storage.read(GetStoreKeys.orgKey);
+                final orgId = org['code'].toString().toLowerCase();
+                await GoogleIntegrationService().connectGoogle(orgId: orgId);
+              },
       ),
       IntegrationModel(
         id: 'canvas',
@@ -64,9 +72,9 @@ class SettingsController extends GetxController {
         actionText: isCanvasConnected ? 'Connected' : 'Connect Canvas',
         onTap: isCanvasConnected
             ? null
-            : () async{
-          debugPrint('Canvas integration tapped.');
-        },
+            : () async {
+                debugPrint('Canvas integration tapped.');
+              },
       ),
       IntegrationModel(
         id: 'zoom',
@@ -77,9 +85,9 @@ class SettingsController extends GetxController {
         actionText: isZoomConnected ? 'Connected' : 'Connect Zoom',
         onTap: isZoomConnected
             ? null
-            : () async{
-          debugPrint('Zoom integration tapped.');
-        },
+            : () async {
+                debugPrint('Zoom integration tapped.');
+              },
       ),
     ]);
   }
@@ -141,8 +149,8 @@ class SettingsController extends GetxController {
   /// Usage: SettingsController.instance.isIntegrationConnected('canvas')
   bool isIntegrationConnected(String integrationId) {
     return integrations
-        .firstWhereOrNull((i) => i.id == integrationId)
-        ?.connected ??
+            .firstWhereOrNull((i) => i.id == integrationId)
+            ?.connected ??
         false;
   }
 
