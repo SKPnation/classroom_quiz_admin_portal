@@ -17,12 +17,21 @@
 import 'package:classroom_quiz_admin_portal/core/theme/colors.dart';
 import 'package:flutter/material.dart';
 
-enum PublishDestination { googleOnly, googleAndCanvas }
+enum PublishDestination {
+  googleFormsOnly,
+  googleFormsAndClassroom,
+  googleAndCanvas,
+}
 
 class PublishDestinationDialog extends StatefulWidget {
-  const PublishDestinationDialog({super.key, required this.isCanvasConnected});
+  const PublishDestinationDialog({
+    super.key,
+    required this.isCanvasConnected,
+    required this.isGoogleConnected,
+  });
 
   final bool isCanvasConnected;
+  final bool isGoogleConnected;
 
   @override
   State<PublishDestinationDialog> createState() =>
@@ -30,7 +39,7 @@ class PublishDestinationDialog extends StatefulWidget {
 }
 
 class _PublishDestinationDialogState extends State<PublishDestinationDialog> {
-  PublishDestination selected = PublishDestination.googleOnly;
+  PublishDestination selected = PublishDestination.googleFormsOnly;
 
   static const _border = Color(0xFFE5E7EB);
   static const _ink = Color(0xFF111827);
@@ -64,10 +73,22 @@ class _PublishDestinationDialogState extends State<PublishDestinationDialog> {
 
             _DestinationOption(
               title: 'Google Forms Only',
-              subtitle: 'Students answer via a shareable link. No setup needed.',
-              value: PublishDestination.googleOnly,
+              subtitle:
+                  'Students answer via a shareable link. No setup needed.',
+              value: PublishDestination.googleFormsOnly,
               groupValue: selected,
-              enabled: true,
+              enabled: widget.isGoogleConnected,
+              onChanged: (val) => setState(() => selected = val),
+            ),
+            const SizedBox(height: 10),
+            _DestinationOption(
+              title: 'Google Classroom + Google Forms',
+              subtitle: widget.isGoogleConnected
+                  ? 'Creates an assignment in Google Classroom with the form attached.'
+                  : 'Connect Google Classroom in Settings first.',
+              value: PublishDestination.googleFormsAndClassroom,
+              groupValue: selected,
+              enabled: widget.isGoogleConnected,
               onChanged: (val) => setState(() => selected = val),
             ),
             const SizedBox(height: 10),
@@ -158,7 +179,9 @@ class _DestinationOption extends StatelessWidget {
           child: Row(
             children: [
               Icon(
-                isSelected ? Icons.radio_button_checked : Icons.radio_button_off,
+                isSelected
+                    ? Icons.radio_button_checked
+                    : Icons.radio_button_off,
                 size: 20,
                 color: isSelected ? AppColors.purple : _sub,
               ),

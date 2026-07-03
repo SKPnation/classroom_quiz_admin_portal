@@ -50,6 +50,9 @@ export const connectGoogle = onCall(
         "https://www.googleapis.com/auth/forms.responses.readonly",
         "https://www.googleapis.com/auth/drive.file",
         "https://www.googleapis.com/auth/spreadsheets",
+        // FOR GOOGLE CLASSROOM
+        "https://www.googleapis.com/auth/classroom.coursework.students",
+        "https://www.googleapis.com/auth/classroom.courses.readonly",
       ],
       state,
     });

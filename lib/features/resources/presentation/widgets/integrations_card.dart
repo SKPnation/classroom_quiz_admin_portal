@@ -5,10 +5,7 @@ import 'package:classroom_quiz_admin_portal/features/resources/presentation/widg
 import 'package:flutter/material.dart';
 
 class IntegrationsCard extends StatelessWidget {
-  const IntegrationsCard({
-    super.key,
-    required this.integrations,
-  });
+  const IntegrationsCard({super.key, required this.integrations});
 
   final List<IntegrationModel> integrations;
 
@@ -40,19 +37,19 @@ class IntegrationsCard extends StatelessWidget {
           Expanded(
             child: integrations.isEmpty
                 ? const Center(
-              child: Text(
-                'No integrations available yet',
-                style: TextStyle(fontSize: 12, color: sub),
-              ),
-            )
+                    child: Text(
+                      'No integrations available yet',
+                      style: TextStyle(fontSize: 12, color: sub),
+                    ),
+                  )
                 : ListView.separated(
-              padding: EdgeInsets.zero,
-              itemCount: integrations.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 12),
-              itemBuilder: (context, index) {
-                return integrationTile(integrations[index]);
-              },
-            ),
+                    padding: EdgeInsets.zero,
+                    itemCount: integrations.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 12),
+                    itemBuilder: (context, index) {
+                      return integrationTile(integrations[index]);
+                    },
+                  ),
           ),
         ],
       ),
