@@ -2,19 +2,19 @@
 // FILE: functions/src/integrations/microsoft/connectMicrosoft.ts
 // ═══════════════════════════════════════════════════════════════════════
 
-import * as functions from "firebase-functions";
-import { ConfidentialClientApplication, AuthorizationUrlRequest } from "@azure/msal-node";
-import { getMsalConfig, getRedirectUri, SCOPES } from "./config";
+import {onCall, CallableRequest} from "firebase-functions/v2/https";
+import {
+  ConfidentialClientApplication,
+  AuthorizationUrlRequest,
+} from "@azure/msal-node";
+import {getMsalConfig, getRedirectUri, SCOPES} from "./config";
 
-export const connectMicrosoft = functions.https.onCall(
-  async (data: { orgId: string }, _context) => {
-    const { orgId } = data;
+export const connectMicrosoft = onCall(
+  async (request: CallableRequest) => {
+    const orgId = request.data?.orgId as string;
 
     if (!orgId) {
-      throw new functions.https.HttpsError(
-        "invalid-argument",
-        "orgId is required."
-      );
+      throw new Error("orgId is required.");
     }
 
     const cca = new ConfidentialClientApplication(getMsalConfig());
@@ -28,6 +28,6 @@ export const connectMicrosoft = functions.https.onCall(
 
     const url = await cca.getAuthCodeUrl(authUrlRequest);
 
-    return { url };
+    return {url};
   }
 );

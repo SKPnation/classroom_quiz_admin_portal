@@ -5,12 +5,15 @@ admin.initializeApp();
 // ======= GOOGLE INTEGRATION IMPORTS ======= //
 export {connectGoogle} from "./integrations/google/connectGoogle";
 export {googleOAuthCallback} from "./integrations/google/googleOAuthCallback";
-export {saveGradedAttempt} from "./integrations/saveGradedAttempt";
 export {syncToGoogleClassroom} from
-"./integrations/google/syncToGoogleClassroom";
+  "./integrations/google/syncToGoogleClassroom";
 export {disconnectGoogle} from "./integrations/google/disconnectGoogle";
 
 // ======= MICROSOFT INTEGRATION IMPORTS ======= //
-export { connectMicrosoft } from "./connectMicrosoft";
-export { microsoftAuthCallback } from "./microsoftAuthCallback";
-export { disconnectMicrosoft } from "./disconnectMicrosoft";
+export {connectMicrosoft} from "./integrations/microsoft/connectMicrosoft";
+export {microsoftAuthCallback} from
+  "./integrations/microsoft/microsoftAuthCallback";
+export {disconnectMicrosoft} from
+  "./integrations/microsoft/disconnectMicrosoft";
+
+export {extractNotesText} from "./extractNotesText";
