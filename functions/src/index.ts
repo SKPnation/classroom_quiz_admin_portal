@@ -2,8 +2,15 @@ import * as admin from "firebase-admin";
 
 admin.initializeApp();
 
-export {connectGoogle} from "./google/connectGoogle";
-export {googleOAuthCallback} from "./google/googleOAuthCallback";
-export {saveGradedAttempt} from "./saveGradedAttempt";
-export {syncToGoogleClassroom} from "./google/syncToGoogleClassroom";
-export {disconnectGoogle} from "./google/disconnectGoogle";
+// ======= GOOGLE INTEGRATION IMPORTS ======= //
+export {connectGoogle} from "./integrations/google/connectGoogle";
+export {googleOAuthCallback} from "./integrations/google/googleOAuthCallback";
+export {saveGradedAttempt} from "./integrations/saveGradedAttempt";
+export {syncToGoogleClassroom} from
+"./integrations/google/syncToGoogleClassroom";
+export {disconnectGoogle} from "./integrations/google/disconnectGoogle";
+
+// ======= MICROSOFT INTEGRATION IMPORTS ======= //
+export { connectMicrosoft } from "./connectMicrosoft";
+export { microsoftAuthCallback } from "./microsoftAuthCallback";
+export { disconnectMicrosoft } from "./disconnectMicrosoft";
