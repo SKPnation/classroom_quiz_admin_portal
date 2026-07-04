@@ -6,7 +6,6 @@ abstract class AuthRepo {
 
   Future<void> signInWithEmailPassword({
     required String email,
-    required String password,
     required SchoolModel school,
   });
 

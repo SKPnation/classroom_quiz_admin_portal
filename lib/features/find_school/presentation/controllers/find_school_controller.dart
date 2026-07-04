@@ -20,7 +20,7 @@ class FindSchoolController extends GetxController {
   static FindSchoolController get instance => Get.find<FindSchoolController>();
 
   final emailTEC = TextEditingController();
-  final passwordTEC = TextEditingController();
+  // final passwordTEC = TextEditingController();
 
   final isPasswordHidden = true.obs;
   final typedEmail = ''.obs; // This will track the email in real-time
@@ -59,7 +59,7 @@ class FindSchoolController extends GetxController {
     debounce?.cancel();
     countdownTimer?.cancel(); // Clean up timer
     emailTEC.dispose();
-    passwordTEC.dispose();
+    // passwordTEC.dispose();
     super.onClose();
   }
 
@@ -159,7 +159,7 @@ class FindSchoolController extends GetxController {
   void openEmailPasswordLogin(SchoolModel school, BuildContext context) {
     // Clear previous inputs if necessary
     emailTEC.clear();
-    passwordTEC.clear();
+    // passwordTEC.clear();
     dialogErrorMessage.value = '';
 
     showDialog(
@@ -218,7 +218,7 @@ class FindSchoolController extends GetxController {
   Future<void> signInWithEmailPassword({required SchoolModel school}) async {
     await authRepo.signInWithEmailPassword(
       email: emailTEC.text,
-      password: passwordTEC.text,
+      // password: passwordTEC.text,
       school: school,
     );
   }
@@ -230,7 +230,7 @@ class FindSchoolController extends GetxController {
   void resetAllVariables({bool keepSchools = false}) {
     countdownTimer?.cancel();
     emailTEC.clear();
-    passwordTEC.clear();
+    // passwordTEC.clear();
     loading.value = false;
     errorMessage.value = '';
     latestQuery = '';
