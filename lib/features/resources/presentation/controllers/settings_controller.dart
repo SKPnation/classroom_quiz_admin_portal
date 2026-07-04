@@ -1,6 +1,8 @@
 import 'package:classroom_quiz_admin_portal/core/data/local/get_store_keys.dart';
 import 'package:classroom_quiz_admin_portal/core/navigation/app_routes.dart';
+import 'package:classroom_quiz_admin_portal/core/theme/colors.dart';
 import 'package:classroom_quiz_admin_portal/core/utils/services/google_integration_service.dart';
+import 'package:classroom_quiz_admin_portal/core/utils/services/microsoft_integration_service.dart';
 import 'package:classroom_quiz_admin_portal/features/auth/data/repos/auth_repo_impl.dart';
 import 'package:classroom_quiz_admin_portal/features/resources/data/model/integration_model.dart';
 import 'package:classroom_quiz_admin_portal/features/resources/data/model/user_model.dart';
@@ -41,7 +43,37 @@ class SettingsController extends GetxController {
       (integration) => integration['id'] == 'zoom',
     );
 
+    final isMicrosoftConnected = list.any(
+      (integration) => integration['id'] == 'microsoft',
+    );
+
     integrations.assignAll([
+      // IntegrationModel(
+      //   id: 'microsoft',
+      //   name: 'Microsoft',
+      //   description:
+      //       'Create Microsoft Forms and sync with Teams for Education.',
+      //   icon: Icons.window_rounded,
+      //   connected: isMicrosoftConnected,
+      //   actionText: isMicrosoftConnected ? '' : 'Connect Microsoft',
+      //   onTap: isMicrosoftConnected
+      //       ? () async {
+      //           final org = storage.read(GetStoreKeys.orgKey);
+      //           final orgId = org['code'].toString().toLowerCase();
+      //           await MicrosoftIntegrationService().disconnectMicrosoft(
+      //             orgId: orgId,
+      //           );
+      //           // refresh the settings page after disconnecting
+      //           SettingsController.instance.loadDefaultIntegrations(user);
+      //         }
+      //       : () async {
+      //           final org = storage.read(GetStoreKeys.orgKey);
+      //           final orgId = org['code'].toString().toLowerCase();
+      //           await MicrosoftIntegrationService().connectMicrosoft(
+      //             orgId: orgId,
+      //           );
+      //         },
+      // ),
       IntegrationModel(
         id: 'google',
         name: 'Google',
@@ -73,22 +105,41 @@ class SettingsController extends GetxController {
         onTap: isCanvasConnected
             ? null
             : () async {
-                debugPrint('Canvas integration tapped.');
+                showDialog(
+                  context: Get.context!,
+                  builder: (context) {
+                    return AlertDialog(
+                      backgroundColor: AppColors.white,
+                      title: Text('Coming Soon'),
+                      content: Text(
+                        'The Canvas LMS integration is coming soon. Stay tuned!',
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                          child: Text('OK'),
+                        ),
+                      ],
+                    );
+                  },
+                );
               },
       ),
-      IntegrationModel(
-        id: 'zoom',
-        name: 'Zoom',
-        description: 'Schedule and share class meetings.',
-        icon: Icons.videocam_outlined,
-        connected: isZoomConnected,
-        actionText: isZoomConnected ? 'Connected' : 'Connect Zoom',
-        onTap: isZoomConnected
-            ? null
-            : () async {
-                debugPrint('Zoom integration tapped.');
-              },
-      ),
+      // IntegrationModel(
+      //   id: 'zoom',
+      //   name: 'Zoom',
+      //   description: 'Schedule and share class meetings.',
+      //   icon: Icons.videocam_outlined,
+      //   connected: isZoomConnected,
+      //   actionText: isZoomConnected ? 'Connected' : 'Connect Zoom',
+      //   onTap: isZoomConnected
+      //       ? null
+      //       : () async {
+      //           debugPrint('Zoom integration tapped.');
+      //         },
+      // ),
     ]);
   }
 

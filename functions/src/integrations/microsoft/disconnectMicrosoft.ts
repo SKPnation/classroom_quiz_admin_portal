@@ -2,18 +2,15 @@
 // FILE: functions/src/integrations/microsoft/disconnectMicrosoft.ts
 // ═══════════════════════════════════════════════════════════════════════
 
-import * as functions from "firebase-functions";
+import {onCall, CallableRequest} from "firebase-functions/v2/https";
 import * as admin from "firebase-admin";
 
-export const disconnectMicrosoft = functions.https.onCall(
-  async (data: { orgId: string }, _context) => {
-    const { orgId } = data;
+export const disconnectMicrosoft = onCall(
+  async (request: CallableRequest) => {
+    const orgId = request.data?.orgId as string;
 
     if (!orgId) {
-      throw new functions.https.HttpsError(
-        "invalid-argument",
-        "orgId is required."
-      );
+      throw new Error("orgId is required.");
     }
 
     await admin
@@ -24,8 +21,6 @@ export const disconnectMicrosoft = functions.https.onCall(
       .doc("microsoft")
       .delete();
 
-    console.log(`Microsoft disconnected for org: ${orgId}`);
-
-    return { success: true };
+    return {success: true};
   }
 );

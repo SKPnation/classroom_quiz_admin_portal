@@ -15,7 +15,9 @@ import 'package:classroom_quiz_admin_portal/main.dart';
 import 'package:dart_openai/dart_openai.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
 import 'package:uuid/uuid.dart';
+import 'package:http_parser/http_parser.dart';
 
 class QuizEditorController extends GetxController {
   static QuizEditorController get instance => Get.find();
@@ -527,4 +529,45 @@ class QuizEditorController extends GetxController {
 
     quizItems.refresh();
   }
+
+  Future<String> extractTextFromFile({
+    required List<int> fileBytes,
+    required String fileName,
+  }) async {
+    // Replace with your actual Firebase Function URL after deploying
+    const extractUrl =
+        'https://us-central1-schoolquizapp-8b07d.cloudfunctions.net/extractNotesText';
+
+    final uri = Uri.parse(extractUrl);
+
+    final extension = fileName.split('.').last.toLowerCase();
+    final mimeType = extension == 'pdf' ? 'application/pdf'
+        : 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+
+    final request = http.MultipartRequest('POST', uri)
+      ..files.add(
+        http.MultipartFile.fromBytes(
+          'file',
+          fileBytes,
+          filename: fileName,
+          contentType: MediaType.parse(mimeType),
+        ),
+      );
+
+    final streamedResponse = await request.send();
+    final response = await http.Response.fromStream(streamedResponse);
+
+    if (response.statusCode != 200) {
+      throw Exception('Extraction failed: ${response.body}');
+    }
+
+    final decoded = jsonDecode(response.body) as Map<String, dynamic>;
+
+    if (decoded['status'] != 'success') {
+      throw Exception(decoded['message'] ?? 'Extraction failed.');
+    }
+
+    return decoded['text'] as String;
+  }
+
 }

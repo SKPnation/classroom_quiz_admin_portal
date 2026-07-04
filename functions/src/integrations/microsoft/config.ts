@@ -1,16 +1,29 @@
-import * as functions from "firebase-functions";
-import { Configuration } from "@azure/msal-node";
+// ═══════════════════════════════════════════════════════════════════════
+// FILE: functions/src/integrations/microsoft/config.ts
+// ═══════════════════════════════════════════════════════════════════════
+//
+// Firebase Functions v2 uses defineString() instead of functions.config()
+// Create a functions/.env file with:
+//   MICROSOFT_CLIENT_ID=your_client_id
+//   MICROSOFT_CLIENT_SECRET=your_client_secret
+//   MICROSOFT_REDIRECT_URI=your_redirect_uri
+
+import {defineString} from "firebase-functions/params";
+import {Configuration} from "@azure/msal-node";
+
+const microsoftClientId = defineString("MICROSOFT_CLIENT_ID");
+const microsoftClientSecret = defineString("MICROSOFT_CLIENT_SECRET");
+const microsoftRedirectUri = defineString("MICROSOFT_REDIRECT_URI");
 
 export const getMsalConfig = (): Configuration => ({
   auth: {
-    clientId: functions.config().microsoft.client_id as string,
-    clientSecret: functions.config().microsoft.client_secret as string,
+    clientId: microsoftClientId.value(),
+    clientSecret: microsoftClientSecret.value(),
     authority: "https://login.microsoftonline.com/common",
   },
 });
 
-export const getRedirectUri = (): string =>
-  functions.config().microsoft.redirect_uri as string;
+export const getRedirectUri = (): string => microsoftRedirectUri.value();
 
 export const SCOPES: string[] = [
   "https://graph.microsoft.com/Forms.Read",
