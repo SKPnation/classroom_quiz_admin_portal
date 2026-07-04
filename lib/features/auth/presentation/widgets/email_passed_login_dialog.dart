@@ -46,28 +46,28 @@ class EmailPasswordLoginDialog extends StatelessWidget {
               keyboardType: TextInputType.emailAddress,
               onChanged: (val) => controller.typedEmail.value = val,
             ),
-            const SizedBox(height: 16),
-
-            // Password Field
-            Obx(
-              () => TextField(
-                controller: controller.passwordTEC,
-                obscureText: controller.isPasswordHidden.value,
-                decoration: InputDecoration(
-                  labelText: 'Password',
-                  prefixIcon: const Icon(Icons.lock_outline),
-                  border: const OutlineInputBorder(),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      controller.isPasswordHidden.value
-                          ? Icons.visibility_off
-                          : Icons.visibility,
-                    ),
-                    onPressed: () => controller.isPasswordHidden.toggle(),
-                  ),
-                ),
-              ),
-            ),
+            // const SizedBox(height: 16),
+            //
+            // // Password Field
+            // Obx(
+            //   () => TextField(
+            //     controller: controller.passwordTEC,
+            //     obscureText: controller.isPasswordHidden.value,
+            //     decoration: InputDecoration(
+            //       labelText: 'Password',
+            //       prefixIcon: const Icon(Icons.lock_outline),
+            //       border: const OutlineInputBorder(),
+            //       suffixIcon: IconButton(
+            //         icon: Icon(
+            //           controller.isPasswordHidden.value
+            //               ? Icons.visibility_off
+            //               : Icons.visibility,
+            //         ),
+            //         onPressed: () => controller.isPasswordHidden.toggle(),
+            //       ),
+            //     ),
+            //   ),
+            // ),
 
             // Error Message Display
             Obx(

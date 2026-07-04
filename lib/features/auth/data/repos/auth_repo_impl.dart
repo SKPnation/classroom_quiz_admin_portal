@@ -1,5 +1,6 @@
 import 'package:classroom_quiz_admin_portal/core/constants/app_strings.dart';
 import 'package:classroom_quiz_admin_portal/core/data/local/get_store_keys.dart';
+import 'package:classroom_quiz_admin_portal/core/global/custom_snackbar.dart';
 import 'package:classroom_quiz_admin_portal/core/navigation/app_routes.dart';
 import 'package:classroom_quiz_admin_portal/features/auth/domain/repos/auth_repo.dart';
 import 'package:classroom_quiz_admin_portal/features/find_school/data/models/school_model.dart';
@@ -51,23 +52,66 @@ class AuthRepoImpl extends AuthRepo {
   @override
   Future<void> signInWithEmailPassword({
     required String email,
-    required String password,
     required SchoolModel school,
   }) async {
-    final result = await auth.signInWithEmailAndPassword(
-      email: email,
-      password: password,
-    );
-    final user = result.user!;
+    const defaultPassword = "Asseska@SecureDefault2025!";
 
-    //save user info to local storage
-    await saveUserToStorage(user);
-    //Save org  info to local storage
-    saveSchoolToStorage(school);
+    // Validate domain against school's allowedDomains before hitting Firebase
+    final emailDomain = email.trim().toLowerCase().split('@').last;
+    final allowedDomains = school.allowedDomains
+        .map((d) => d.trim().toLowerCase())
+        .toList();
 
-    Get.offNamed(Routes.rootRoute);
+    if (!allowedDomains.contains(emailDomain)) {
+      CustomSnackBar.errorSnackBar(
+        'Please use your ${school.name} institution email address.',
+      );
+      return;
+    }
 
-    result.user;
+    try {
+      UserCredential result;
+
+      try {
+        // Returning user — try signing in first
+        result = await auth.signInWithEmailAndPassword(
+          email: email.trim(),
+          password: defaultPassword,
+        );
+      } on FirebaseAuthException catch (e) {
+        if (e.code == 'user-not-found') {
+          // First time — create the account silently
+          result = await auth.createUserWithEmailAndPassword(
+            email: email.trim(),
+            password: defaultPassword,
+          );
+        } else {
+          rethrow;
+        }
+      }
+
+      final user = result.user!;
+
+      // Save user info to local storage
+      await saveUserToStorage(user);
+
+      // Save org info to local storage
+      saveSchoolToStorage(school);
+
+      Get.offNamed(Routes.rootRoute);
+
+    } on FirebaseAuthException catch (e) {
+      final message = switch (e.code) {
+        'invalid-email'          => 'Please enter a valid institution email address.',
+        'user-disabled'          => 'This account has been disabled. Contact support.',
+        'wrong-password'         => 'Access denied. Please use your institution email.',
+        'network-request-failed' => 'No internet connection. Please try again.',
+        _                        => 'Sign in failed: ${e.message}',
+      };
+      CustomSnackBar.errorSnackBar(message);
+    } catch (e) {
+      CustomSnackBar.errorSnackBar('Something went wrong. Please try again.');
+    }
   }
 
   // @override
