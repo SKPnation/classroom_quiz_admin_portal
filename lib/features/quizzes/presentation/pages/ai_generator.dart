@@ -107,13 +107,46 @@ class _AiQuestionGeneratorPageState extends State<AiQuestionGeneratorPage> {
       return;
     }
 
+    // 2MB limit
+    const maxSizeBytes = 2 * 1024 * 1024; // 2MB
+    if (bytes.lengthInBytes > maxSizeBytes) {
+      final fileSizeMB = (bytes.lengthInBytes / (1024 * 1024))
+          .toStringAsFixed(1);
+
+      showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          backgroundColor: AppColors.white,
+          title: const Row(
+            children: [
+              Icon(Icons.warning_amber_rounded, color: Colors.orange),
+              SizedBox(width: 8),
+              Text('File Too Large'),
+            ],
+          ),
+          content: Text(
+            'Your file is ${fileSizeMB}MB. Please upload a file under 2MB.\n\n'
+                'Tip: Try splitting the PDF into smaller chapters, '
+                'or copy and paste the text directly into the prompt field.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
+
     setState(() {
       isExtracting = true;
       uploadedFileName = file.name;
     });
 
     try {
-      final extractedText = await quizEditorController.extractTextFromFile(
+      final extractedText = await extractTextFromFile(
         fileBytes: bytes,
         fileName: file.name,
       );
@@ -128,12 +161,13 @@ class _AiQuestionGeneratorPageState extends State<AiQuestionGeneratorPage> {
         return;
       }
 
-      // Put extracted text into the prompt field so lecturer can review/edit
-      quizEditorController.promptController.text = extractedText;
+      // ADD THIS — save to controller so onGenerate() can use it
+      quizEditorController.uploadedPdfText = extractedText;
+      quizEditorController.uploadedFileName = file.name;
 
       Get.snackbar(
         'File Loaded',
-        '${file.name} — text extracted successfully. Review and click Generate.',
+        '${file.name} - text extracted successfully. Click Generate.',
         backgroundColor: Colors.green,
         colorText: Colors.white,
       );
