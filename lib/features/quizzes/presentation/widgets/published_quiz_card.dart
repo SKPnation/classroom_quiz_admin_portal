@@ -57,6 +57,7 @@ class PublishedQuizCard extends StatelessWidget {
               ),
               PopupMenuButton<String>(
                 padding: EdgeInsets.zero,
+                color: Colors.white,
                 itemBuilder: (ctx) => const [
                   PopupMenuItem(value: 'rename', child: Text('Rename')),
                   PopupMenuItem(value: 'duplicate', child: Text('Duplicate')),
@@ -82,11 +83,11 @@ class PublishedQuizCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 4),
-          Text(
-            '${t.subject} • ${t.type} • ${t.level}',
-            style: const TextStyle(fontSize: 11, color: _sub),
-          ),
-          const SizedBox(height: 8),
+          // Text(
+          //   '${t.subject} • ${t.type} • ${t.level}',
+          //   style: const TextStyle(fontSize: 11, color: _sub),
+          // ),
+          // const SizedBox(height: 8),
           Text(
             t.description,
             style: const TextStyle(fontSize: 13, color: _ink),
@@ -134,38 +135,38 @@ class PublishedQuizCard extends StatelessWidget {
               ),
               const Spacer(),
 
-              SizedBox(
-                height: 32,
-                width: 160,
-                child: CustomButton(
-                  radius: 100,
-                  borderColor: _purple,
-                  bgColor: Colors.transparent,
-                  onPressed: () => _onUseTemplate(t, context),
-                  text: 'Sync with Canvas',
-                  textColor: AppColors.purple,
-                  fontWeight: FontWeight.w600,
-                  showBorder: true,
-                  borderWidth: 1.5,
-                  fontSize: 12,
-                ),
-
-                // OutlinedButton(
-                //   style: OutlinedButton.styleFrom(
-                //     side: const BorderSide(color: _purple),
-                //     foregroundColor: _purple,
-                //     padding: const EdgeInsets.symmetric(horizontal: 12),
-                //     shape: RoundedRectangleBorder(
-                //       borderRadius: BorderRadius.circular(999),
-                //     ),
-                //   ),
-                //   onPressed: () => _onUseTemplate(t),
-                //   child: const Text(
-                //     'Use template',
-                //     style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
-                //   ),
-                // ),
-              ),
+              // SizedBox(
+              //   height: 32,
+              //   width: 160,
+              //   child: CustomButton(
+              //     radius: 100,
+              //     borderColor: _purple,
+              //     bgColor: Colors.transparent,
+              //     onPressed: () => _onUseTemplate(t, context),
+              //     text: 'Sync with Canvas',
+              //     textColor: AppColors.purple,
+              //     fontWeight: FontWeight.w600,
+              //     showBorder: true,
+              //     borderWidth: 1.5,
+              //     fontSize: 12,
+              //   ),
+              //
+              //   // OutlinedButton(
+              //   //   style: OutlinedButton.styleFrom(
+              //   //     side: const BorderSide(color: _purple),
+              //   //     foregroundColor: _purple,
+              //   //     padding: const EdgeInsets.symmetric(horizontal: 12),
+              //   //     shape: RoundedRectangleBorder(
+              //   //       borderRadius: BorderRadius.circular(999),
+              //   //     ),
+              //   //   ),
+              //   //   onPressed: () => _onUseTemplate(t),
+              //   //   child: const Text(
+              //   //     'Use template',
+              //   //     style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+              //   //   ),
+              //   // ),
+              // ),
             ],
           ),
         ],

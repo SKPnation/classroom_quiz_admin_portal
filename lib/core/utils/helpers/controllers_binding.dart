@@ -20,7 +20,7 @@ class AllControllerBinding extends Bindings {
     Get.lazyPut(() => QuizEditorController());
     Get.lazyPut(() => ScheduleController());
     Get.lazyPut(() => SettingsController());
-    Get.lazyPut(() => PublishedQuizzesController(), fenix: true);
+    Get.lazyPut(() => PublishedQuizzesController());
     Get.lazyPut(
       () => FindSchoolController(
         findSchoolRepo: FindSchoolRepoImpl(),

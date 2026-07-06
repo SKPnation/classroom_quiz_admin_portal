@@ -93,13 +93,13 @@ class _PublishedQuizzesPageState extends State<PublishedQuizzesPage> {
               children: [
                 _buildHeader(),
                 const SizedBox(height: 16),
-                _buildFiltersRow(
-                  width,
-                  subjectOptions,
-                  typeOptions,
-                  levelOptions,
-                ),
-                const SizedBox(height: 16),
+                // _buildFiltersRow(
+                //   width,
+                //   subjectOptions,
+                //   typeOptions,
+                //   levelOptions,
+                // ),
+                // const SizedBox(height: 16),
                 _buildSummaryRow(filtered),
                 const SizedBox(height: 16),
                 _buildTemplatesGrid(filtered, columns),
@@ -149,11 +149,11 @@ class _PublishedQuizzesPageState extends State<PublishedQuizzesPage> {
             color: _ink,
           ),
         ),
-        SizedBox(height: 4),
-        Text(
-          'Start new quizzes faster with reusable templates.',
-          style: TextStyle(fontSize: 13, color: _sub),
-        ),
+        // SizedBox(height: 4),
+        // Text(
+        //   'Start new quizzes faster with reusable templates.',
+        //   style: TextStyle(fontSize: 13, color: _sub),
+        // ),
       ],
     );
   }
@@ -319,8 +319,8 @@ class _PublishedQuizzesPageState extends State<PublishedQuizzesPage> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        Expanded(child: _summaryCard('Total Templates', total.toString())),
-        const SizedBox(width: 12),
+        // Expanded(child: _summaryCard('Total Templates', total.toString())),
+        // const SizedBox(width: 12),
         Expanded(child: _summaryCard('Quizzes', quizCount.toString())),
         const SizedBox(width: 12),
         Expanded(child: _summaryCard('Exams', examCount.toString())),

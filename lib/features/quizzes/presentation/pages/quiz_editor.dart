@@ -132,15 +132,16 @@ class _QuizEditorPageState extends State<QuizEditorPage> {
                 height: 40,
                 child: ElevatedButton(
                   onPressed: () async {
-                    // Build a PublishedQuiz from current editor state, then show destination dialog
                     if (quizEditorController.quizItems.isEmpty) return;
+
+                    // Ensure controller is initialised before using it
+                    if (!Get.isRegistered<PublishedQuizzesController>()) {
+                      Get.put(PublishedQuizzesController());
+                    }
 
                     final userInfoCache = storage.read(GetStoreKeys.userKey);
                     final userModel = UserModel.fromJson(userInfoCache);
-                    final title =
-                        quizEditorController.currentDraftTitle.value
-                            .trim()
-                            .isEmpty
+                    final title = quizEditorController.currentDraftTitle.value.trim().isEmpty
                         ? 'Untitled Quiz'
                         : quizEditorController.currentDraftTitle.value.trim();
 
@@ -156,20 +157,17 @@ class _QuizEditorPageState extends State<QuizEditorPage> {
                       items: quizEditorController.quizItems
                           .map(
                             (q) => q.copyWith(
-                              options: List<String>.from(q.options),
-                              correctOptionIndexes: List<int>.from(
-                                q.correctOptionIndexes,
-                              ),
-                            ),
-                          )
+                          options: List<String>.from(q.options),
+                          correctOptionIndexes: List<int>.from(q.correctOptionIndexes),
+                        ),
+                      )
                           .toList(),
                       publishedAt: DateTime.now(),
                       createdBy: userModel.uid,
                       tags: const ['Published'],
                     );
 
-                    PublishedQuizzesController.instance
-                        .onUseTemplate(quiz, context);
+                    PublishedQuizzesController.instance.onUseTemplate(quiz, context);
                   },
                   child: const Text('Publish Quiz'),
                 ),

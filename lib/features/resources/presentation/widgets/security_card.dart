@@ -14,7 +14,7 @@ class SecurityCard extends StatelessWidget {
     const border = Color(0xFFE5E7EB);
 
     return CardShell(
-      height: 200,
+      height: 150,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -27,12 +27,12 @@ class SecurityCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 10),
-          ListRow(
-            icon: Icons.lock_outline,
-            title: 'Change Password',
-            onTap: () {},
-          ),
-          Divider(color: border, height: 1),
+          // ListRow(
+          //   icon: Icons.lock_outline,
+          //   title: 'Change Password',
+          //   onTap: () {},
+          // ),
+          // Divider(color: border, height: 1),
           ListRow(
             icon: Icons.logout_rounded,
             title: 'Sign Out',

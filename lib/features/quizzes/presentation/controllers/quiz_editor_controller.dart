@@ -5,6 +5,7 @@ import 'package:classroom_quiz_admin_portal/core/data/local/get_store_keys.dart'
 import 'package:classroom_quiz_admin_portal/core/global/custom_snackbar.dart';
 import 'package:classroom_quiz_admin_portal/core/navigation/app_routes.dart';
 import 'package:classroom_quiz_admin_portal/core/navigation/navigation_controller.dart';
+import 'package:classroom_quiz_admin_portal/core/utils/functions.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/data/models/published_quiz_template.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/data/models/question_model.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/data/models/quiz_draft_model.dart';
@@ -45,6 +46,10 @@ class QuizEditorController extends GetxController {
   final RxString currentDraftId = ''.obs;
   final RxString currentDraftTitle = 'Untitled Quiz'.obs;
 
+  String? uploadedPdfText;
+  String? uploadedFileName;
+  var isExtractingPdf = false.obs;
+
   QuizItemModel? get activeQuestion {
     // 1. Check if the list is empty first
     if (quizItems.isEmpty) return null;
@@ -70,24 +75,37 @@ class QuizEditorController extends GetxController {
     OpenAI.apiKey = apiKey;
   }
 
-  Future<void> onGenerate() async {
+  Future<void> onGenerate({
+    QuizItemType? questionType,
+    int questionCount = 10,
+  }) async {
     final text = promptController.text.trim();
     if (text.isEmpty) {
       CustomSnackBar.errorSnackBar('Please enter a prompt first.');
-
       return;
     }
 
     isLoading.value = true;
     generatedQuestions.clear();
 
+    // Build type instruction
+    final typeInstruction = questionType != null
+        ? 'Generate ONLY ${typeLabel(questionType)} questions. Do not generate any other type.'
+        : 'Generate a mix of question types.';
+
+    // Build full prompt
+    final pdfContext = uploadedPdfText != null
+        ? 'Use these notes as your PRIMARY source:\n\n$uploadedPdfText\n\n---\n\n'
+        : '';
+
+    final fullPrompt =
+        '${pdfContext}Generate exactly $questionCount questions. '
+        '$typeInstruction\n\n$text';
+
     try {
-      // Create the chat completion request
       final chatCompletion = await OpenAI.instance.chat.create(
         model: 'gpt-3.5-turbo',
-        // Or 'gpt-4' if you have access
         responseFormat: {"type": "json_object"},
-        // Enforce JSON output
         messages: [
           OpenAIChatCompletionChoiceMessageModel(
             role: OpenAIChatMessageRole.system,
@@ -100,13 +118,14 @@ class QuizEditorController extends GetxController {
           OpenAIChatCompletionChoiceMessageModel(
             role: OpenAIChatMessageRole.user,
             content: [
-              OpenAIChatCompletionChoiceMessageContentItemModel.text(text),
+              OpenAIChatCompletionChoiceMessageContentItemModel.text(
+                fullPrompt,
+              ),
             ],
           ),
         ],
         temperature: 0.7,
-        // Adjust for creativity vs. predictability
-        maxTokens: 1500,
+        maxTokens: uploadedPdfText != null ? 3000 : 1500,
       );
 
       print("AI Response: ${chatCompletion.choices.first.message.content}");
@@ -143,11 +162,9 @@ class QuizEditorController extends GetxController {
         this.generatedQuestions.addAll(generatedQuestions);
       }
     } catch (e) {
-      // Handle potential errors from the API call or JSON parsing
       print('Error generating questions: $e');
       CustomSnackBar.errorSnackBar('Error generating questions: $e');
     } finally {
-      // Ensure the loading indicator is always turned off
       isLoading.value = false;
     }
   }
@@ -279,9 +296,21 @@ class QuizEditorController extends GetxController {
   void deleteQuestion(String id) {
     final idx = quizItems.indexWhere((q) => q.id == id);
     if (idx == -1) return;
+
     quizItems.removeAt(idx);
+
+    if (quizItems.isEmpty) {
+      // No questions left — clear active selection
+      activeId.value = '';
+      questionController.clear();
+      pointsController.clear();
+      return;
+    }
+
     if (activeId.value == id) {
-      activeId.value = quizItems[(idx - 1).clamp(0, quizItems.length - 1)].id;
+      // Select the previous item, or first if we deleted the first
+      final newIdx = (idx - 1).clamp(0, quizItems.length - 1);
+      activeId.value = quizItems[newIdx].id;
       _loadCurrentIntoControllers();
     }
   }
@@ -541,7 +570,8 @@ class QuizEditorController extends GetxController {
     final uri = Uri.parse(extractUrl);
 
     final extension = fileName.split('.').last.toLowerCase();
-    final mimeType = extension == 'pdf' ? 'application/pdf'
+    final mimeType = extension == 'pdf'
+        ? 'application/pdf'
         : 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
 
     final request = http.MultipartRequest('POST', uri)
@@ -569,5 +599,4 @@ class QuizEditorController extends GetxController {
 
     return decoded['text'] as String;
   }
-
 }

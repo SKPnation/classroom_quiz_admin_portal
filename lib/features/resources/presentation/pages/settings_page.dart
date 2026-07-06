@@ -109,8 +109,8 @@ class _SettingsPageState extends State<SettingsPage> {
                 const SizedBox(height: 16),
                 Row(
                   children: [
-                    Expanded(child: const PreferencesCard()),
-                    const SizedBox(width: 16),
+                    // Expanded(child: const PreferencesCard()),
+                    // const SizedBox(width: 16),
                     Expanded(
                       child: Obx(
                             () => IntegrationsCard(
@@ -123,7 +123,6 @@ class _SettingsPageState extends State<SettingsPage> {
                 const SizedBox(height: 16),
                 const SecurityCard(),
                 const SizedBox(height: 24),
-                Container(height: 8, color: Colors.transparent),
               ],
             ),
           ),

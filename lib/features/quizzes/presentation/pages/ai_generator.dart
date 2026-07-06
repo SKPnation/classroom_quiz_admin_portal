@@ -13,15 +13,19 @@
 //
 // Then run: flutter pub get
 
+import 'package:classroom_quiz_admin_portal/core/data/local/get_store_keys.dart';
 import 'package:classroom_quiz_admin_portal/core/global/custom_button.dart';
+import 'package:classroom_quiz_admin_portal/core/global/custom_snackbar.dart';
 import 'package:classroom_quiz_admin_portal/core/navigation/app_routes.dart';
 import 'package:classroom_quiz_admin_portal/core/navigation/navigation_controller.dart';
 import 'package:classroom_quiz_admin_portal/core/theme/colors.dart';
 import 'package:classroom_quiz_admin_portal/core/utils/config.dart';
+import 'package:classroom_quiz_admin_portal/core/utils/functions.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/data/models/question_model.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/data/models/quiz_item_model.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/controllers/quiz_editor_controller.dart';
 import 'package:classroom_quiz_admin_portal/features/site_layout/presentation/controllers/menu_controller.dart';
+import 'package:classroom_quiz_admin_portal/main.dart';
 import 'package:dart_openai/dart_openai.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -42,21 +46,31 @@ class _AiQuestionGeneratorPageState extends State<AiQuestionGeneratorPage> {
   final navigationController = NavigationController.instance;
 
   // ── NEW: tracks whether a file is currently being uploaded/extracted ──
-  bool _isExtracting = false;
-  String? _uploadedFileName;
+  bool isExtracting = false;
+  String? uploadedFileName;
+
+  // Add these state variables at the top of _AiQuestionGeneratorPageState
+  QuizItemType? selectedQuestionType; // null = mixed
+  int questionCount = 10;
 
   @override
   void initState() {
-    // OpenAI.apiKey = AppConfig
-    //     .openAiApiKey; //TODO: Use for testing only, remove before production
-    quizEditorController.getApiKey();
+    OpenAI.apiKey = AppConfig
+        .openAiApiKey; //TODO: Use for testing only, remove before production
+    // quizEditorController.getApiKey();
+
+    // In your setState or initState, reset to a valid value
+    if (![5, 10].contains(questionCount)) {
+      questionCount = 10;
+    }
+
     super.initState();
   }
 
   void _onClear() {
     quizEditorController.promptController.clear();
     setState(() {
-      _uploadedFileName = null;
+      uploadedFileName = null;
     });
     quizEditorController.generatedQuestions
       ..clear()
@@ -94,8 +108,8 @@ class _AiQuestionGeneratorPageState extends State<AiQuestionGeneratorPage> {
     }
 
     setState(() {
-      _isExtracting = true;
-      _uploadedFileName = file.name;
+      isExtracting = true;
+      uploadedFileName = file.name;
     });
 
     try {
@@ -131,7 +145,7 @@ class _AiQuestionGeneratorPageState extends State<AiQuestionGeneratorPage> {
         colorText: Colors.white,
       );
     } finally {
-      setState(() => _isExtracting = false);
+      setState(() => isExtracting = false);
     }
   }
 
@@ -217,12 +231,12 @@ class _AiQuestionGeneratorPageState extends State<AiQuestionGeneratorPage> {
                                 ),
                               ),
                               Text(
-                                _uploadedFileName != null
-                                    ? '📄 $_uploadedFileName'
+                                uploadedFileName != null
+                                    ? '📄 $uploadedFileName'
                                     : 'PDF or Word (.docx) - text will be extracted automatically',
                                 style: TextStyle(
                                   fontSize: 11,
-                                  color: _uploadedFileName != null
+                                  color: uploadedFileName != null
                                       ? AppColors.purple
                                       : sub,
                                 ),
@@ -231,7 +245,7 @@ class _AiQuestionGeneratorPageState extends State<AiQuestionGeneratorPage> {
                           ),
                         ),
                         const SizedBox(width: 10),
-                        _isExtracting
+                        isExtracting
                             ? const SizedBox(
                                 width: 20,
                                 height: 20,
@@ -244,7 +258,7 @@ class _AiQuestionGeneratorPageState extends State<AiQuestionGeneratorPage> {
                                 onPressed: _onUploadFile,
                                 icon: const Icon(Icons.attach_file, size: 16),
                                 label: Text(
-                                  _uploadedFileName != null
+                                  uploadedFileName != null
                                       ? 'Change File'
                                       : 'Choose File',
                                 ),
@@ -265,6 +279,20 @@ class _AiQuestionGeneratorPageState extends State<AiQuestionGeneratorPage> {
                       ],
                     ),
                   ),
+
+                  // Add below the upload button
+                  if (uploadedFileName != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 6),
+                      child: Text(
+                        '⚠️ Note: diagrams and images in the PDF are not included - '
+                        'text content only.',
+                        style: TextStyle(
+                          fontSize: kDefaultFontSize,
+                          color: Colors.orange.shade700,
+                        ),
+                      ),
+                    ),
 
                   const SizedBox(height: 16),
 
@@ -328,7 +356,96 @@ class _AiQuestionGeneratorPageState extends State<AiQuestionGeneratorPage> {
                   ),
                   const SizedBox(height: 16),
 
-                  // ── Buttons (unchanged) ──────────────────────────────────
+                  Row(
+                    children: [
+                      // Question Type Dropdown
+                      Expanded(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          decoration: BoxDecoration(
+                            border: Border.all(color: border),
+                            borderRadius: BorderRadius.circular(8),
+                            color: Colors.white,
+                          ),
+                          child: DropdownButtonHideUnderline(
+                            child: DropdownButton<QuizItemType?>(
+                              value: selectedQuestionType,
+                              dropdownColor: Colors.white,
+                              hint: const Text(
+                                'Mixed question types',
+                                style: TextStyle(fontSize: 13, color: sub),
+                              ),
+                              icon: const Icon(
+                                Icons.keyboard_arrow_down,
+                                size: 18,
+                              ),
+                              items: [
+                                const DropdownMenuItem<QuizItemType?>(
+                                  value: null,
+                                  child: Text(
+                                    'Mixed types',
+                                    style: TextStyle(fontSize: 13),
+                                  ),
+                                ),
+                                ...QuizItemType.values.map(
+                                  (type) => DropdownMenuItem<QuizItemType?>(
+                                    value: type,
+                                    child: Text(
+                                      typeLabel(type),
+                                      style: const TextStyle(fontSize: 13),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                              onChanged: (val) {
+                                setState(() => selectedQuestionType = val);
+                              },
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(width: 10),
+
+                      // Question Count Dropdown
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: border),
+                          borderRadius: BorderRadius.circular(8),
+                          color: Colors.white,
+                        ),
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<int>(
+                            value: questionCount,
+                            dropdownColor: Colors.white,
+                            icon: const Icon(
+                              Icons.keyboard_arrow_down,
+                              size: 18,
+                            ),
+                            items: [5, 10]
+                                .map(
+                                  (n) => DropdownMenuItem(
+                                    value: n,
+                                    child: Text(
+                                      '$n questions',
+                                      style: const TextStyle(fontSize: 13),
+                                    ),
+                                  ),
+                                )
+                                .toList(),
+                            onChanged: (val) {
+                              setState(() => questionCount = val ?? 10);
+                            },
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  // Clear + Generate buttons
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
@@ -336,27 +453,31 @@ class _AiQuestionGeneratorPageState extends State<AiQuestionGeneratorPage> {
                         label: "Clear",
                         width: 100,
                         onPressed: () {
-                          if (!isLoading && !_isExtracting) _onClear();
+                          if (!isLoading) _onClear();
                         },
                       ),
                       const SizedBox(width: 10),
                       Btn(
                         label: "Generate Questions",
-                        width: 180,
+                        width: 220,
                         onPressed: () {
-                          if (!isLoading && !_isExtracting) {
-                            quizEditorController.onGenerate();
+                          if (!isLoading && !isExtracting) {
+                            quizEditorController.onGenerate(
+                              questionType: selectedQuestionType,
+                              questionCount: questionCount,
+                            );
                           }
                         },
                         primary: true,
                       ),
                     ],
                   ),
-                  if (isLoading || _isExtracting) ...[
+
+                  if (isLoading || isExtracting) ...[
                     const SizedBox(height: 16),
                     Center(
                       child: Text(
-                        _isExtracting
+                        isExtracting
                             ? '📄 Extracting text from file...'
                             : '🧠 AI is generating your questions...',
                         style: const TextStyle(fontSize: 14, color: sub),
