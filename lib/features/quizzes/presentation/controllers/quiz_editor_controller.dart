@@ -80,8 +80,12 @@ class QuizEditorController extends GetxController {
     int questionCount = 10,
   }) async {
     final text = promptController.text.trim();
-    if (text.isEmpty) {
-      CustomSnackBar.errorSnackBar('Please enter a prompt first.');
+
+    // Allow generation if either a prompt is typed OR a PDF is uploaded
+    if (text.isEmpty && uploadedPdfText == null) {
+      CustomSnackBar.errorSnackBar(
+        'Please enter a prompt or upload a PDF first.',
+      );
       return;
     }
 
@@ -98,9 +102,14 @@ class QuizEditorController extends GetxController {
         ? 'Use these notes as your PRIMARY source:\n\n$uploadedPdfText\n\n---\n\n'
         : '';
 
+    // If no prompt typed but PDF uploaded, use a default instruction
+    final userPrompt = text.isNotEmpty
+        ? text
+        : 'Generate questions from the provided notes.';
+
     final fullPrompt =
         '${pdfContext}Generate exactly $questionCount questions. '
-        '$typeInstruction\n\n$text';
+        '$typeInstruction\n\n$userPrompt';
 
     try {
       final chatCompletion = await OpenAI.instance.chat.create(
@@ -557,46 +566,5 @@ class QuizEditorController extends GetxController {
     pointsController.text = '1';
 
     quizItems.refresh();
-  }
-
-  Future<String> extractTextFromFile({
-    required List<int> fileBytes,
-    required String fileName,
-  }) async {
-    // Replace with your actual Firebase Function URL after deploying
-    const extractUrl =
-        'https://us-central1-schoolquizapp-8b07d.cloudfunctions.net/extractNotesText';
-
-    final uri = Uri.parse(extractUrl);
-
-    final extension = fileName.split('.').last.toLowerCase();
-    final mimeType = extension == 'pdf'
-        ? 'application/pdf'
-        : 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
-
-    final request = http.MultipartRequest('POST', uri)
-      ..files.add(
-        http.MultipartFile.fromBytes(
-          'file',
-          fileBytes,
-          filename: fileName,
-          contentType: MediaType.parse(mimeType),
-        ),
-      );
-
-    final streamedResponse = await request.send();
-    final response = await http.Response.fromStream(streamedResponse);
-
-    if (response.statusCode != 200) {
-      throw Exception('Extraction failed: ${response.body}');
-    }
-
-    final decoded = jsonDecode(response.body) as Map<String, dynamic>;
-
-    if (decoded['status'] != 'success') {
-      throw Exception(decoded['message'] ?? 'Extraction failed.');
-    }
-
-    return decoded['text'] as String;
   }
 }

@@ -20,24 +20,8 @@ class QuizEditorPage extends StatefulWidget {
 }
 
 class _QuizEditorPageState extends State<QuizEditorPage> {
-  // Colors from the HTML design
-  static const _bg = Color(0xFFF6F7FB);
-  static const _card = Colors.white;
-  static const _radius = 14.0;
-  static const sub = Color(0xFF6B7280);
-  static const _ink = Color(0xFF111827);
-  static const _border = Color(0xFFE5E7EB);
-
   final quizEditorController = QuizEditorController.instance;
   final publishedQuizController = PublishedQuizzesController.instance;
-
-  @override
-  void dispose() {
-    // quizEditorController.shortKeywordsController.dispose();
-    // quizEditorController.essayRubricController.dispose();
-    // quizEditorController.essayMaxWordsController.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
