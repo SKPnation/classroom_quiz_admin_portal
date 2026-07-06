@@ -28,7 +28,7 @@ class SettingsController extends GetxController {
 
   final RxList<IntegrationModel> integrations = <IntegrationModel>[].obs;
 
-  void loadDefaultIntegrations(UserModel user) async {
+  Future loadDefaultIntegrations(UserModel user) async {
     final list = await userRepo.getMyIntegrations(user.orgId, user.uid);
 
     final isGoogleConnected = list.any(

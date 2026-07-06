@@ -13,6 +13,7 @@ import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/contro
 import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/widgets/publish_destination_dialog.dart';
 import 'package:classroom_quiz_admin_portal/features/resources/data/model/user_model.dart';
 import 'package:classroom_quiz_admin_portal/features/resources/presentation/controllers/settings_controller.dart';
+import 'package:classroom_quiz_admin_portal/features/site_layout/presentation/controllers/menu_controller.dart';
 import 'package:classroom_quiz_admin_portal/main.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
@@ -152,10 +153,18 @@ class PublishedQuizzesController extends GetxController {
 
     final userModel = UserModel.fromJson(userInfoCache);
 
+    // Load integrations and wait for them before reading connected status
+    await Future.delayed(Duration.zero, () async {
+      await SettingsController.instance.loadDefaultIntegrations(userModel);
+    });
+
     final isCanvasConnected = SettingsController.instance
         .isIntegrationConnected('canvas');
     final isGoogleConnected = SettingsController.instance
         .isIntegrationConnected('google');
+
+    debugPrint('Google connected: $isGoogleConnected');
+    debugPrint('Canvas connected: $isCanvasConnected');
 
     final result = await showDialog<PublishDestination>(
       context: context,
@@ -235,6 +244,10 @@ class PublishedQuizzesController extends GetxController {
         await syncToCanvas(context: context, publishedQuiz: template);
       }
 
+      MenController.instance.changeActiveItemTo(
+        Routes.publishedQuizzesDisplayName,
+        Routes.publishedQuizzesRoute,
+      );
       NavigationController.instance.navigateTo(Routes.publishedQuizzesRoute);
 
       CustomSnackBar.successSnackBar(body: 'Quiz published successfully.');
@@ -528,8 +541,8 @@ class PublishedQuizzesController extends GetxController {
     }
   }
 
-  void onUseTemplate(PublishedQuiz t, BuildContext context) {
-    PublishedQuizzesController.instance.publishWithDestinationDialog(
+  void publish(PublishedQuiz t, BuildContext context) async{
+    await publishWithDestinationDialog(
       context: context,
       publishedQuiz: t,
     );

@@ -1,4 +1,5 @@
 import 'package:classroom_quiz_admin_portal/core/data/local/get_store_keys.dart';
+import 'package:classroom_quiz_admin_portal/core/global/custom_snackbar.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/data/models/published_quiz_template.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/controllers/published_quizzes_controller.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/controllers/quiz_editor_controller.dart';
@@ -49,7 +50,13 @@ class _QuizEditorPageState extends State<QuizEditorPage> {
                     ? const Center(
                         child: Padding(
                           padding: EdgeInsets.all(16.0),
-                          child: CircularProgressIndicator(),
+                          child: Column(
+                            children: [
+                              Text("This may take 10 - 15 seconds, please wait..."),
+                              SizedBox(height: 4),
+                              CircularProgressIndicator()
+                            ],
+                          ),
                         ),
                       )
                     : SizedBox.shrink(),
@@ -116,7 +123,12 @@ class _QuizEditorPageState extends State<QuizEditorPage> {
                 height: 40,
                 child: ElevatedButton(
                   onPressed: () async {
-                    if (quizEditorController.quizItems.isEmpty) return;
+                    if (quizEditorController.quizItems.isEmpty) {
+                      CustomSnackBar.errorSnackBar(
+                        'Add at least one question before publishing.',
+                      );
+                      return;
+                    }
 
                     // Ensure controller is initialised before using it
                     if (!Get.isRegistered<PublishedQuizzesController>()) {
@@ -124,6 +136,8 @@ class _QuizEditorPageState extends State<QuizEditorPage> {
                     }
 
                     final userInfoCache = storage.read(GetStoreKeys.userKey);
+                    if (userInfoCache == null) return;
+
                     final userModel = UserModel.fromJson(userInfoCache);
                     final title = quizEditorController.currentDraftTitle.value.trim().isEmpty
                         ? 'Untitled Quiz'
@@ -135,7 +149,7 @@ class _QuizEditorPageState extends State<QuizEditorPage> {
                           : const Uuid().v4(),
                       title: title,
                       description: 'Published from quiz editor',
-                      subject: 'Mathematics',
+                      subject: 'General',
                       type: 'Quiz',
                       level: 'Intro',
                       items: quizEditorController.quizItems
@@ -151,7 +165,7 @@ class _QuizEditorPageState extends State<QuizEditorPage> {
                       tags: const ['Published'],
                     );
 
-                    PublishedQuizzesController.instance.onUseTemplate(quiz, context);
+                    PublishedQuizzesController.instance.publish(quiz, context);
                   },
                   child: const Text('Publish Quiz'),
                 ),
