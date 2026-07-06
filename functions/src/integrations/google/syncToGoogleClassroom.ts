@@ -10,6 +10,7 @@ const GOOGLE_REDIRECT_URI = defineSecret("GOOGLE_REDIRECT_URI");
 export const syncToGoogleClassroom = onCall(
   {
     region: "us-central1",
+    memory: "512MiB",
     secrets: [
       GOOGLE_CLIENT_ID,
       GOOGLE_CLIENT_SECRET,
