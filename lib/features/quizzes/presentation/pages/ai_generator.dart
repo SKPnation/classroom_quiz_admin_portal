@@ -1,21 +1,4 @@
-// ═══════════════════════════════════════════════════════════════════════
-// MODIFIED FILE: lib/features/quizzes/presentation/pages/ai_generator.dart
-// ═══════════════════════════════════════════════════════════════════════
-//
-// Changes from original:
-// 1. Added file upload button (PDF / Word) above the prompt TextField
-// 2. When a file is picked, it's sent to extractNotesText Firebase Function
-//    and the returned text is placed into promptController automatically
-// 3. Everything else (Generate, Clear, results display) is unchanged
-//
-// ADD TO pubspec.yaml:
-//   file_picker: ^8.0.0
-//
-// Then run: flutter pub get
-
-import 'package:classroom_quiz_admin_portal/core/data/local/get_store_keys.dart';
 import 'package:classroom_quiz_admin_portal/core/global/custom_button.dart';
-import 'package:classroom_quiz_admin_portal/core/global/custom_snackbar.dart';
 import 'package:classroom_quiz_admin_portal/core/navigation/app_routes.dart';
 import 'package:classroom_quiz_admin_portal/core/navigation/navigation_controller.dart';
 import 'package:classroom_quiz_admin_portal/core/theme/colors.dart';
