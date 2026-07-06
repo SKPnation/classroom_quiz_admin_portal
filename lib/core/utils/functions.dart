@@ -21,19 +21,6 @@ DateTime parseDate(dynamic value) {
   return DateTime.fromMillisecondsSinceEpoch(0);
 }
 
-String typeLabel(QuizItemType t) {
-  switch (t) {
-    case QuizItemType.multipleChoice:
-      return 'Multiple Choice';
-    case QuizItemType.trueFalse:
-      return 'True/False';
-    case QuizItemType.shortAnswer:
-      return 'Short Answer';
-    default:
-      return 'Essay';
-  }
-}
-
 QuizItemType typeFromLabel(String label) {
   switch (label) {
     case 'True/False':
@@ -46,3 +33,18 @@ QuizItemType typeFromLabel(String label) {
       return QuizItemType.multipleChoice;
   }
 }
+
+String typeLabel(QuizItemType type) {
+  switch (type) {
+    case QuizItemType.multipleChoice:
+      return 'Multiple Choice';
+    case QuizItemType.shortAnswer:
+      return 'Short Answer';
+    case QuizItemType.trueFalse:
+      return 'True / False';
+    case QuizItemType.essay:
+      return 'Essay';
+    }
+}
+
+bool isProCount(int count) => count == 15 || count == 20;
