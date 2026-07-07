@@ -1,7 +1,11 @@
 import 'dart:convert';
 
+import 'package:classroom_quiz_admin_portal/core/data/local/get_store_keys.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/data/models/quiz_item_model.dart';
+import 'package:classroom_quiz_admin_portal/features/resources/data/model/user_model.dart';
+import 'package:classroom_quiz_admin_portal/main.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 
@@ -93,3 +97,5 @@ Future<String> extractTextFromFile({
 
   return decoded['text'] as String;
 }
+
+String? get myUID => FirebaseAuth.instance.currentUser?.uid;

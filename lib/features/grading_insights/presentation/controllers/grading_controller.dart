@@ -39,7 +39,7 @@ class GradingInsightsController extends GetxController {
             e.status == GradingStatus.pending ||
             e.status == GradingStatus.needsReview ||
             e.status == GradingStatus.flagged ||
-            e.aiConfidence < 0.7,
+            e.aiConfidence < 0.7
       )
       .toList();
 
