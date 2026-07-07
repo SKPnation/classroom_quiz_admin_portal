@@ -2,13 +2,11 @@ import 'package:classroom_quiz_admin_portal/core/global/custom_button.dart';
 import 'package:classroom_quiz_admin_portal/core/navigation/app_routes.dart';
 import 'package:classroom_quiz_admin_portal/core/navigation/navigation_controller.dart';
 import 'package:classroom_quiz_admin_portal/core/theme/colors.dart';
-import 'package:classroom_quiz_admin_portal/core/utils/config.dart';
 import 'package:classroom_quiz_admin_portal/core/utils/functions.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/data/models/question_model.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/data/models/quiz_item_model.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/controllers/quiz_editor_controller.dart';
 import 'package:classroom_quiz_admin_portal/features/site_layout/presentation/controllers/menu_controller.dart';
-import 'package:dart_openai/dart_openai.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -37,9 +35,9 @@ class _AiQuestionGeneratorPageState extends State<AiQuestionGeneratorPage> {
 
   @override
   void initState() {
-    OpenAI.apiKey = AppConfig
-        .openAiApiKey; //TODO: Use for testing only, remove before production
-    // quizEditorController.getApiKey();
+    // OpenAI.apiKey = AppConfig
+    //     .openAiApiKey; //TODO: Use for testing only, remove before production
+    quizEditorController.getApiKey();
 
     // In your setState or initState, reset to a valid value
     if (![5, 10].contains(questionCount)) {

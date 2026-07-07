@@ -280,26 +280,26 @@ class _GradingQueuePageState extends State<GradingQueuePage> {
             ),
           ),
         ),
-        const Spacer(),
-        SizedBox(
-          height: 40,
-          child: OutlinedButton.icon(
-            style: OutlinedButton.styleFrom(
-              side: const BorderSide(color: _purple),
-              foregroundColor: _purple,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(999),
-              ),
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-            ),
-            icon: const Icon(Icons.checklist_rounded, size: 18),
-            label: const Text(
-              'Bulk Review',
-              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
-            ),
-            onPressed: _onBulkReview,
-          ),
-        ),
+        // const Spacer(),
+        // SizedBox(
+        //   height: 40,
+        //   child: OutlinedButton.icon(
+        //     style: OutlinedButton.styleFrom(
+        //       side: const BorderSide(color: _purple),
+        //       foregroundColor: _purple,
+        //       shape: RoundedRectangleBorder(
+        //         borderRadius: BorderRadius.circular(999),
+        //       ),
+        //       padding: const EdgeInsets.symmetric(horizontal: 16),
+        //     ),
+        //     icon: const Icon(Icons.checklist_rounded, size: 18),
+        //     label: const Text(
+        //       'Bulk Review',
+        //       style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+        //     ),
+        //     onPressed: _onBulkReview,
+        //   ),
+        // ),
       ],
     );
   }

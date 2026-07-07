@@ -6,6 +6,6 @@ abstract class QuizRepo {
     required String orgId,
   });
 
-  Future<List<PublishedQuiz>> getTemplates({required String orgId});
+  Future<List<PublishedQuiz>> getPublishedQuizzes({required String orgId});
   Future<void> deleteTemplate({required String templateId, required String orgId});
 }

@@ -171,8 +171,8 @@ class _ResultsPageState extends State<ResultsPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildFiltersRow(),
-          const SizedBox(height: 16),
+          // _buildFiltersRow(),
+          // const SizedBox(height: 16),
           _buildResultsTable(),
         ],
       ),

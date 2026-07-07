@@ -34,7 +34,7 @@ class _PublishedQuizzesPageState extends State<PublishedQuizzesPage> {
 
   @override
   void initState() {
-    pubQuizzesController.loadTemplates();
+    pubQuizzesController.loadPublishedQuizzes();
 
     super.initState();
   }

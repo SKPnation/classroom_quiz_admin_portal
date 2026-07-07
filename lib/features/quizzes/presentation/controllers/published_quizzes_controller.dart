@@ -122,18 +122,18 @@ class PublishedQuizzesController extends GetxController {
   //   }
   // }
 
-  Future<void> loadTemplates() {
+  Future<void> loadPublishedQuizzes() {
     final userInfoCache = storage.read(GetStoreKeys.userKey);
 
     UserModel userModel = UserModel.fromJson(userInfoCache);
 
     return quizRepo
-        .getTemplates(orgId: userModel.orgId)
-        .then((templates) {
-          publishedTemplates.assignAll(templates);
+        .getPublishedQuizzes(orgId: userModel.orgId)
+        .then((publishedQuizzes) {
+          publishedTemplates.assignAll(publishedQuizzes);
         })
         .catchError((e) {
-          CustomSnackBar.errorSnackBar('Failed to load templates: $e');
+          CustomSnackBar.errorSnackBar('Failed to load published quizzes: $e');
         });
   }
 
