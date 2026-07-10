@@ -1,4 +1,4 @@
-import 'package:classroom_quiz_admin_portal/features/quizzes/data/models/published_quiz_template.dart';
+import 'package:classroom_quiz_admin_portal/features/quizzes/data/models/published_quiz_model.dart';
 
 abstract class QuizRepo {
   Future<void> addToTemplates({

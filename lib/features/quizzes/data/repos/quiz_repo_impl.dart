@@ -1,6 +1,6 @@
 import 'package:classroom_quiz_admin_portal/core/constants/app_strings.dart';
 import 'package:classroom_quiz_admin_portal/core/utils/functions.dart';
-import 'package:classroom_quiz_admin_portal/features/quizzes/data/models/published_quiz_template.dart';
+import 'package:classroom_quiz_admin_portal/features/quizzes/data/models/published_quiz_model.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/domain/repos/quiz_repo.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 

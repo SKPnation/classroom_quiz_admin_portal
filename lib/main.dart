@@ -10,6 +10,7 @@ import 'package:classroom_quiz_admin_portal/features/resources/presentation/cont
 import 'package:classroom_quiz_admin_portal/features/site_layout/presentation/controllers/menu_controller.dart';
 import 'package:classroom_quiz_admin_portal/src/app.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
@@ -20,6 +21,14 @@ import 'features/quizzes/presentation/controllers/quiz_editor_controller.dart';
 final storage = GetStorage();
 
 void main() async {
+  if (kDebugMode) {
+    // Shows full error details in browser console
+    FlutterError.onError = (details) {
+      FlutterError.presentError(details);
+      debugPrint(details.toString());
+    };
+  }
+
   WidgetsFlutterBinding.ensureInitialized();
 
   await Firebase.initializeApp(

@@ -1,6 +1,5 @@
-import 'package:classroom_quiz_admin_portal/core/global/custom_button.dart';
 import 'package:classroom_quiz_admin_portal/core/theme/colors.dart';
-import 'package:classroom_quiz_admin_portal/features/quizzes/data/models/published_quiz_template.dart';
+import 'package:classroom_quiz_admin_portal/features/quizzes/data/models/published_quiz_model.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/controllers/published_quizzes_controller.dart';
 import 'package:flutter/material.dart';
 
@@ -14,7 +13,6 @@ class PublishedQuizCard extends StatelessWidget {
   static const _ink = Color(0xFF111827);
   static const _sub = Color(0xFF6B7280);
   static const _border = Color(0xFFE5E7EB);
-  static const _purple = AppColors.purple;
   static final Color _chipBg = AppColors.purple.withValues(alpha: 0.12);
   static const _radius = 16.0;
 
@@ -179,12 +177,5 @@ class PublishedQuizCard extends StatelessWidget {
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(SnackBar(content: Text('$action tapped for ${t.title}')));
-  }
-
-  void _onUseTemplate(PublishedQuiz t, BuildContext context) {
-    // TODO: open quiz editor pre-filled from template
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text('Use template: ${t.title}')));
   }
 }
