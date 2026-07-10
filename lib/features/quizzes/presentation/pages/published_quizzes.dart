@@ -1,7 +1,7 @@
 import 'package:classroom_quiz_admin_portal/core/global/custom_button.dart';
 import 'package:classroom_quiz_admin_portal/core/global/custom_text.dart';
 import 'package:classroom_quiz_admin_portal/core/theme/colors.dart';
-import 'package:classroom_quiz_admin_portal/features/quizzes/data/models/published_quiz_template.dart';
+import 'package:classroom_quiz_admin_portal/features/quizzes/data/models/published_quiz_model.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/controllers/published_quizzes_controller.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/widgets/published_quiz_card.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/widgets/published_quizzes_grid.dart';
@@ -23,8 +23,6 @@ class _PublishedQuizzesPageState extends State<PublishedQuizzesPage> {
   static const _ink = Color(0xFF111827);
   static const _sub = Color(0xFF6B7280);
   static const _border = Color(0xFFE5E7EB);
-  static const _purple = AppColors.purple;
-  static final Color _chipBg = AppColors.purple.withValues(alpha: 0.12);
   static const _radius = 16.0;
 
   String _selectedSubject = 'All Subjects';

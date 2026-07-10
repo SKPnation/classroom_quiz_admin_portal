@@ -1,6 +1,6 @@
 import 'package:classroom_quiz_admin_portal/core/data/local/get_store_keys.dart';
 import 'package:classroom_quiz_admin_portal/core/global/custom_snackbar.dart';
-import 'package:classroom_quiz_admin_portal/features/quizzes/data/models/published_quiz_template.dart';
+import 'package:classroom_quiz_admin_portal/features/quizzes/data/models/published_quiz_model.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/controllers/published_quizzes_controller.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/controllers/quiz_editor_controller.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/widgets/editor_card.dart';
@@ -34,6 +34,23 @@ class _QuizEditorPageState extends State<QuizEditorPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildHeader(),
+              Obx(
+                    () => publishedQuizController.isLoading.value
+                    ? const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: Column(
+                      children: [
+                        Text("This may take 10 - 15 seconds, please wait..."),
+                        SizedBox(height: 4),
+                        CircularProgressIndicator()
+                      ],
+                    ),
+                  ),
+                )
+                    : SizedBox.shrink(),
+              ),
+
               SavedDraftsSection(quizEditorController: quizEditorController),
               const SizedBox(height: 16),
 
@@ -44,23 +61,6 @@ class _QuizEditorPageState extends State<QuizEditorPage> {
                 }
                 return const GeneratedQuestionsPanel();
               }),
-
-              Obx(
-                () => publishedQuizController.isLoading.value
-                    ? const Center(
-                        child: Padding(
-                          padding: EdgeInsets.all(16.0),
-                          child: Column(
-                            children: [
-                              Text("This may take 10 - 15 seconds, please wait..."),
-                              SizedBox(height: 4),
-                              CircularProgressIndicator()
-                            ],
-                          ),
-                        ),
-                      )
-                    : SizedBox.shrink(),
-              ),
 
               isNarrow
                   ? Column(

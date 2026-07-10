@@ -17,3 +17,4 @@ export {disconnectMicrosoft} from
   "./integrations/microsoft/disconnectMicrosoft";
 
 export {extractNotesText} from "./extractNotesText";
+export {saveGradedAttempt} from "./saveGradedAttempt";
