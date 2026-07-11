@@ -112,8 +112,22 @@ class AuthRepoImpl extends AuthRepo {
         _ => 'Sign in failed: ${e.message}',
       };
 
-      // Use Get.snackbar as it doesn't depend on context
-      CustomSnackBar.errorSnackBar(message);
+      // Close the dialog first
+      if (Get.isDialogOpen ?? false) {
+        Get.back();
+      }
+
+      // Then show the snackbar
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Get.snackbar(
+          'Sign In Error',
+          message,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+          snackPosition: SnackPosition.BOTTOM,
+          duration: const Duration(seconds: 4),
+        );
+      });
     } catch (e) {
       // Use Get.snackbar as it doesn't depend on context
       CustomSnackBar.errorSnackBar('Something went wrong. Please try again.');

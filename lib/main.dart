@@ -21,15 +21,14 @@ import 'features/quizzes/presentation/controllers/quiz_editor_controller.dart';
 final storage = GetStorage();
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
   if (kDebugMode) {
-    // Shows full error details in browser console
     FlutterError.onError = (details) {
-      FlutterError.presentError(details);
-      debugPrint(details.toString());
+      debugPrint(details.exceptionAsString());
+      debugPrint(details.stack.toString());
     };
   }
-
-  WidgetsFlutterBinding.ensureInitialized();
 
   await Firebase.initializeApp(
     options: const FirebaseOptions(
@@ -61,5 +60,5 @@ void main() async {
   Get.put<SettingsController>(SettingsController());
   Get.put<GradingInsightsController>(GradingInsightsController());
 
-  runApp(const App());
+  runApp(App());
 }
