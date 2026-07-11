@@ -112,18 +112,6 @@ class AuthRepoImpl extends AuthRepo {
         _ => 'Sign in failed: ${e.message}',
       };
 
-    } on FirebaseAuthException catch (e) {
-      final message = switch (e.code) {
-        'invalid-email'          => 'Please enter a valid institution email address.',
-        'user-disabled'          => 'This account has been disabled. Contact support.',
-        'wrong-password'         => 'Access denied. Please use your institution email.',
-        'network-request-failed' => 'No internet connection. Please try again.',
-        _                        => 'Sign in failed: ${e.message}',
-      };
-      CustomSnackBar.errorSnackBar(message);
-    } catch (e) {
-      CustomSnackBar.errorSnackBar('Something went wrong. Please try again.');
-    }
       // Use Get.snackbar as it doesn't depend on context
       CustomSnackBar.errorSnackBar(message);
     } catch (e) {
