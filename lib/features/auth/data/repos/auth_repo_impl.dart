@@ -53,93 +53,58 @@ class AuthRepoImpl extends AuthRepo {
   Future<void> signInWithEmailPassword({
     required String email,
     required SchoolModel school,
+    required Function(String) onError,
   }) async {
     const defaultPassword = "Asseska@SecureDefault2025!";
-    ScaffoldMessenger.of(Get.context!).showSnackBar(
-      SnackBar(
-        content: Text(defaultPassword),
-        backgroundColor: Colors.red,
-        duration: const Duration(seconds: 4),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
 
-    // // Validate domain against school's allowedDomains before hitting Firebase
-    // final emailDomain = email.trim().toLowerCase().split('@').last;
-    // final allowedDomains = school.allowedDomains
-    //     .map((d) => d.trim().toLowerCase())
-    //     .toList();
-    //
-    // if (!allowedDomains.contains(emailDomain)) {
-    //   CustomSnackBar.errorSnackBar(
-    //     'Please use your ${school.name} institution email address.',
-    //   );
-    //   return;
-    // }
-    //
-    // try {
-    //   UserCredential result;
-    //
-    //   try {
-    //     // Returning user — try signing in first
-    //     result = await auth.signInWithEmailAndPassword(
-    //       email: email.trim(),
-    //       password: defaultPassword,
-    //     );
-    //   } on FirebaseAuthException catch (e) {
-    //     if (e.code == 'user-not-found') {
-    //       // First time — create the account silently
-    //       result = await auth.createUserWithEmailAndPassword(
-    //         email: email.trim(),
-    //         password: defaultPassword,
-    //       );
-    //     } else {
-    //       rethrow;
-    //     }
-    //   }
-    //
-    //   final user = result.user!;
-    //
-    //   // Save user info to local storage
-    //   await saveUserToStorage(user);
-    //
-    //   // Save org info to local storage
-    //   saveSchoolToStorage(school);
-    //
-    //   Get.offNamed(Routes.rootRoute);
-    //   Get.offNamed(Routes.rootRoute);
-    // } on FirebaseAuthException catch (e) {
-    //   final message = switch (e.code) {
-    //     'invalid-email' => 'Please enter a valid institution email address.',
-    //     'user-disabled' => 'This account has been disabled. Contact support.',
-    //     'wrong-password' => 'Access denied. Please use your institution email.',
-    //     'invalid-credential' => 'Sign in failed. Please try again.',
-    //     'invalid-login-credentials' => 'Sign in failed. Please try again.',
-    //     'network-request-failed' => 'No internet connection. Please try again.',
-    //     'too-many-requests' => 'Too many attempts. Please try again later.',
-    //     _ => 'Sign in failed: ${e.message}',
-    //   };
-    //
-    //   // Close the dialog first
-    //   if (Get.isDialogOpen ?? false) {
-    //     Get.back();
-    //   }
-    //
-    //   // Then show the snackbar
-    //   WidgetsBinding.instance.addPostFrameCallback((_) {
-    //     Get.snackbar(
-    //       'Sign In Error',
-    //       message,
-    //       backgroundColor: Colors.red,
-    //       colorText: Colors.white,
-    //       snackPosition: SnackPosition.BOTTOM,
-    //       duration: const Duration(seconds: 4),
-    //     );
-    //   });
-    // } catch (e) {
-    //   // Use Get.snackbar as it doesn't depend on context
-    //   CustomSnackBar.errorSnackBar('Something went wrong. Please try again.');
-    // }
+    final emailDomain = email.trim().toLowerCase().split('@').last;
+    final allowedDomains = school.allowedDomains
+        .map((d) => d.trim().toLowerCase())
+        .toList();
+
+    if (!allowedDomains.contains(emailDomain)) {
+      onError('Please use your ${school.name} institution email address.');
+      return;
+    }
+
+    try {
+      UserCredential result;
+
+      try {
+        result = await auth.signInWithEmailAndPassword(
+          email: email.trim(),
+          password: defaultPassword,
+        );
+      } on FirebaseAuthException catch (e) {
+        if (e.code == 'user-not-found') {
+          result = await auth.createUserWithEmailAndPassword(
+            email: email.trim(),
+            password: defaultPassword,
+          );
+        } else {
+          rethrow;
+        }
+      }
+
+      final user = result.user!;
+      await saveUserToStorage(user);
+      saveSchoolToStorage(school);
+      Get.offNamed(Routes.rootRoute);
+
+    } on FirebaseAuthException catch (e) {
+      final message = switch (e.code) {
+        'invalid-email'             => 'Please enter a valid email address.',
+        'user-disabled'             => 'This account has been disabled.',
+        'invalid-credential'        => 'Sign in failed. Please try again.',
+        'invalid-login-credentials' => 'Sign in failed. Please try again.',
+        'network-request-failed'    => 'No internet connection.',
+        'too-many-requests'         => 'Too many attempts. Try again later.',
+        _                           => 'Sign in failed. Please try again.',
+      };
+      onError(message);
+    } catch (e) {
+      onError('Something went wrong. Please try again.');
+    }
   }
 
   // @override

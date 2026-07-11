@@ -16,10 +16,6 @@ class EmailPasswordLoginDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // final domain = (school.allowedDomains.isNotEmpty)
-    //     ? school.allowedDomains.first.trim().toLowerCase()
-    //     : '';
-
     return AlertDialog(
       title: const Text('Sign In'),
       backgroundColor: AppColors.white,
@@ -46,28 +42,6 @@ class EmailPasswordLoginDialog extends StatelessWidget {
               keyboardType: TextInputType.emailAddress,
               onChanged: (val) => controller.typedEmail.value = val,
             ),
-            // const SizedBox(height: 16),
-            //
-            // // Password Field
-            // Obx(
-            //   () => TextField(
-            //     controller: controller.passwordTEC,
-            //     obscureText: controller.isPasswordHidden.value,
-            //     decoration: InputDecoration(
-            //       labelText: 'Password',
-            //       prefixIcon: const Icon(Icons.lock_outline),
-            //       border: const OutlineInputBorder(),
-            //       suffixIcon: IconButton(
-            //         icon: Icon(
-            //           controller.isPasswordHidden.value
-            //               ? Icons.visibility_off
-            //               : Icons.visibility,
-            //         ),
-            //         onPressed: () => controller.isPasswordHidden.toggle(),
-            //       ),
-            //     ),
-            //   ),
-            // ),
 
             // Error Message Display
             Obx(
@@ -121,13 +95,5 @@ class EmailPasswordLoginDialog extends StatelessWidget {
     controller.dialogErrorMessage.value = "";
 
     await controller.signInWithEmailPassword(school: school);
-
-
-    // print("is email valid: $isEmailValid ");
-    // if (isEmailValid) {
-    //   await controller.signInWithEmailPassword(school: school);
-    // } else {
-    //   controller.dialogErrorMessage.value = "Invalid email address";
-    // }
   }
 }

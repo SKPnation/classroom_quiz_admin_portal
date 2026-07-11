@@ -216,11 +216,18 @@ class FindSchoolController extends GetxController {
   }
 
   Future<void> signInWithEmailPassword({required SchoolModel school}) async {
+    loading.value = true;
+    dialogErrorMessage.value = '';
+
     await authRepo.signInWithEmailPassword(
       email: emailTEC.text,
-      // password: passwordTEC.text,
       school: school,
+      onError: (message) {
+        dialogErrorMessage.value = message;
+      },
     );
+
+    loading.value = false;
   }
 
   bool _isValidSchoolEmail(String email, String domain) {

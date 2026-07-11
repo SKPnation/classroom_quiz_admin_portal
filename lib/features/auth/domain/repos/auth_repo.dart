@@ -7,6 +7,7 @@ abstract class AuthRepo {
   Future<void> signInWithEmailPassword({
     required String email,
     required SchoolModel school,
+    required Function(String) onError,
   });
 
   // Future<void> registerWithEmailPassword({
