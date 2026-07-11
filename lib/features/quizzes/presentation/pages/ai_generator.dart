@@ -37,9 +37,9 @@ class _AiQuestionGeneratorPageState extends State<AiQuestionGeneratorPage> {
 
   @override
   void initState() {
-    OpenAI.apiKey = AppConfig
-        .openAiApiKey; //TODO: Use for testing only, remove before production
-    // quizEditorController.getApiKey();
+    // OpenAI.apiKey = AppConfig
+    //     .openAiApiKey; //TODO: Use for testing only, remove before production
+    quizEditorController.getApiKey();
 
     // In your setState or initState, reset to a valid value
     if (![5, 10].contains(questionCount)) {
