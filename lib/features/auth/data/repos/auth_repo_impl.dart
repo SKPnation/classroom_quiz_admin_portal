@@ -99,17 +99,22 @@ class AuthRepoImpl extends AuthRepo {
       saveSchoolToStorage(school);
 
       Get.offNamed(Routes.rootRoute);
-
     } on FirebaseAuthException catch (e) {
       final message = switch (e.code) {
-        'invalid-email'          => 'Please enter a valid institution email address.',
-        'user-disabled'          => 'This account has been disabled. Contact support.',
-        'wrong-password'         => 'Access denied. Please use your institution email.',
+        'invalid-email' => 'Please enter a valid institution email address.',
+        'user-disabled' => 'This account has been disabled. Contact support.',
+        'wrong-password' => 'Access denied. Please use your institution email.',
+        'invalid-credential' => 'Sign in failed. Please try again.',
+        'invalid-login-credentials' => 'Sign in failed. Please try again.',
         'network-request-failed' => 'No internet connection. Please try again.',
-        _                        => 'Sign in failed: ${e.message}',
+        'too-many-requests' => 'Too many attempts. Please try again later.',
+        _ => 'Sign in failed: ${e.message}',
       };
+
+      // Use Get.snackbar as it doesn't depend on context
       CustomSnackBar.errorSnackBar(message);
     } catch (e) {
+      // Use Get.snackbar as it doesn't depend on context
       CustomSnackBar.errorSnackBar('Something went wrong. Please try again.');
     }
   }
