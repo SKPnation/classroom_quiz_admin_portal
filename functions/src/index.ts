@@ -18,3 +18,4 @@ export {disconnectMicrosoft} from
 
 export {extractNotesText} from "./extractNotesText";
 export {saveGradedAttempt} from "./saveGradedAttempt";
+export {gradeAndSave} from "./gradeAndSave";
