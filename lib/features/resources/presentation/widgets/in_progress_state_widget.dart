@@ -121,8 +121,8 @@ class _ProfileInProgressCardState extends State<ProfileInProgressCard> {
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    const AvatarCircle(size: 72),
-                    const SizedBox(width: 16),
+                    // const AvatarCircle(size: 72),
+                    // const SizedBox(width: 16),
 
                     Expanded(
                       child: Column(
@@ -161,25 +161,25 @@ class _ProfileInProgressCardState extends State<ProfileInProgressCard> {
                     const SizedBox(width: 12),
 
                     // Upload button (UI only)
-                    OutlinedButton.icon(
-                      onPressed: () {},
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: const Color(0xFF111827),
-                        side: const BorderSide(color: Color(0xFFE5E7EB)),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 12,
-                        ),
-                      ),
-                      icon: const Icon(Icons.photo_camera_outlined, size: 18),
-                      label: const Text(
-                        'Upload New',
-                        style: TextStyle(fontWeight: FontWeight.w700),
-                      ),
-                    ),
+                    // OutlinedButton.icon(
+                    //   onPressed: () {},
+                    //   style: OutlinedButton.styleFrom(
+                    //     foregroundColor: const Color(0xFF111827),
+                    //     side: const BorderSide(color: Color(0xFFE5E7EB)),
+                    //     shape: RoundedRectangleBorder(
+                    //       borderRadius: BorderRadius.circular(10),
+                    //     ),
+                    //     padding: const EdgeInsets.symmetric(
+                    //       horizontal: 12,
+                    //       vertical: 12,
+                    //     ),
+                    //   ),
+                    //   icon: const Icon(Icons.photo_camera_outlined, size: 18),
+                    //   label: const Text(
+                    //     'Upload New',
+                    //     style: TextStyle(fontWeight: FontWeight.w700),
+                    //   ),
+                    // ),
                   ],
                 ),
 

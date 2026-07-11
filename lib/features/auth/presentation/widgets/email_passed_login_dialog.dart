@@ -17,9 +17,30 @@ class EmailPasswordLoginDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Sign In'),
       backgroundColor: AppColors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      title: Column(
+        children: [
+          // ── Asseska logo ──────────────────────────────────────────
+          Center(
+            child: Image.asset(
+              'assets/images/asseska_logo.png',
+              height: 56,
+              width: 56,
+            ),
+          ),
+          const SizedBox(height: 8),
+          const Center(
+            child: Text(
+              'Sign In',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ],
+      ),
       content: SizedBox(
         width: 400,
         child: Column(
@@ -28,10 +49,10 @@ class EmailPasswordLoginDialog extends StatelessWidget {
             const Text(
               'Enter your credentials to access your account.',
               style: TextStyle(fontSize: 14, color: Colors.grey),
+              textAlign: TextAlign.center,
             ),
             const SizedBox(height: 20),
 
-            // Email Field
             TextField(
               controller: controller.emailTEC,
               decoration: const InputDecoration(
@@ -43,16 +64,15 @@ class EmailPasswordLoginDialog extends StatelessWidget {
               onChanged: (val) => controller.typedEmail.value = val,
             ),
 
-            // Error Message Display
             Obx(
-              () => controller.dialogErrorMessage.value.isNotEmpty
+                  () => controller.dialogErrorMessage.value.isNotEmpty
                   ? Padding(
-                      padding: const EdgeInsets.only(top: 12),
-                      child: Text(
-                        controller.dialogErrorMessage.value,
-                        style: const TextStyle(color: Colors.red, fontSize: 13),
-                      ),
-                    )
+                padding: const EdgeInsets.only(top: 12),
+                child: Text(
+                  controller.dialogErrorMessage.value,
+                  style: const TextStyle(color: Colors.red, fontSize: 13),
+                ),
+              )
                   : const SizedBox.shrink(),
             ),
           ],
@@ -61,9 +81,6 @@ class EmailPasswordLoginDialog extends StatelessWidget {
       actions: [
         TextButton(onPressed: () => Get.back(), child: const Text('Cancel')),
         Obx(() {
-          final email = controller.typedEmail.value.trim().toLowerCase();
-          // final isEmailValid = email.endsWith('@$domain');
-
           return ElevatedButton(
             style: ElevatedButton.styleFrom(
               minimumSize: const Size(100, 45),
@@ -71,17 +88,16 @@ class EmailPasswordLoginDialog extends StatelessWidget {
             ),
             onPressed: controller.loading.value
                 ? null
-                : () =>
-                      _handleLogin(school: school),
+                : () => _handleLogin(school: school),
             child: controller.loading.value
                 ? const SizedBox(
-                    height: 20,
-                    width: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: Colors.white,
-                    ),
-                  )
+              height: 20,
+              width: 20,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: Colors.white,
+              ),
+            )
                 : const Text('Login', style: TextStyle(color: Colors.white)),
           );
         }),
@@ -89,11 +105,8 @@ class EmailPasswordLoginDialog extends StatelessWidget {
     );
   }
 
-  void _handleLogin({
-    required SchoolModel school,
-  }) async {
+  void _handleLogin({required SchoolModel school}) async {
     controller.dialogErrorMessage.value = "";
-
     await controller.signInWithEmailPassword(school: school);
   }
 }

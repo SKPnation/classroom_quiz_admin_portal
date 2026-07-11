@@ -80,6 +80,7 @@ flutter:
   assets:
     - assets/icons/
     - assets/icons/side_menu/
+    - assets/images/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
