@@ -32,7 +32,7 @@ class SettingsController extends GetxController {
     final list = await userRepo.getMyIntegrations(user.orgId, user.uid);
 
     final isGoogleConnected = list.any(
-      (integration) => integration['id'] == 'google',
+      (integration) => (integration['id'] == 'google') && (integration['connected'] == true),
     );
 
     final isCanvasConnected = list.any(

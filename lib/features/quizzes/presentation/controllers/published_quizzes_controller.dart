@@ -6,6 +6,7 @@ import 'package:classroom_quiz_admin_portal/core/global/custom_snackbar.dart';
 import 'package:classroom_quiz_admin_portal/core/navigation/app_routes.dart';
 import 'package:classroom_quiz_admin_portal/core/navigation/navigation_controller.dart';
 import 'package:classroom_quiz_admin_portal/core/theme/colors.dart';
+import 'package:classroom_quiz_admin_portal/core/utils/services/google_integration_service.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/data/models/published_quiz_model.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/data/models/quiz_item_model.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/data/repos/quiz_repo_impl.dart';
@@ -144,6 +145,7 @@ class PublishedQuizzesController extends GetxController {
     final qEditorController = QuizEditorController.instance;
 
     final userInfoCache = storage.read(GetStoreKeys.userKey);
+
     if (userInfoCache == null) {
       CustomSnackBar.errorSnackBar(
         'User session not found. Please sign in again.',
@@ -153,25 +155,27 @@ class PublishedQuizzesController extends GetxController {
 
     final userModel = UserModel.fromJson(userInfoCache);
 
-    // Load integrations and wait for them before reading connected status
-    await Future.delayed(Duration.zero, () async {
-      await SettingsController.instance.loadDefaultIntegrations(userModel);
-    });
+    await SettingsController.instance.loadDefaultIntegrations(userModel);
 
     final isCanvasConnected = SettingsController.instance
         .isIntegrationConnected('canvas');
+
     final isGoogleConnected = SettingsController.instance
         .isIntegrationConnected('google');
 
     debugPrint('Google connected: $isGoogleConnected');
     debugPrint('Canvas connected: $isCanvasConnected');
 
+    if (!context.mounted) return;
+
     final result = await showDialog<PublishDestination>(
       context: context,
-      builder: (context) => PublishDestinationDialog(
-        isCanvasConnected: isCanvasConnected,
-        isGoogleConnected: isGoogleConnected,
-      ),
+      builder: (dialogContext) {
+        return PublishDestinationDialog(
+          isCanvasConnected: isCanvasConnected,
+          isGoogleConnected: isGoogleConnected,
+        );
+      },
     );
 
     if (result == null) return;
@@ -186,11 +190,15 @@ class PublishedQuizzesController extends GetxController {
     isLoading.value = true;
 
     try {
-      final title = qEditorController.currentDraftTitle.value.trim().isEmpty
-          ? 'Untitled Quiz'
-          : qEditorController.currentDraftTitle.value.trim();
+      final draftTitle =
+      qEditorController.currentDraftTitle.value.trim();
 
-      final publishedQuizId = qEditorController.currentDraftId.value.isNotEmpty
+      final title = draftTitle.isEmpty
+          ? 'Untitled Quiz'
+          : draftTitle;
+
+      final publishedQuizId =
+      qEditorController.currentDraftId.value.isNotEmpty
           ? qEditorController.currentDraftId.value
           : const Uuid().v4();
 
@@ -207,58 +215,166 @@ class PublishedQuizzesController extends GetxController {
         subject: publishedQuiz.subject.isNotEmpty
             ? publishedQuiz.subject
             : 'General',
-        type: publishedQuiz.type.isNotEmpty ? publishedQuiz.type : 'Quiz',
-        level: publishedQuiz.level.isNotEmpty ? publishedQuiz.level : 'Intro',
+        type: publishedQuiz.type.isNotEmpty
+            ? publishedQuiz.type
+            : 'Quiz',
+        level: publishedQuiz.level.isNotEmpty
+            ? publishedQuiz.level
+            : 'Intro',
         items: copiedItems,
         publishedAt: DateTime.now(),
         tags: const ['Published'],
         createdBy: userModel.uid,
       );
 
-      // 1. Publish the template first
+      // Save the quiz template.
       await publishTemplate(template);
 
-      // 2. Create the Google Form — suppress link dialog if going to Classroom
+      // Create the Google Form.
       final updatedQuiz = await createGoogleForm(
         context: context,
         publishedQuiz: template,
         showLinkDialog:
-            result != PublishDestination.googleFormsAndClassroom, // ADD
+        result != PublishDestination.googleFormsAndClassroom,
       );
 
-      // 3. Sync to Classroom
+      // Create the Google Classroom assignment.
       if (result == PublishDestination.googleFormsAndClassroom) {
-        if (updatedQuiz?.formUrl == null) {
-          CustomSnackBar.errorSnackBar(
+        if (updatedQuiz?.formUrl == null ||
+            updatedQuiz!.formUrl!.trim().isEmpty) {
+          throw Exception(
             'Google Form was not created. Cannot sync to Classroom.',
           );
-          return;
         }
+
         await syncToGoogleClassroom(
           context: context,
-          publishedQuiz: updatedQuiz!,
+          publishedQuiz: updatedQuiz,
         );
       }
 
+      // Sync to Canvas.
       if (result == PublishDestination.googleAndCanvas) {
-        await syncToCanvas(context: context, publishedQuiz: template);
+        await syncToCanvas(
+          context: context,
+          publishedQuiz: template,
+        );
       }
 
       MenController.instance.changeActiveItemTo(
         Routes.publishedQuizzesDisplayName,
         Routes.publishedQuizzesRoute,
       );
-      NavigationController.instance.navigateTo(Routes.publishedQuizzesRoute);
 
-      CustomSnackBar.successSnackBar(body: 'Quiz published successfully.');
-    } catch (e) {
+      NavigationController.instance.navigateTo(
+        Routes.publishedQuizzesRoute,
+      );
+
+      CustomSnackBar.successSnackBar(
+        body: 'Quiz published successfully.',
+      );
+    } on FirebaseFunctionsException catch (e) {
+      debugPrint('Firebase Functions publish error:');
+      debugPrint('Code: ${e.code}');
+      debugPrint('Message: ${e.message}');
+      debugPrint('Details: ${e.details}');
+
+      final details = e.details is Map
+          ? Map<String, dynamic>.from(e.details as Map)
+          : <String, dynamic>{};
+
+      final reason = details['reason']?.toString();
+
+      final requiresGoogleReconnect =
+          details['requiresGoogleReconnect'] == true;
+
+      if (reason == 'GOOGLE_REAUTH_REQUIRED' ||
+          requiresGoogleReconnect) {
+        if (!context.mounted) return;
+
+        await showGoogleReconnectDialog(context, userModel);
+        return;
+      }
+
+      if (reason == 'GOOGLE_NOT_CONNECTED') {
+        CustomSnackBar.errorSnackBar(
+          'Connect your Google account in Settings before publishing.',
+        );
+        return;
+      }
+
+      CustomSnackBar.errorSnackBar(
+        e.message ?? 'Unable to publish the quiz.',
+      );
+    } catch (e, stackTrace) {
       debugPrint('Publish failed: $e');
+      debugPrintStack(stackTrace: stackTrace);
 
-      Get.snackbar(
-        'Publish Failed',
-        e.toString(),
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
+      CustomSnackBar.errorSnackBar(
+        'Unable to publish the quiz. Please try again.',
+      );
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> showGoogleReconnectDialog(BuildContext context, UserModel user) async {
+    final shouldReconnect = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text('Reconnect Google'),
+          content: const Text(
+            'Your Google connection has expired or is no longer valid. '
+                'Disconnect and reconnect your Google account to continue.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(dialogContext).pop(false);
+              },
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () {
+                Navigator.of(dialogContext).pop(true);
+
+                MenController.instance.changeActiveItemTo(
+                  Routes.settingsDisplayName,
+                  Routes.settingsRoute,
+                );
+
+                NavigationController.instance.navigateTo(
+                  Routes.settingsRoute,
+                );
+              },
+              child: const Text('Disconnect & Reconnect'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (shouldReconnect != true || !context.mounted) return;
+
+    try {
+      isLoading.value = true;
+
+      await GoogleIntegrationService().disconnectGoogle(orgId: user.orgId);
+      if (!context.mounted) return;
+
+      await GoogleIntegrationService().connectGoogle(orgId: user.orgId);
+
+      CustomSnackBar.successSnackBar(
+        body: 'Google reconnected successfully. Please publish again.',
+      );
+    } catch (e, stackTrace) {
+      debugPrint('Google reconnect failed: $e');
+      debugPrintStack(stackTrace: stackTrace);
+
+      CustomSnackBar.errorSnackBar(
+        'Google could not be reconnected. Please reconnect from Settings.',
       );
     } finally {
       isLoading.value = false;
@@ -460,7 +576,7 @@ class PublishedQuizzesController extends GetxController {
         region: 'us-central1',
       ).httpsCallable('syncToGoogleClassroom');
 
-      // First call — no courseId, fetches list of classes
+      // First call - no courseId, fetches list of classes
       final coursesResult = await callable.call({
         'orgId': orgId,
         'quiz': {
