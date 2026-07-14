@@ -12,6 +12,7 @@ class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
+      title: 'Asseska Portal',
       navigatorKey: navigatorKey,
       initialRoute: AppPages.initial,
       unknownRoute: GetPage(
