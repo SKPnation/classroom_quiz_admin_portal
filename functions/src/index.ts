@@ -5,6 +5,9 @@ admin.initializeApp();
 // ======= GOOGLE INTEGRATION IMPORTS ======= //
 export {connectGoogle} from "./integrations/google/connectGoogle";
 export {googleOAuthCallback} from "./integrations/google/googleOAuthCallback";
+export {createGoogleForm} from "./integrations/google/createGoogleForm";
+export {onFormResponse} from "./integrations/google/onFormResponse";
+export {renewFormWatches} from "./integrations/google/renewFormWatches";
 export {syncToGoogleClassroom} from
   "./integrations/google/syncToGoogleClassroom";
 export {disconnectGoogle} from "./integrations/google/disconnectGoogle";
