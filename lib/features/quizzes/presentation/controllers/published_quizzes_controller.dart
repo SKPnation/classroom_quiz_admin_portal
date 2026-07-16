@@ -392,79 +392,69 @@ class PublishedQuizzesController extends GetxController {
   }) async {
     final userInfoCache = storage.read(GetStoreKeys.userKey);
 
+    if (userInfoCache == null) {
+      CustomSnackBar.errorSnackBar('User session not found. Please sign in again.');
+      return null;
+    }
+
     isLoading.value = true;
 
     try {
-      UserModel userModel = UserModel.fromJson(userInfoCache);
+      final userModel = UserModel.fromJson(userInfoCache);
 
       final payload = {
         'orgId': userModel.orgId,
-        'createdBy': userModel.uid,
-        "title": publishedQuiz.title,
-        "description": publishedQuiz.description,
         'publishedQuizId': publishedQuiz.id,
-        "questions": publishedQuiz.items
+        'title': publishedQuiz.title,
+        'description': publishedQuiz.description,
+        'questions': publishedQuiz.items
             .map(
               (q) => {
-                "type": q.type.name,
-                "question": q.question,
-                "options": q.options,
-                "correctOptionIndexes": q.correctOptionIndexes,
-                "answerKey": q.answerKey,
-                "points": q.points,
-                "required": true,
-              },
-            )
+            'type': q.type.name,
+            'question': q.question,
+            'options': q.options,
+            'correctOptionIndexes': q.correctOptionIndexes,
+            'answerKey': q.answerKey,
+            'points': q.points,
+            'required': true,
+          },
+        )
             .toList(),
       };
 
-      final response = await http.post(
-        Uri.parse(scriptUrl),
-        body: jsonEncode(payload),
-      );
+      final callable = FirebaseFunctions.instanceFor(region: 'us-central1')
+          .httpsCallable('createGoogleForm');
 
-      final decoded = jsonDecode(response.body);
+      // Pass the Map directly — do NOT jsonEncode. Callables handle serialization.
+      final response = await callable.call(payload);
 
-      if (decoded == null || decoded is! Map<String, dynamic>) {
-        throw Exception("Invalid response from Apps Script: ${response.body}");
-      }
-
-      final result = decoded;
+      final result = Map<String, dynamic>.from(response.data as Map);
 
       if (result['status'] == 'success' && result['publishedUrl'] != null) {
-        String publishedUrl = result['publishedUrl'].toString();
-        String editUrl = result['formUrl'].toString();
+        final publishedUrl = result['publishedUrl'].toString();
 
         final updatedQuiz = publishedQuiz.copyWith(formUrl: publishedUrl);
 
-        await updateQuizFormUrl(
-          quizId: publishedQuiz.id,
-          orgId: userModel.orgId,
-          formUrl: publishedUrl,
-          editUrl: editUrl,
-        );
+        // No updateQuizFormUrl call needed — the Firebase Function already
+        // wrote formUrl/formEditUrl to the Firestore doc server-side.
 
-        // Only show the link dialog if not going straight to Classroom
         if (showLinkDialog && context.mounted) {
           showDialog(
             context: context,
             builder: (context) => AlertDialog(
               backgroundColor: Colors.white,
-              title: const Text("Form Created"),
+              title: const Text('Form Created'),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text("Your Google Form is ready:"),
+                  const Text('Your Google Form is ready:'),
                   const SizedBox(height: 10),
                   InkWell(
                     onTap: () async {
-                      final Uri uri = Uri.parse(publishedUrl);
-                      if (await canLaunchUrl(uri)) {
-                        await launchUrl(
-                          uri,
-                          mode: LaunchMode.externalApplication,
-                        );
-                      }
+                      await launchUrl(
+                        Uri.parse(publishedUrl),
+                        mode: LaunchMode.externalApplication,
+                      );
                     },
                     child: Text(
                       publishedUrl,
@@ -483,8 +473,8 @@ class PublishedQuizzesController extends GetxController {
                     Clipboard.setData(ClipboardData(text: publishedUrl));
                     Navigator.pop(context);
                     Get.snackbar(
-                      "Copied",
-                      "Link copied to clipboard!",
+                      'Copied',
+                      'Link copied to clipboard!',
                       snackPosition: SnackPosition.BOTTOM,
                       backgroundColor: Colors.green,
                       colorText: Colors.white,
@@ -494,51 +484,36 @@ class PublishedQuizzesController extends GetxController {
                 ),
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text("Close"),
+                  child: const Text('Close'),
                 ),
               ],
             ),
           );
         }
 
-        return updatedQuiz; // ← return updated quiz with formUrl
+        return updatedQuiz;
       } else {
-        String errorMsg = result['message'] ?? "Unknown error occurred";
+        final errorMsg = result['message']?.toString() ?? 'Unknown error occurred';
 
         Get.snackbar(
-          "Creation Failed",
+          'Creation Failed',
           errorMsg,
           backgroundColor: Colors.red,
           colorText: Colors.white,
         );
 
-        return null; // ← form creation failed
+        return null;
       }
+    } on FirebaseFunctionsException {
+      // Let publishWithDestinationDialog handle GOOGLE_NOT_CONNECTED /
+      // GOOGLE_REAUTH_REQUIRED and show the reconnect dialog.
+      rethrow;
     } catch (e) {
       debugPrint('Error creating Google Form: $e');
-      return null; // ← return null on error
+      rethrow;
     } finally {
       isLoading.value = false;
     }
-  }
-
-  // Helper to persist formUrl on the Firestore quiz document
-  Future<void> updateQuizFormUrl({
-    required String quizId,
-    required String orgId,
-    required String formUrl,
-    required String editUrl,
-  }) async {
-    await FirebaseFirestore.instance
-        .collection('orgs')
-        .doc(orgId)
-        .collection('templates')
-        .doc(quizId)
-        .update({
-          'formUrl': formUrl,
-          'formEditUrl': editUrl,
-          'updatedAt': FieldValue.serverTimestamp(),
-        });
   }
 
   /// STUB: Canvas sync is not implemented yet (OAuth flow + API calls are
