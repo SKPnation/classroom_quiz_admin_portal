@@ -62,7 +62,11 @@ class AuthRepoImpl extends AuthRepo {
         .map((d) => d.trim().toLowerCase())
         .toList();
 
-    if (!allowedDomains.contains(emailDomain)) {
+    final isDomainAllowed = allowedDomains.any(
+          (domain) => emailDomain == domain || emailDomain.endsWith('.$domain'),
+    );
+
+    if (!isDomainAllowed) {
       onError('Please use your ${school.name} institution email address.');
       return;
     }

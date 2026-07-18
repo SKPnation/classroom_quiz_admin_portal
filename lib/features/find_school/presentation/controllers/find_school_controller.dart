@@ -1,18 +1,10 @@
 import 'dart:async';
 
-import 'package:classroom_quiz_admin_portal/core/global/custom_text.dart';
-import 'package:classroom_quiz_admin_portal/core/navigation/app_routes.dart';
-import 'package:classroom_quiz_admin_portal/core/theme/colors.dart';
 import 'package:classroom_quiz_admin_portal/features/auth/data/repos/auth_repo_impl.dart';
 import 'package:classroom_quiz_admin_portal/features/auth/presentation/widgets/email_passed_login_dialog.dart';
-import 'package:classroom_quiz_admin_portal/features/auth/presentation/widgets/passwordless_login_dialog.dart';
 import 'package:classroom_quiz_admin_portal/features/find_school/data/models/school_model.dart';
 import 'package:classroom_quiz_admin_portal/features/find_school/data/repos/find_school_repo_impl.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
