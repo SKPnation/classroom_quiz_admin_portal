@@ -1,5 +1,8 @@
 import 'package:classroom_quiz_admin_portal/core/data/local/get_store_keys.dart';
 import 'package:classroom_quiz_admin_portal/core/global/custom_snackbar.dart';
+import 'package:classroom_quiz_admin_portal/core/navigation/app_routes.dart';
+import 'package:classroom_quiz_admin_portal/core/navigation/navigation_controller.dart';
+import 'package:classroom_quiz_admin_portal/core/theme/colors.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/data/models/published_quiz_model.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/controllers/published_quizzes_controller.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/controllers/quiz_editor_controller.dart';
@@ -8,6 +11,8 @@ import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/widget
 import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/widgets/quiz_editor_question_card.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/widgets/saved_drafts_section.dart';
 import 'package:classroom_quiz_admin_portal/features/resources/data/model/user_model.dart';
+import 'package:classroom_quiz_admin_portal/features/resources/presentation/controllers/settings_controller.dart';
+import 'package:classroom_quiz_admin_portal/features/site_layout/presentation/controllers/menu_controller.dart';
 import 'package:classroom_quiz_admin_portal/main.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -23,6 +28,7 @@ class QuizEditorPage extends StatefulWidget {
 class _QuizEditorPageState extends State<QuizEditorPage> {
   final quizEditorController = QuizEditorController.instance;
   final publishedQuizController = PublishedQuizzesController.instance;
+  final navigationController = NavigationController.instance;
 
   @override
   Widget build(BuildContext context) {
@@ -35,19 +41,21 @@ class _QuizEditorPageState extends State<QuizEditorPage> {
             children: [
               _buildHeader(),
               Obx(
-                    () => publishedQuizController.isLoading.value
+                () => publishedQuizController.isLoading.value
                     ? const Center(
-                  child: Padding(
-                    padding: EdgeInsets.all(16.0),
-                    child: Column(
-                      children: [
-                        Text("This may take 10 - 15 seconds, please wait..."),
-                        SizedBox(height: 4),
-                        CircularProgressIndicator()
-                      ],
-                    ),
-                  ),
-                )
+                        child: Padding(
+                          padding: EdgeInsets.all(16.0),
+                          child: Column(
+                            children: [
+                              Text(
+                                "This may take 10 - 15 seconds, please wait...",
+                              ),
+                              SizedBox(height: 4),
+                              CircularProgressIndicator(),
+                            ],
+                          ),
+                        ),
+                      )
                     : SizedBox.shrink(),
               ),
 
@@ -123,49 +131,104 @@ class _QuizEditorPageState extends State<QuizEditorPage> {
                 height: 40,
                 child: ElevatedButton(
                   onPressed: () async {
-                    if (quizEditorController.quizItems.isEmpty) {
-                      CustomSnackBar.errorSnackBar(
-                        'Add at least one question before publishing.',
-                      );
-                      return;
-                    }
-
-                    // Ensure controller is initialised before using it
-                    if (!Get.isRegistered<PublishedQuizzesController>()) {
-                      Get.put(PublishedQuizzesController());
-                    }
-
                     final userInfoCache = storage.read(GetStoreKeys.userKey);
-                    if (userInfoCache == null) return;
-
                     final userModel = UserModel.fromJson(userInfoCache);
-                    final title = quizEditorController.currentDraftTitle.value.trim().isEmpty
-                        ? 'Untitled Quiz'
-                        : quizEditorController.currentDraftTitle.value.trim();
-
-                    final quiz = PublishedQuiz(
-                      id: quizEditorController.currentDraftId.value.isNotEmpty
-                          ? quizEditorController.currentDraftId.value
-                          : const Uuid().v4(),
-                      title: title,
-                      description: 'Published from quiz editor',
-                      subject: 'General',
-                      type: 'Quiz',
-                      level: 'Intro',
-                      items: quizEditorController.quizItems
-                          .map(
-                            (q) => q.copyWith(
-                          options: List<String>.from(q.options),
-                          correctOptionIndexes: List<int>.from(q.correctOptionIndexes),
-                        ),
-                      )
-                          .toList(),
-                      publishedAt: DateTime.now(),
-                      createdBy: userModel.uid,
-                      tags: const ['Published'],
+                    await SettingsController.instance.loadDefaultIntegrations(
+                      userModel,
                     );
 
-                    PublishedQuizzesController.instance.publish(quiz, context);
+                    if (SettingsController.instance.isIntegrationConnected(
+                      'google',
+                    ))
+                    {
+                      if (quizEditorController.quizItems.isEmpty) {
+                        CustomSnackBar.errorSnackBar(
+                          'Add at least one question before publishing.',
+                        );
+                        return;
+                      }
+
+                      // Ensure controller is initialised before using it
+                      if (!Get.isRegistered<PublishedQuizzesController>()) {
+                        Get.put(PublishedQuizzesController());
+                      }
+
+                      final userInfoCache = storage.read(GetStoreKeys.userKey);
+                      if (userInfoCache == null) return;
+
+                      final userModel = UserModel.fromJson(userInfoCache);
+                      final title =
+                          quizEditorController.currentDraftTitle.value
+                              .trim()
+                              .isEmpty
+                          ? 'Untitled Quiz'
+                          : quizEditorController.currentDraftTitle.value.trim();
+
+                      final quiz = PublishedQuiz(
+                        id: quizEditorController.currentDraftId.value.isNotEmpty
+                            ? quizEditorController.currentDraftId.value
+                            : const Uuid().v4(),
+                        title: title,
+                        description: 'Published from asseska quiz editor',
+                        subject: 'General',
+                        type: 'Quiz',
+                        level: 'Intro',
+                        items: quizEditorController.quizItems
+                            .map(
+                              (q) => q.copyWith(
+                                options: List<String>.from(q.options),
+                                correctOptionIndexes: List<int>.from(
+                                  q.correctOptionIndexes,
+                                ),
+                              ),
+                            )
+                            .toList(),
+                        publishedAt: DateTime.now(),
+                        createdBy: userModel.uid,
+                        tags: const ['Published'],
+                      );
+
+                      PublishedQuizzesController.instance.publish(
+                        quiz,
+                        context,
+                        true
+                      );
+                    }
+                    else
+                    {
+                      showDialog(
+                        context: context,
+                        builder: (context) {
+                          return AlertDialog(
+                            backgroundColor: AppColors.white,
+                            title: const Text('Connect Google Account'),
+                            content: const Text(
+                              'You need to connect your Google account to publish quizzes. Do you want to connect now?',
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                                child: const Text('Cancel'),
+                              ),
+                              ElevatedButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+
+                                  //Auto scroll to end of integrations section in settings page
+                                  SettingsController.instance.scrollToIntegrations.value = true;
+                                  // Navigate to the settings page
+                                  navigationController.navigateTo(Routes.settingsRoute);
+                                  MenController.instance.activePageRoute.value = Routes.settingsDisplayName;
+                                },
+                                child: const Text('Connect'),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    }
                   },
                   child: const Text('Publish Quiz'),
                 ),

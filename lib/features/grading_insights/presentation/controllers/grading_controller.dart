@@ -12,7 +12,10 @@ class GradingInsightsController extends GetxController {
 
   final GradingRepoImpl gradingRepo = GradingRepoImpl();
 
-  RxBool isLoading = false.obs;
+  final RxBool isLoading = false.obs;
+  final RxBool isRegrading = false.obs;
+  final RxBool isSavingReview = false.obs;
+  final RxBool isApprovingReview = false.obs;
 
   RxList<GradingAttemptModel> attempts = <GradingAttemptModel>[].obs;
 
@@ -31,19 +34,21 @@ class GradingInsightsController extends GetxController {
     }
   }
 
-  List<GradingAttemptModel> get results => attempts;
+  List<GradingAttemptModel> get results =>
+      attempts.where((e) => e.aiConfidence != 0.0).toList();
 
   List<GradingAttemptModel> get gradingQueue => attempts
       .where(
         (e) =>
-            e.status == GradingStatus.pending ||
-            e.status == GradingStatus.needsReview ||
-            e.status == GradingStatus.flagged ||
-            e.aiConfidence < 0.7
+            e.aiConfidence > 0.0 &&
+            (e.status == GradingStatus.pending ||
+                e.status == GradingStatus.needsReview ||
+                e.status == GradingStatus.flagged ||
+                e.aiConfidence < 0.7),
       )
       .toList();
 
-  int get totalStudents => attempts.map((e) => e.studentId).toSet().length;
+  int get totalStudents => attempts.map((e) => e.studentEmail).toSet().length;
 
   double get averageScore {
     if (attempts.isEmpty) return 0;
@@ -53,12 +58,68 @@ class GradingInsightsController extends GetxController {
   }
 
   double get averageAiConfidence {
-    if (attempts.isEmpty) return 0;
+    final validAttempts = results;
 
-    return attempts.map((e) => e.aiConfidence).reduce((a, b) => a + b) /
-        attempts.length;
+    if (validAttempts.isEmpty) return 0;
+
+    return validAttempts
+        .map((e) => e.aiConfidence)
+        .reduce((a, b) => a + b) /
+        validAttempts.length;
   }
 
   int get manualOverrides =>
       attempts.where((e) => e.gradingMethod == 'manual').length;
+
+  Future<void> regradeAttempt(String attemptId) async {
+    if (attemptId.trim().isEmpty || isRegrading.value) return;
+
+    try {
+      isRegrading.value = true;
+
+      final userModel = _getCurrentUser();
+
+      await gradingRepo.regradeAttempt(
+        orgId: userModel.orgId,
+        attemptId: attemptId,
+      );
+
+      await loadGradingInsights();
+
+      Get.snackbar(
+        'Regrading completed',
+        'The submission has been regraded successfully.',
+      );
+    } catch (error) {
+      Get.snackbar('Regrading failed', error.toString());
+
+      rethrow;
+    } finally {
+      isRegrading.value = false;
+    }
+  }
+
+  UserModel _getCurrentUser() {
+    final userInfoCache = storage.read(GetStoreKeys.userKey);
+
+    if (userInfoCache == null) {
+      throw Exception('User session was not found.');
+    }
+
+    return UserModel.fromJson(userInfoCache);
+  }
+
+  Future<void> saveReviewDraft({
+    required String attemptId,
+    required Map<int, double> scoreOverrides,
+    required Map<int, String> feedbackOverrides,
+    required String overallFeedback,
+  }) async {}
+
+  Future<void> approveFinalGrade({
+    required String attemptId,
+    required Map<int, double> scoreOverrides,
+    required Map<int, String> feedbackOverrides,
+    required String overallFeedback,
+  }) async {}
 }

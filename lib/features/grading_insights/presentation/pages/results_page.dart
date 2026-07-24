@@ -330,7 +330,15 @@ class _ResultsPageState extends State<ResultsPage> {
                     ),
                     DataCell(
                       OutlinedButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          _onRowAction(_ResultRow(
+                            student: attempt.studentName,
+                            className: attempt.quizTitle,
+                            score: attempt.percentage.toInt(),
+                            status: attempt.status.name,
+                            aiConfidence: (attempt.aiConfidence * 100).toInt(),
+                          ));
+                        },
                         child: Text(
                           attempt.status == 'needs_review'
                               ? 'Review'
@@ -403,7 +411,7 @@ class _ResultsPageState extends State<ResultsPage> {
     } else {
       // open override flow
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Overriding score for ${row.student}...')),
+        SnackBar(content: Text('Coming soon...')),
       );
     }
   }

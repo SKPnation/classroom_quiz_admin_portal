@@ -27,4 +27,22 @@ class GradingRepoImpl extends GradingRepo {
         )
         .toList();
   }
+
+  @override
+  Future<void> approveFinalGrade({required String orgId, required String attemptId, required Map<int, double> scoreOverrides, required Map<int, String> feedbackOverrides, required String overallFeedback}) {
+    // TODO: implement approveFinalGrade
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> regradeAttempt({required String orgId, required String attemptId}) {
+    // TODO: implement regradeAttempt
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> saveReviewDraft({required String orgId, required String attemptId, required Map<int, double> scoreOverrides, required Map<int, String> feedbackOverrides, required String overallFeedback}) {
+    // TODO: implement saveReviewDraft
+    throw UnimplementedError();
+  }
 }

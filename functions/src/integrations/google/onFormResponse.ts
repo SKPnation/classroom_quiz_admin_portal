@@ -174,7 +174,7 @@ text: string; googleScore: number; googleCorrect: boolean | null;
   let aiScore = 0;
   let aiConfidence: number | null = null;
   let overallFeedback = "";
-  //!isDuplicate is dedupe guard
+  // !isDuplicate is dedupe guard
   if (hasSubjective && !isDuplicate) {
     const ai = await gradeSubjectiveWithAI(subjectiveQueue);
     aiConfidence = ai.confidence;

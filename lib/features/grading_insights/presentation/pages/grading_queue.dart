@@ -1,6 +1,7 @@
 import 'package:classroom_quiz_admin_portal/core/theme/colors.dart';
 import 'package:classroom_quiz_admin_portal/features/grading_insights/data/models/grading_attempt_model.dart';
 import 'package:classroom_quiz_admin_portal/features/grading_insights/presentation/controllers/grading_controller.dart';
+import 'package:classroom_quiz_admin_portal/features/grading_insights/presentation/pages/review_submission_page.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -14,7 +15,7 @@ class GradingQueuePage extends StatefulWidget {
 class _GradingQueuePageState extends State<GradingQueuePage> {
   late final GradingInsightsController controller;
 
-  static const _bg = Color(0xFFF3F4F6);
+  static const _bg = AppColors.white;
   static const _card = Colors.white;
   static const _ink = Color(0xFF111827);
   static const _sub = Color(0xFF6B7280);
@@ -391,19 +392,11 @@ class _GradingQueuePageState extends State<GradingQueuePage> {
             borderRadius: BorderRadius.circular(999),
           ),
         ),
-        onPressed: () => _onReviewRow(row),
+        onPressed: () => onReviewRow(row),
         child: const Text(
           'Review',
           style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
         ),
-      ),
-    );
-  }
-
-  void _onReviewRow(GradingAttemptModel row) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Reviewing: ${row.studentEmail ?? 'Unknown student'}'),
       ),
     );
   }
@@ -418,5 +411,50 @@ class _GradingQueuePageState extends State<GradingQueuePage> {
     if (date == null) return 'Unknown';
 
     return '${date.month}/${date.day}/${date.year}';
+  }
+
+  void onReviewRow(GradingAttemptModel row) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) {
+          return ReviewSubmissionPage(
+            gradingAttempt: row,
+            onRegrade: (attempt) async {
+              await controller.regradeAttempt(attempt.id);
+            },
+            onSaveDraft: (
+                attempt,
+                scoreOverrides,
+                feedbackOverrides,
+                overallFeedback,
+                ) async {
+              await controller.saveReviewDraft(
+                attemptId: attempt.id,
+                scoreOverrides: scoreOverrides,
+                feedbackOverrides: feedbackOverrides,
+                overallFeedback: overallFeedback,
+              );
+            },
+            onApprove: (
+                attempt,
+                scoreOverrides,
+                feedbackOverrides,
+                overallFeedback,
+                ) async {
+              await controller.approveFinalGrade(
+                attemptId: attempt.id,
+                scoreOverrides: scoreOverrides,
+                feedbackOverrides: feedbackOverrides,
+                overallFeedback: overallFeedback,
+              );
+
+              if (context.mounted) {
+                Navigator.of(context).pop();
+              }
+            },
+          );
+        },
+      ),
+    );
   }
 }

@@ -141,6 +141,7 @@ class PublishedQuizzesController extends GetxController {
   Future<void> publishWithDestinationDialog({
     required BuildContext context,
     required PublishedQuiz publishedQuiz,
+    required bool fromEditor,
   }) async {
     final qEditorController = QuizEditorController.instance;
 
@@ -180,9 +181,16 @@ class PublishedQuizzesController extends GetxController {
 
     if (result == null) return;
 
-    if (qEditorController.quizItems.isEmpty) {
+    if (fromEditor && qEditorController.quizItems.isEmpty) {
       CustomSnackBar.errorSnackBar(
         'Add at least one question before publishing.',
+      );
+      return;
+    }
+
+    if (!fromEditor && publishedQuiz.items.isEmpty) {
+      CustomSnackBar.errorSnackBar(
+        'This published quiz does not contain any questions.',
       );
       return;
     }
@@ -190,52 +198,82 @@ class PublishedQuizzesController extends GetxController {
     isLoading.value = true;
 
     try {
-      final draftTitle =
-      qEditorController.currentDraftTitle.value.trim();
+      final List<QuizItemModel> sourceItems;
 
-      final title = draftTitle.isEmpty
-          ? 'Untitled Quiz'
-          : draftTitle;
+      final String title;
+      final String quizId;
 
-      final publishedQuizId =
-      qEditorController.currentDraftId.value.isNotEmpty
-          ? qEditorController.currentDraftId.value
-          : const Uuid().v4();
+      if (fromEditor) {
+        final draftTitle = qEditorController.currentDraftTitle.value.trim();
 
-      final copiedItems = qEditorController.cloneQuizItems(
-        qEditorController.quizItems,
-      );
+        title = draftTitle.isEmpty ? 'Untitled Quiz' : draftTitle;
+
+        quizId = qEditorController.currentDraftId.value.isNotEmpty
+            ? qEditorController.currentDraftId.value
+            : const Uuid().v4();
+
+        sourceItems = qEditorController.cloneQuizItems(
+          qEditorController.quizItems,
+        );
+      } else {
+        title = publishedQuiz.title.trim().isEmpty
+            ? 'Untitled Quiz'
+            : publishedQuiz.title.trim();
+
+        quizId = publishedQuiz.id.isNotEmpty
+            ? publishedQuiz.id
+            : const Uuid().v4();
+
+        sourceItems = publishedQuiz.items
+            .map(
+              (item) => item.copyWith(
+                options: List<String>.from(item.options),
+                correctOptionIndexes: List<int>.from(item.correctOptionIndexes),
+              ),
+            )
+            .toList();
+      }
+
+      if (sourceItems.isEmpty) {
+        CustomSnackBar.errorSnackBar(
+          'This quiz does not contain any questions.',
+        );
+        return;
+      }
 
       final template = PublishedQuiz(
-        id: publishedQuizId,
+        id: quizId,
         title: title,
         description: publishedQuiz.description.isNotEmpty
             ? publishedQuiz.description
-            : 'Published from quiz editor',
+            : 'Published quiz',
         subject: publishedQuiz.subject.isNotEmpty
             ? publishedQuiz.subject
             : 'General',
-        type: publishedQuiz.type.isNotEmpty
-            ? publishedQuiz.type
-            : 'Quiz',
-        level: publishedQuiz.level.isNotEmpty
-            ? publishedQuiz.level
-            : 'Intro',
-        items: copiedItems,
+        type: publishedQuiz.type.isNotEmpty ? publishedQuiz.type : 'Quiz',
+        level: publishedQuiz.level.isNotEmpty ? publishedQuiz.level : 'Intro',
+        items: sourceItems,
         publishedAt: DateTime.now(),
-        tags: const ['Published'],
-        createdBy: userModel.uid,
+        tags: publishedQuiz.tags.isNotEmpty
+            ? List<String>.from(publishedQuiz.tags)
+            : const ['Published'],
+        createdBy: publishedQuiz.createdBy.isNotEmpty
+            ? publishedQuiz.createdBy
+            : userModel.uid,
       );
 
-      // Save the quiz template.
-      await publishTemplate(template);
+      if (fromEditor) {
+        debugPrint('Saving new quiz to templates collection');
+        await publishTemplate(template);
+      } else {
+        debugPrint('Exporting existing quiz without saving a template');
+      }
 
       // Create the Google Form.
       final updatedQuiz = await createGoogleForm(
         context: context,
         publishedQuiz: template,
-        showLinkDialog:
-        result != PublishDestination.googleFormsAndClassroom,
+        showLinkDialog: result != PublishDestination.googleFormsAndClassroom,
       );
 
       // Create the Google Classroom assignment.
@@ -255,10 +293,7 @@ class PublishedQuizzesController extends GetxController {
 
       // Sync to Canvas.
       if (result == PublishDestination.googleAndCanvas) {
-        await syncToCanvas(
-          context: context,
-          publishedQuiz: template,
-        );
+        await syncToCanvas(context: context, publishedQuiz: template);
       }
 
       MenController.instance.changeActiveItemTo(
@@ -266,13 +301,9 @@ class PublishedQuizzesController extends GetxController {
         Routes.publishedQuizzesRoute,
       );
 
-      NavigationController.instance.navigateTo(
-        Routes.publishedQuizzesRoute,
-      );
+      NavigationController.instance.navigateTo(Routes.publishedQuizzesRoute);
 
-      CustomSnackBar.successSnackBar(
-        body: 'Quiz published successfully.',
-      );
+      CustomSnackBar.successSnackBar(body: 'Quiz published successfully.');
     } on FirebaseFunctionsException catch (e) {
       debugPrint('Firebase Functions publish error:');
       debugPrint('Code: ${e.code}');
@@ -288,8 +319,7 @@ class PublishedQuizzesController extends GetxController {
       final requiresGoogleReconnect =
           details['requiresGoogleReconnect'] == true;
 
-      if (reason == 'GOOGLE_REAUTH_REQUIRED' ||
-          requiresGoogleReconnect) {
+      if (reason == 'GOOGLE_REAUTH_REQUIRED' || requiresGoogleReconnect) {
         if (!context.mounted) return;
 
         await showGoogleReconnectDialog(context, userModel);
@@ -303,9 +333,7 @@ class PublishedQuizzesController extends GetxController {
         return;
       }
 
-      CustomSnackBar.errorSnackBar(
-        e.message ?? 'Unable to publish the quiz.',
-      );
+      CustomSnackBar.errorSnackBar(e.message ?? 'Unable to publish the quiz.');
     } catch (e, stackTrace) {
       debugPrint('Publish failed: $e');
       debugPrintStack(stackTrace: stackTrace);
@@ -318,7 +346,10 @@ class PublishedQuizzesController extends GetxController {
     }
   }
 
-  Future<void> showGoogleReconnectDialog(BuildContext context, UserModel user) async {
+  Future<void> showGoogleReconnectDialog(
+    BuildContext context,
+    UserModel user,
+  ) async {
     final shouldReconnect = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
@@ -327,7 +358,7 @@ class PublishedQuizzesController extends GetxController {
           title: const Text('Reconnect Google'),
           content: const Text(
             'Your Google connection has expired or is no longer valid. '
-                'Disconnect and reconnect your Google account to continue.',
+            'Disconnect and reconnect your Google account to continue.',
           ),
           actions: [
             TextButton(
@@ -345,9 +376,7 @@ class PublishedQuizzesController extends GetxController {
                   Routes.settingsRoute,
                 );
 
-                NavigationController.instance.navigateTo(
-                  Routes.settingsRoute,
-                );
+                NavigationController.instance.navigateTo(Routes.settingsRoute);
               },
               child: const Text('Disconnect & Reconnect'),
             ),
@@ -393,7 +422,9 @@ class PublishedQuizzesController extends GetxController {
     final userInfoCache = storage.read(GetStoreKeys.userKey);
 
     if (userInfoCache == null) {
-      CustomSnackBar.errorSnackBar('User session not found. Please sign in again.');
+      CustomSnackBar.errorSnackBar(
+        'User session not found. Please sign in again.',
+      );
       return null;
     }
 
@@ -410,20 +441,21 @@ class PublishedQuizzesController extends GetxController {
         'questions': publishedQuiz.items
             .map(
               (q) => {
-            'type': q.type.name,
-            'question': q.question,
-            'options': q.options,
-            'correctOptionIndexes': q.correctOptionIndexes,
-            'answerKey': q.answerKey,
-            'points': q.points,
-            'required': true,
-          },
-        )
+                'type': q.type.name,
+                'question': q.question,
+                'options': q.options,
+                'correctOptionIndexes': q.correctOptionIndexes,
+                'answerKey': q.answerKey,
+                'points': q.points,
+                'required': true,
+              },
+            )
             .toList(),
       };
 
-      final callable = FirebaseFunctions.instanceFor(region: 'us-central1')
-          .httpsCallable('createGoogleForm');
+      final callable = FirebaseFunctions.instanceFor(
+        region: 'us-central1',
+      ).httpsCallable('createGoogleForm');
 
       // Pass the Map directly — do NOT jsonEncode. Callables handle serialization.
       final response = await callable.call(payload);
@@ -493,7 +525,8 @@ class PublishedQuizzesController extends GetxController {
 
         return updatedQuiz;
       } else {
-        final errorMsg = result['message']?.toString() ?? 'Unknown error occurred';
+        final errorMsg =
+            result['message']?.toString() ?? 'Unknown error occurred';
 
         Get.snackbar(
           'Creation Failed',
@@ -632,10 +665,11 @@ class PublishedQuizzesController extends GetxController {
     }
   }
 
-  void publish(PublishedQuiz t, BuildContext context) async{
+  void publish(PublishedQuiz t, BuildContext context, bool fromEditor) async {
     await publishWithDestinationDialog(
       context: context,
       publishedQuiz: t,
+      fromEditor: fromEditor,
     );
   }
 }

@@ -384,7 +384,7 @@ class _PublishedQuizzesPageState extends State<PublishedQuizzesPage> {
       ),
       itemBuilder: (context, index) {
         final t = templates[index];
-        return PublishedQuizCard(t: t);
+        return PublishedQuizCard(publishedQuiz: t);
       },
     );
   }

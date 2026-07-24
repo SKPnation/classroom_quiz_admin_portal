@@ -1,12 +1,21 @@
+import 'package:classroom_quiz_admin_portal/core/data/local/get_store_keys.dart';
+import 'package:classroom_quiz_admin_portal/core/navigation/app_routes.dart';
+import 'package:classroom_quiz_admin_portal/core/navigation/local_navigator.dart';
 import 'package:classroom_quiz_admin_portal/core/theme/colors.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/data/models/published_quiz_model.dart';
 import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/controllers/published_quizzes_controller.dart';
+import 'package:classroom_quiz_admin_portal/features/quizzes/presentation/controllers/quiz_editor_controller.dart';
+import 'package:classroom_quiz_admin_portal/features/resources/data/model/user_model.dart';
+import 'package:classroom_quiz_admin_portal/features/resources/presentation/controllers/settings_controller.dart';
+import 'package:classroom_quiz_admin_portal/features/site_layout/presentation/controllers/menu_controller.dart';
+import 'package:classroom_quiz_admin_portal/main.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class PublishedQuizCard extends StatelessWidget {
-  PublishedQuizCard({super.key, required this.t});
+  PublishedQuizCard({super.key, required this.publishedQuiz});
 
-  final PublishedQuiz t;
+  final PublishedQuiz publishedQuiz;
 
   // ---- Design tokens ----
   static const _card = Colors.white;
@@ -43,7 +52,7 @@ class PublishedQuizCard extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  t.title,
+                  publishedQuiz.title,
                   style: const TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
@@ -59,22 +68,77 @@ class PublishedQuizCard extends StatelessWidget {
                 itemBuilder: (ctx) => const [
                   PopupMenuItem(value: 'rename', child: Text('Rename')),
                   PopupMenuItem(value: 'duplicate', child: Text('Duplicate')),
-                  PopupMenuItem(value: 'to_google_forms', child: Text('Export to google forms')),
+                  PopupMenuItem(value: 'export', child: Text('Export')),
                   PopupMenuItem(
                     value: 'delete',
                     child: Text('Delete', style: TextStyle(color: Colors.red)),
                   ),
                 ],
-                onSelected: (value) async{
-                  if (value == 'to_google_forms') {
-                    await pubQuizzesController.createGoogleForm(context: context, publishedQuiz: t);
-                    // templatesController.exportTemplate(t);
+                onSelected: (value) async {
+                  if (value == 'export') {
+                    final userInfoCache = storage.read(GetStoreKeys.userKey);
+                    final userModel = UserModel.fromJson(userInfoCache);
+                    await SettingsController.instance.loadDefaultIntegrations(
+                      userModel,
+                    );
+
+                    if (SettingsController.instance.isIntegrationConnected(
+                      'google',
+                    )) {
+                      await PublishedQuizzesController.instance
+                          .publishWithDestinationDialog(
+                            context: context,
+                            publishedQuiz: publishedQuiz,
+                            fromEditor: false,
+                          );
+                    } else {
+                      showDialog(
+                        context: context,
+                        builder: (context) {
+                          return AlertDialog(
+                            backgroundColor: AppColors.white,
+                            title: const Text('Connect Google Account'),
+                            content: const Text(
+                              'You need to connect your Google account to publish quizzes. Do you want to connect now?',
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                                child: const Text('Cancel'),
+                              ),
+                              ElevatedButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+
+                                  //Auto scroll to end of integrations section in settings page
+                                  SettingsController
+                                          .instance
+                                          .scrollToIntegrations
+                                          .value =
+                                      true;
+                                  // Navigate to the settings page
+                                  navigationController.navigateTo(
+                                    Routes.settingsRoute,
+                                  );
+                                  MenController.instance.activePageRoute.value =
+                                      Routes.settingsDisplayName;
+                                },
+                                child: const Text('Connect'),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    }
+
                     return;
-                  }else if(value == 'delete'){
-                    pubQuizzesController.deleteTemplate(t);
+                  } else if (value == 'delete') {
+                    pubQuizzesController.deleteTemplate(publishedQuiz);
                     return;
                   }
-                  _onMenuAction(value, t, context);
+                  _onMenuAction(value, publishedQuiz, context);
                 },
                 icon: const Icon(Icons.more_vert, size: 18),
               ),
@@ -87,7 +151,7 @@ class PublishedQuizCard extends StatelessWidget {
           // ),
           // const SizedBox(height: 8),
           Text(
-            t.description,
+            publishedQuiz.description,
             style: const TextStyle(fontSize: 13, color: _ink),
             maxLines: 3,
             overflow: TextOverflow.ellipsis,
@@ -96,12 +160,12 @@ class PublishedQuizCard extends StatelessWidget {
           Row(
             children: [
               Text(
-                '${t.questionCount} questions • ~${t.estimatedMinutes} min',
+                '${publishedQuiz.questionCount} questions • ~${publishedQuiz.estimatedMinutes} min',
                 style: const TextStyle(fontSize: 11, color: _sub),
               ),
               const Spacer(),
               Text(
-                'Last used ${t.lastUsed}',
+                'Last used ${publishedQuiz.lastUsed}',
                 style: const TextStyle(fontSize: 10, color: _sub),
               ),
             ],
@@ -112,23 +176,23 @@ class PublishedQuizCard extends StatelessWidget {
               Wrap(
                 spacing: 6,
                 runSpacing: 4,
-                children: t.tags
+                children: publishedQuiz.tags
                     .map(
                       (tag) => Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 3,
-                    ),
-                    decoration: BoxDecoration(
-                      color: _chipBg,
-                      borderRadius: BorderRadius.circular(999),
-                    ),
-                    child: Text(
-                      tag,
-                      style: const TextStyle(fontSize: 11, color: _ink),
-                    ),
-                  ),
-                )
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 3,
+                        ),
+                        decoration: BoxDecoration(
+                          color: _chipBg,
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                        child: Text(
+                          tag,
+                          style: const TextStyle(fontSize: 11, color: _ink),
+                        ),
+                      ),
+                    )
                     .toList(),
               ),
               const Spacer(),

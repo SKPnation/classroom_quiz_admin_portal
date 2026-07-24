@@ -23,6 +23,8 @@ class SettingsController extends GetxController {
   var profileCompleted = true.obs;
   var percentageCompletion = 0.0.obs;
 
+  final RxBool scrollToIntegrations = false.obs;
+
   UserRepoImpl userRepo = UserRepoImpl();
   AuthRepoImpl authRepo = AuthRepoImpl();
 

@@ -28,17 +28,51 @@ class SettingsPage extends StatefulWidget {
 
 class _SettingsPageState extends State<SettingsPage> {
   final settingsController = SettingsController.instance;
-  bool _signingOut = false; // ← ADD THIS
+  bool _signingOut = false;
+
+  final ScrollController scrollController = ScrollController();
+
+  final GlobalKey integrationsKey = GlobalKey();
 
   @override
   void initState() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final userInfoCache = storage.read(GetStoreKeys.userKey);
-      if (userInfoCache == null) return; // guard against missing data
-      UserModel userModel = UserModel.fromJson(userInfoCache);
-      settingsController.loadDefaultIntegrations(userModel);
-    });
     super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final userInfoCache = storage.read(GetStoreKeys.userKey);
+      if (userInfoCache == null || !mounted) return;
+
+      final userModel = UserModel.fromJson(userInfoCache);
+
+      await settingsController.loadDefaultIntegrations(userModel);
+
+      if (!mounted) return;
+      if (!settingsController.scrollToIntegrations.value) return;
+
+      await Future.delayed(const Duration(milliseconds: 300));
+
+      if (!mounted) return;
+
+      final targetContext = integrationsKey.currentContext;
+
+      if (targetContext != null && scrollController.hasClients) {
+        settingsController.scrollToIntegrations.value = false;
+
+        await Scrollable.ensureVisible(
+          targetContext,
+          duration: const Duration(milliseconds: 700),
+          curve: Curves.easeInOut,
+          alignment: 0.05,
+          alignmentPolicy: ScrollPositionAlignmentPolicy.explicit,
+        );
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    scrollController.dispose();
+    super.dispose();
   }
 
   @override
@@ -55,16 +89,12 @@ class _SettingsPageState extends State<SettingsPage> {
         if (!mounted) return; // ← widget might already be gone
         SettingsController.instance.signOut();
       });
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     // Already signing out — just show loading, don't do anything else
     if (_signingOut) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     try {
@@ -76,6 +106,7 @@ class _SettingsPageState extends State<SettingsPage> {
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 920),
           child: SingleChildScrollView(
+            controller: scrollController,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -107,18 +138,14 @@ class _SettingsPageState extends State<SettingsPage> {
                     school: schoolModel,
                   ),
                 const SizedBox(height: 16),
-                Row(
-                  children: [
-                    // Expanded(child: const PreferencesCard()),
-                    // const SizedBox(width: 16),
-                    Expanded(
-                      child: Obx(
-                            () => IntegrationsCard(
-                          integrations: settingsController.integrations.toList(),
-                        ),
-                      ),
+                SizedBox(
+                  key: integrationsKey,
+                  width: double.infinity,
+                  child: Obx(
+                    () => IntegrationsCard(
+                      integrations: settingsController.integrations.toList(),
                     ),
-                  ],
+                  ),
                 ),
                 const SizedBox(height: 16),
                 const SecurityCard(),

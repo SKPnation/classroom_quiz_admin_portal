@@ -1,5 +1,9 @@
 {
   "projects": {
-    "default": "schoolquizapp-8b07d"
-  }
+    "staging": "asseska-staging",
+    "dev": "schoolquizapp-8b07d",
+    "prod": "asseska-production"
+  },
+  "targets": {},
+  "etags": {}
 }
