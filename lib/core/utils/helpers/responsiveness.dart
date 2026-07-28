@@ -37,17 +37,11 @@ class ResponsiveWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(builder: (context, constraints){
-      double _width = constraints.maxWidth;
-      if(_width >= largeScreenSize){
-        return largeScreen!;
-      }
-      else if (_width < largeScreenSize && _width >= mediumScreenSize){
-        return mediumScreen ?? largeScreen!;
-      }
-      else {
-        return smallScreen ?? largeScreen!;
-      }
-    });
+    if (isSmallScreen(context)) {
+      return smallScreen ?? largeScreen!;
+    } else if (isMediumScreen(context)) {
+      return mediumScreen ?? largeScreen!;
+    }
+    return largeScreen!;
   }
 }

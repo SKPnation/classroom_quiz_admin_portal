@@ -220,88 +220,60 @@ class _GradingQueuePageState extends State<GradingQueuePage> {
   }
 
   Widget _buildTableFiltersRow() {
-    return Row(
+    return Wrap(
+      spacing: 12,
+      runSpacing: 12,
       children: [
-        SizedBox(
+        _filterDropdown(
           width: 230,
-          height: 40,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: _border),
-            ),
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<String>(
-                value: _selectedQuiz,
-                isExpanded: true,
-                icon: const Icon(Icons.keyboard_arrow_down_rounded, size: 18),
-                style: const TextStyle(fontSize: 13, color: _ink),
-                items: _quizOptions
-                    .map(
-                      (q) => DropdownMenuItem<String>(value: q, child: Text(q)),
-                    )
-                    .toList(),
-                onChanged: (val) {
-                  if (val == null) return;
-                  setState(() => _selectedQuiz = val);
-                },
-              ),
-            ),
-          ),
+          value: _selectedQuiz,
+          options: _quizOptions,
+          onChanged: (val) => setState(() => _selectedQuiz = val),
         ),
-        const SizedBox(width: 12),
-        SizedBox(
+        _filterDropdown(
           width: 180,
-          height: 40,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: _border),
-            ),
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<String>(
-                value: _selectedStatus,
-                isExpanded: true,
-                icon: const Icon(Icons.keyboard_arrow_down_rounded, size: 18),
-                style: const TextStyle(fontSize: 13, color: _ink),
-                items: _statusOptions
-                    .map(
-                      (s) => DropdownMenuItem<String>(value: s, child: Text(s)),
-                    )
-                    .toList(),
-                onChanged: (val) {
-                  if (val == null) return;
-                  setState(() => _selectedStatus = val);
-                },
-              ),
-            ),
+          value: _selectedStatus,
+          options: _statusOptions,
+          onChanged: (val) => setState(() => _selectedStatus = val),
+        ),
+      ],
+    );
+  }
+
+  Widget _filterDropdown({
+    required double width,
+    required String value,
+    required List<String> options,
+    required ValueChanged<String> onChanged,
+  }) {
+    return ConstrainedBox(
+      // On narrow screens the box shrinks instead of overflowing;
+      // Wrap moves it to the next line if even that doesn't fit.
+      constraints: BoxConstraints(maxWidth: width, minHeight: 40),
+      child: Container(
+        height: 40,
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: _border),
+        ),
+        child: DropdownButtonHideUnderline(
+          child: DropdownButton<String>(
+            value: value,
+            isExpanded: true,
+            icon: const Icon(Icons.keyboard_arrow_down_rounded, size: 18),
+            style: const TextStyle(fontSize: 13, color: _ink),
+            items: options
+                .map((o) => DropdownMenuItem<String>(value: o, child: Text(o)))
+                .toList(),
+            onChanged: (val) {
+              if (val == null) return;
+              onChanged(val);
+            },
           ),
         ),
-        // const Spacer(),
-        // SizedBox(
-        //   height: 40,
-        //   child: OutlinedButton.icon(
-        //     style: OutlinedButton.styleFrom(
-        //       side: const BorderSide(color: _purple),
-        //       foregroundColor: _purple,
-        //       shape: RoundedRectangleBorder(
-        //         borderRadius: BorderRadius.circular(999),
-        //       ),
-        //       padding: const EdgeInsets.symmetric(horizontal: 16),
-        //     ),
-        //     icon: const Icon(Icons.checklist_rounded, size: 18),
-        //     label: const Text(
-        //       'Bulk Review',
-        //       style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
-        //     ),
-        //     onPressed: _onBulkReview,
-        //   ),
-        // ),
-      ],
+      ),
     );
   }
 

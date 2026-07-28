@@ -30,7 +30,7 @@ class SideMenu extends StatelessWidget {
       ),
       child: ListView(
         children: [
-          // ── Asseska branding — large screen ────────────────────────
+          // ── Asseska branding - large screen ────────────────────────
           if (!ResponsiveWidget.isSmallScreen(context))
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
@@ -188,30 +188,3 @@ class SideMenu extends StatelessWidget {
     );
   }
 }
-//sideMenuItemRoutes
-//                     .map(
-//                       (item) => SideMenuItem(
-//                         itemName: item.name,
-//                         onTap: () async {
-//                           // if (item.route == Routes.authRoute) {
-//                           //   //TODO: Uncomment
-//                           //   await AuthController.instance.logOut();
-//                           //   // menController.changeActiveItemTo(item.name, item.route);
-//                           //   Get.offAllNamed(Routes.authRoute);
-//                           //   getStore.clearAllData();
-//                           // }
-//                           //
-//                           if (!menController.isActive(item.name)) {
-//                             menController.changeActiveItemTo(
-//                               item.name,
-//                               item.route,
-//                             );
-//                             if (ResponsiveWidget.isSmallScreen(context)) {
-//                               Get.back();
-//                             }
-//                             navigationController.navigateTo(item.route);
-//                           }
-//                         },
-//                       ),
-//                     )
-//                     .toList()
