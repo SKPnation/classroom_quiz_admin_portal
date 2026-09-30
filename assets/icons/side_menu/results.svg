@@ -1,0 +1,11 @@
+<svg viewBox="0 0 24 24" width="24" height="24"
+    xmlns="http://www.w3.org/2000/svg">
+    <line x1="4" y1="19" x2="20" y2="19"
+        stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+    <rect x="6" y="11" width="2.5" height="7"
+        fill="none" stroke="currentColor" stroke-width="1.6"/>
+    <rect x="10.75" y="8" width="2.5" height="10"
+        fill="none" stroke="currentColor" stroke-width="1.6"/>
+    <rect x="15.5" y="5" width="2.5" height="13"
+        fill="none" stroke="currentColor" stroke-width="1.6"/>
+</svg>
